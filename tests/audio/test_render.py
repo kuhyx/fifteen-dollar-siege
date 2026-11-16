@@ -2,6 +2,7 @@
 
 import contextlib
 import io
+import re
 import sys
 import tempfile
 import unittest
@@ -99,6 +100,12 @@ class CatalogTest(unittest.TestCase):
         done = catalog.finish(asset, asset.build())
         self.assertAlmostEqual(loudness.short_peak(done, SR), asset.target_lufs, delta=0.1)
         self.assertEqual(checks.faults(checks.measure(done, SR), asset.kind, False), [])
+
+    def test_the_game_asks_for_exactly_the_files_the_catalogue_renders(self) -> None:
+        cues = (REPO / "src" / "audio" / "audio_cues.gd").read_text()
+        asked = set(re.findall(r'"((?:music|sfx|ui)/[a-z0-9_]+)"', cues))
+        rendered = {asset.path.removesuffix(".wav") for asset in catalog.all_assets()}
+        self.assertEqual(asked, rendered)
 
 
 class ToolTest(unittest.TestCase):

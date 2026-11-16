@@ -10,6 +10,7 @@
 #   static     greps: muted runs, lossless imports, no AI-art tooling, dev
 #              files without class_name, exports without src/dev, no visible text
 #   shared     file length, md naming, no binaries, dependency freshness, contract
+#   audio      audio tool tests, rendered files current, offline analysis of each
 #   export     the Linux build plays without src/dev
 # smoke runs first, the middle gates run side by side (each in its own capped
 # scope), export runs last (it re-imports). One line per gate; a failed gate
@@ -25,7 +26,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 readonly FIRST=(smoke)
-readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared)
+readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio)
 readonly LAST=(export)
 LOGS=""
 FAILED=0
@@ -109,6 +110,7 @@ run_gate() {
         recording) scripts/test_recording.sh ;;
         autodrive) scripts/autodrive_all.sh ;;
         launcher) scripts/test_launcher.sh ;;
+        audio) tools/audio/check.sh ;;
         export) scripts/test_export.sh ;;
     esac
 }
