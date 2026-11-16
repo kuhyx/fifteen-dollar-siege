@@ -149,7 +149,28 @@ Other gates, each one call under 60 s:
 - `scripts/test_recording.sh` recorder unit tests
 - `scripts/e2e_recording.sh never|sync|gap|game` recorder on Xvfb, one case
   per call
-- `scripts/export.sh <web|linux> <out_dir>` one export (`builds/vNN/` per
-  round, R17)
-- `scripts/check.sh [gate ...]` every gate; `scripts/check.sh --list` names
-  them
+- `scripts/export.sh <web|linux> <out_dir>` one export
+- `scripts/build_round.sh <NN> "<note>"` one prototype round: `builds/vNN/`
+  (Web at the top, `linux/`, a `NOTES` line), never overwritten (R17)
+- `scripts/test_build_round.sh` that script, in a throwaway folder
+- `scripts/test_web.sh` the Web build in an isolated headless Chromium: hub
+  drawn, no console error, touch taps reach the shop and a battle, the audio
+  context runs and the music advances after the first touch
+- `tools/audio/check.sh`, `scripts/coverage.sh` the audio gate and the 100 %
+  Python coverage gate
+
+**Every gate runs through `scripts/check.sh`, in groups that each stay under
+60 s** (a hook kills any call over that). One call per group:
+
+| Group | Gates | Time |
+|---|---|---|
+| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, recording | ~13 s |
+| `scripts/check.sh --group play` | test, autodrive, launcher | ~26 s |
+| `scripts/check.sh --group tools` | audio, coverage | ~33 s |
+| `scripts/check.sh --group build` | export, round | ~17 s |
+| `scripts/check.sh --group web` | web | ~20 s |
+
+`scripts/check.sh <gate> ...` runs single gates, `--list` names groups and
+gates, and `--all` runs every group in turn (about 2 minutes: for people and
+CI, never in one agent call). A new gate goes into exactly one group
+(`scripts/lib/check_groups.sh` refuses anything else). CI runs every group.

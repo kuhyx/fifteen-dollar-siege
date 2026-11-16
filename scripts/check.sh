@@ -1,106 +1,51 @@
 #!/bin/bash
 
 # ============================================================================
-# Every gate of this repo in one exit code, under 60 s:
-#   smoke      godot --import, then --quit: no SCRIPT ERROR (build-game R9), no
-#              "resources still in use at exit" (a sound left playing)
-#   lint       gdlint, gdformat --check, shellcheck, ruff
-#   test       GUT suite              save_guard  GUT without the hook redirect
-#   recording  recorder unit tests    autodrive   the bot, all three modes
-#   launcher   run.sh on a broken GPU GL + the F12 bundle (Xvfb)
-#   static     greps: muted runs, lossless imports, no AI-art tooling, dev
-#              files without class_name, exports without src/dev, no visible text,
-#              no colour literal outside the palette file
-#   shared     file length, md naming, no binaries, dependency freshness, contract
-#   audio      audio tool tests, rendered files current, offline analysis of each
-#   coverage   100 % branch coverage of tools/recording and tools/audio (scripts/coverage.sh)
-#   export     the Linux build plays without src/dev
-# smoke runs first, the middle gates run side by side (each in its own capped
-# scope), export runs last (it re-imports). One line per gate; a failed gate
-# prints the tail of its log.
-#   scripts/check.sh              all gates
-#   scripts/check.sh lint test    only these
-#   scripts/check.sh --list       the gate names
+# Every gate of this repo, in named groups that each finish well under 60 s
+# (the hook that kills any call over 60 s is why; measured with `capped.sh`):
+#   fast   (~12 s)  smoke    import, then boot and quit: no SCRIPT ERROR (build-game
+#                            R9), no "resources still in use at exit"
+#                   lint     gdlint, gdformat --check, shellcheck, ruff
+#                   static   greps: muted runs, lossless imports, no AI-art tooling,
+#                            dev files without class_name, exports without src/dev,
+#                            no visible text, no colour literal outside the palette
+#                   shared   file length, md naming, no binaries, dependency
+#                            freshness, contract
+#                   save_guard  GUT without the hook redirect
+#                   recording   recorder unit tests
+#   play   (~25 s)  test     the GUT suite
+#                   autodrive   the bot, every mode (frames on a private Xvfb)
+#                   launcher    run.sh on a broken GPU GL + the F12 bundle
+#   tools  (~35 s)  audio    audio tool tests, rendered files current, offline
+#                            analysis, the boot probe
+#                   coverage 100 % branch coverage of tools/recording, tools/audio
+#   build  (~20 s)  export   the Linux build plays without src/dev
+#                   round    scripts/build_round.sh in a throwaway folder
+#   web    (~25 s)  web      the Web build in an isolated headless Chromium
+# Inside a group smoke runs first, the middle gates side by side (each in its own
+# capped scope), export / round / web last and one by one (they re-import). One
+# line per gate; a failed gate prints the tail of its log.
+#   scripts/check.sh --group fast        one group (several may follow)
+#   scripts/check.sh lint test           only these gates
+#   scripts/check.sh --list              the groups and their gates
+#   scripts/check.sh --all               every group in turn: about 2 minutes, for
+#                                        people and CI, never for a 60 s cap
 # ============================================================================
 
 set -euo pipefail
 
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+# shellcheck source=scripts/lib/check_gates.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/check_gates.sh"
+# shellcheck source=scripts/lib/check_groups.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/check_groups.sh"
 
-readonly FIRST=(smoke)
-readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio coverage)
-readonly LAST=(export)
 LOGS=""
 FAILED=0
 
 cleanup() {
     [[ -z "$LOGS" ]] || rm -rf "$LOGS"
-}
-
-gate_smoke() {
-    local out
-    out="$(cap timeout 50 godot --headless --path "$REPO_ROOT" --import 2>&1)"
-    out+="$(cap timeout 30 godot --headless --path "$REPO_ROOT" --quit 2>&1)"
-    if grep -E 'SCRIPT ERROR|Parse Error|still in use at exit' <<<"$out"; then
-        return 1
-    fi
-    echo "import and quit: no SCRIPT ERROR"
-}
-
-# Prints the offending lines of a check that must find nothing; fails if any.
-must_be_empty() {
-    local what="$1" found
-    shift
-    found="$("$@" 2>/dev/null || true)"
-    [[ -z "$found" ]] && return 0
-    echo "static: $what" >&2
-    echo "$found" | head -10 >&2
-    return 1
-}
-
-gate_static() {
-    local bad=0 dev_filters
-    # The words below are split so this file never matches its own patterns.
-    local ai_art='art''gate|generate\.p''y|Lo''RA' no_hook='-gcon''fig='
-    local lossy='libvor''bis|libmp3''lame|ogg''enc'
-    # R2: a script that starts godot says so muted or headless.
-    must_be_empty "a godot run that is neither headless nor muted" bash -c \
-        "grep -rlE '(^|[[:space:]])godot[[:space:]]+(--|\")' scripts | xargs -r grep -LE 'audio-driver Dummy|--headless'" || bad=1
-    # R13: no lossy import, no lossy audio encoder in the tooling.
-    must_be_empty "a lossy texture import (compress/mode=1)" bash -c \
-        "find -L . \( -name .godot -o -name .claude \) -prune -o -name '*.import' -print0 | xargs -0 -r grep -lE 'compress/mode=1'" || bad=1
-    must_be_empty "a lossy audio encoder in scripts/ or tools/" \
-        grep -rlE "$lossy" scripts tools || bad=1
-    # R3: no AI-art tooling outside the docs.
-    must_be_empty "AI-art tooling" git grep -nE "$ai_art" -- ':!*.md' || bad=1
-    # R10: dev files are reachable by path only, and stay out of every export.
-    must_be_empty "a class_name in src/dev" grep -rn '^class_name' src/dev || bad=1
-    dev_filters="$(grep -c 'exclude_filter=.*src/dev/\*' export_presets.cfg || true)"
-    if [[ "$dev_filters" -ne "$(grep -c '^\[preset\.[0-9]*\]$' export_presets.cfg)" ]]; then
-        echo "static: an export preset does not exclude src/dev/*" >&2
-        bad=1
-    fi
-    # L11: GUT only ever starts through scripts/test.sh and its config.
-    must_be_empty "a GUT call that skips .gutconfig.json" grep -rn -- "$no_hook" scripts || bad=1
-    # One palette: no colour literal outside src/ui/palette.gd.
-    scripts/check_palette.sh >/dev/null || bad=1
-    # textgate: nothing the player sees is a word.
-    if command -v textgate >/dev/null && ! textgate scan | grep -q '^0 to rework'; then
-        textgate scan | tail -10 >&2
-        bad=1
-    fi
-    ((bad == 0)) || return 1
-    echo "greps clean"
-}
-
-gate_shared() {
-    scripts/check_file_length.sh --all
-    scripts/check_md_naming.sh --all
-    git ls-files -z | xargs -0 scripts/check_no_binaries.sh
-    scripts/check_dependency_freshness.sh --all >/dev/null
-    scripts/check_repo_contract.sh
-    echo "shared gates ok"
 }
 
 # Runs one gate; its output goes to the caller (a log file).
@@ -118,6 +63,8 @@ run_gate() {
         audio) tools/audio/check.sh ;;
         coverage) scripts/coverage.sh ;;
         export) scripts/test_export.sh ;;
+        round) scripts/test_build_round.sh ;;
+        web) scripts/test_web.sh ;;
     esac
 }
 
@@ -159,19 +106,12 @@ phase() {
 }
 
 main() {
-    local all=("${FIRST[@]}" "${PARALLEL[@]}" "${LAST[@]}") gate
+    verify_groups
     if [[ "${1:-}" == --list ]]; then
-        printf '%s\n' "${all[@]}"
+        list_groups
         return 0
     fi
-    WANTED=("$@")
-    [[ ${#WANTED[@]} -gt 0 ]] || WANTED=("${all[@]}")
-    for gate in "${WANTED[@]}"; do
-        [[ " ${all[*]} " == *" $gate "* ]] || {
-            echo "unknown gate '$gate' (scripts/check.sh --list)" >&2
-            exit 2
-        }
-    done
+    parse_args "$@"
     cd "$REPO_ROOT"
     mkdir -p "$SCRATCH"
     LOGS="$(mktemp -d "$SCRATCH/check.XXXXXX")"
