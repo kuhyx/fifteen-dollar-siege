@@ -26,16 +26,23 @@ bot_frames() {
 
 # Runs the bot once on a private Xvfb screen of `size`. Writes the log and the
 # bot's verdict file; returns the run's exit code (judge it with bot_judge).
+# BOT_HEADLESS=1 (CI: no display, no GL) runs it with --headless instead: the
+# same clicks and asserts, but no frame is drawn or saved.
 #   bot_run <size> <limit_s> <log> <result_file> <save_dir> <mode> [game args...]
 bot_run() {
     local size="$1" limit="$2" log="$3" result="$4" save="$5" mode="$6" code=0
     shift 6
     mkdir -p "$(dirname "$log")"
     rm -rf "$save" "$result"
-    cap timeout -k 3 "$limit" "$REPO_ROOT/scripts/xvfb_run.sh" "$size" \
-        godot "${BOT_ENGINE_FLAGS[@]}" --resolution "$size" --path "$REPO_ROOT" -- \
+    local launch=("$REPO_ROOT/scripts/xvfb_run.sh" "$size" godot --resolution "$size")
+    local window=("--expect-window=$size")
+    if [[ "${BOT_HEADLESS:-0}" == 1 ]]; then
+        launch=(godot --headless)
+        window=()
+    fi
+    cap timeout -k 3 "$limit" "${launch[@]}" "${BOT_ENGINE_FLAGS[@]}" --path "$REPO_ROOT" -- \
         "--autodrive=$mode" "--save-dir=$save" "--result-file=$result" \
-        "--expect-window=$size" "$@" >"$log" 2>&1 || code=$?
+        "${window[@]}" "$@" >"$log" 2>&1 || code=$?
     return "$code"
 }
 

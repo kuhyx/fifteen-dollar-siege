@@ -13,6 +13,7 @@
 #   BOT_SIZE=1280x720   window size (default 1920x1080)
 #   BOT_SPEED=16        sim seconds per second
 #   GATE_MAX_S=40       also fail when the whole gate took longer
+#   BOT_HEADLESS=1      no display (CI): the same asserts, no frames
 # Never touches the live display; godot runs with --audio-driver Dummy (the
 # flags live in scripts/lib/bot.sh). Whole script < 60 s; one mode per call if
 # the machine is very busy.
@@ -46,6 +47,10 @@ run_mode() {
     bot_run "$SIZE" "$RUN_TIMEOUT" "$dir/log.txt" "$dir/result" "$dir/save" "$mode" \
         "--speed=$SPEED" "--seed=7" "--lab-runs=30" "--screenshot-dir=$dir/shots" || code=$?
     bot_judge "autodrive $mode" "$code" "$dir/log.txt" "$dir/result" || return 1
+    if [[ "${BOT_HEADLESS:-0}" == 1 ]]; then
+        echo "autodrive $mode: PASS (headless: asserts only, no frames)"
+        return 0
+    fi
     mapfile -t shots < <(find "$dir/shots" -maxdepth 1 -name '*.png' | sort)
     if [[ ${#shots[@]} -ne "$want" ]]; then
         echo "autodrive $mode: FAILED (${#shots[@]} frames, expected $want)" >&2
@@ -73,7 +78,8 @@ finish() {
 }
 
 main() {
-    need godot Xvfb
+    need godot
+    [[ "${BOT_HEADLESS:-0}" == 1 ]] || need Xvfb
     refresh_class_cache
     local modes=("$@") mode failed=0 pids=() pid
     [[ ${#modes[@]} -gt 0 ]] || modes=("${ALL_MODES[@]}")

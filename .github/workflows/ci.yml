@@ -1,0 +1,52 @@
+name: ci
+
+# Lint, a headless import and boot (every script must parse), the GUT suite,
+# the save guard, the session recorder's unit tests, and the autodrive bot
+# playing all three modes headless (asserts only: the frame gate needs a
+# display and stays local in scripts/autodrive_all.sh). The shared gates
+# (file length, markdown naming, dependency freshness, repo contract) have
+# their own workflows.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.x" }
+
+      - name: Install Godot
+        run: |
+          curl -fsSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          rm godot.zip
+
+      - name: Install project tooling and GUT
+        run: ./install.sh
+
+      - name: Lint (gdlint, gdformat, shellcheck, ruff)
+        run: scripts/lint.sh
+
+      - name: Headless import and boot, no SCRIPT ERROR
+        run: scripts/check.sh smoke
+
+      - name: GUT
+        run: scripts/test.sh
+
+      - name: Save guard without the hook redirect
+        run: scripts/test_save_guard.sh
+
+      - name: Session recorder unit tests
+        run: scripts/test_recording.sh
+
+      - name: Autodrive bot, all three modes, headless
+        run: BOT_HEADLESS=1 scripts/autodrive_all.sh
