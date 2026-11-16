@@ -61,16 +61,16 @@ static func tumble(p: VignettePen, at: Vector2, tint: Color, turn: float, size :
 
 ## Only the outline of a person, dashed: he cannot be seen.
 static func ghost(p: VignettePen, foot: Vector2, stride: float) -> void:
-	var tint := Color(PictoInk.LIGHT, 0.85)
+	var tint := Color(PictoInk.LIGHT, 0.9)
 	var swing := sin(stride) * 4.0
 	var hip := foot + Vector2(0, -9)
-	p.line(hip, foot + Vector2(swing, 0), 0.9, tint)
-	p.line(hip, foot - Vector2(swing, 0), 0.9, tint)
+	p.line(hip, foot + Vector2(swing, 0), 1.3, tint)
+	p.line(hip, foot - Vector2(swing, 0), 1.3, tint)
 	for turn: float in [0.0, 90.0, 180.0, 270.0]:
-		p.arc(foot + Vector2(0, -26.5), 4.6, turn + 10.0, turn + 60.0, 1.0, tint)
+		p.arc(foot + Vector2(0, -26.5), 4.6, turn + 10.0, turn + 62.0, 1.4, tint)
 	for y: float in [-21.0, -15.0]:
-		p.line(foot + Vector2(-4.2, y), foot + Vector2(-4.2, y + 3.5), 1.0, tint)
-		p.line(foot + Vector2(4.2, y), foot + Vector2(4.2, y + 3.5), 1.0, tint)
+		p.line(foot + Vector2(-4.2, y), foot + Vector2(-4.2, y + 3.5), 1.4, tint)
+		p.line(foot + Vector2(4.2, y), foot + Vector2(4.2, y + 3.5), 1.4, tint)
 
 
 ## A village house standing on `at`.

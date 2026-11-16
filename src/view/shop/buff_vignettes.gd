@@ -22,15 +22,16 @@ static func draw_army(canvas: CanvasItem, stage: Rect2, at_s: float, men: int) -
 	var u := fposmod(at_s / LOOP_S, 1.0)
 	var stride := u * TAU * 2.0
 	VignetteKit.ground(pen, u * VignetteKit.TUFT_GAP)
-	for i in maxi(men / MEN_PER_FIGURE, 1):
-		var rank := i % RANKS
-		var column := i / RANKS
-		var foot := Vector2(
-			26.0 + column * 15.0 + rank * 6.0, VignetteKit.FLOOR - 12.0 + rank * 7.0
-		)
-		foot.y -= absf(sin(stride + rank)) * 1.2
-		var head := VignetteKit.man(pen, foot, VignetteKit.ARMY, stride + rank)
-		pen.line(head + Vector2(5, 9), head + Vector2(9, -6), 2.0, PictoInk.WOOD)
+	var figures := maxi(men / MEN_PER_FIGURE, 1)
+	for rank in RANKS:  # the rank at the back first; it is darker, so ranks stay apart
+		var tint := VignetteKit.ARMY.darkened(0.22 * (RANKS - 1 - rank))
+		for column in ceili(float(figures) / RANKS):
+			if column * RANKS + rank >= figures:
+				continue
+			var foot := Vector2(26.0 + column * 15.0 + rank * 6.0, VignetteKit.FLOOR - 12.0)
+			foot.y += rank * 7.0 - absf(sin(stride + rank)) * 1.2
+			var head := VignetteKit.man(pen, foot, tint, stride + rank)
+			pen.line(head + Vector2(5, 9), head + Vector2(9, -6), 2.0, PictoInk.WOOD)
 
 
 static func has(id: StringName) -> bool:
