@@ -1,8 +1,13 @@
 extends RefCounted
-## The orders the --autodrive bot gives in Command mode (src/autodrive/
-## autodrive.gd `_give_orders`): a rally at RALLY_AT, then retreat, then
-## charge. The bot counts frames, so the exact ticks depend on the frame
-## step; TIMINGS covers the window, one row (rally, retreat, charge tick) each.
+## The fixed three-order burst the pinned fixtures are held to: a rally at
+## RALLY_AT, then retreat, then charge, at one row of TIMINGS (sim ticks since
+## the start of the siege). It is NOT the Command bot of the autodrive: that is
+## `BotCommander` (src/autodrive/bot_commander.gd), which reads the battle. Used
+## by `find_fixtures.gd` (which loadouts and seeds survive every timing),
+## `tests/core/test_siege_fixtures.gd`, and, as the order sequence a LOST Command
+## siege gets, `SiegeRound.give_orders` (src/autodrive/siege_round.gd, whose
+## `BURST_RALLY_AT` repeats RALLY_AT: shipped code never preloads tools/).
+## Headless, outside the sim hash (which covers src/core/*.gd only).
 
 const RALLY_AT := Vector2(200.0, 90.0)
 const TIMINGS: Array[Vector3i] = [
