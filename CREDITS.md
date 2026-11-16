@@ -1,0 +1,40 @@
+# Credits
+
+Every asset, tool and borrowed file gets a row here in the same edit that adds
+it. No AI-generated art or music (see `CLAUDE.md`).
+
+## Idea
+
+| What | Source | Note |
+|---|---|---|
+| The premise and the 25 buffs with their prices | an image macro of unknown authorship, attached by kuhy to todo task df2a2bf2 | quoted verbatim, typos kept, in `DOCS-design.md` and `src/core/buff_catalog.gd`; never shown on screen |
+
+Real people and brands named in the source text (a general, a film actor, a
+rock band and its song, a novel's monster) appear only in that verbatim repo
+data. On screen and in ids they are neutral (`emperor`, `pep_talk`,
+`rock_band`, `stitched_monster`); the band's music is not used.
+
+## Engine and tools
+
+| What | Version | Licence | How it gets here |
+|---|---|---|---|
+| Godot Engine | 4.7.2 | MIT | system package / CI download |
+| GUT (Godot Unit Test) | 9.7.1 | MIT | `install.sh` clones the tag into `addons/gut` (gitignored) |
+| gdtoolkit, pre-commit, ruff, coverage | `requirements-dev.txt` | MIT / MIT / MIT / Apache-2.0 | `install.sh` |
+
+## Code ported from another repo
+
+| Files here | From | Note |
+|---|---|---|
+| `src/dev/` (annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry) | `an earlier game` `src/dev/` | adapted to this game's flow and state |
+| `tools/recording/`, `tests/recording/`, `scripts/e2e_recording.sh`, `scripts/recordings.sh` | `an earlier game` `tools/recording/` | the moment map is rewritten for this game |
+| `src/ui/vector_glyph.gd`, `src/ui/glyph_texture.gd` | `an earlier game` `src/ui/` | unchanged |
+| `src/autodrive/frame_stats.gd`, `input_synth.gd`, `bot_shots.gd`, `bot_report.gd`, `tools/frame_check.gd`, `scripts/xvfb_run.sh`, `tests/run_tmp.gd` | `an earlier game` | small adaptations |
+| `scripts/check_*.sh`, `scripts/todo_hooks.sh`, the shared-gate workflows | `herosi` | shims over `~/src/utils` |
+
+These files were first written by kuhy for an earlier game of his.
+
+## Art, music, sound
+
+None yet. The pictograms in `src/ui/glyphs.gd` and `src/dev/dev_glyphs.gd`
+are code-drawn placeholders.
