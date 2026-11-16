@@ -21,6 +21,13 @@ const CLIMB := 6
 ## Runs a loadout needs before it is ranked, and before it is climbed from.
 const RANKED_RUNS := 8
 const TRUSTED_RUNS := 48
+## Loadouts per buff that are measured to CHAMPION_RUNS whatever their rank:
+## a buff's best home must not miss the top list by the luck of 48 sieges.
+const CHAMPIONS := 3
+const CHAMPION_RUNS := 96
+## --carry: the best CARRY_TOP of the old cache and CARRY_PER_BUFF per buff.
+const CARRY_TOP := 80
+const CARRY_PER_BUFF := 3
 
 ## Sieges of the empty loadout, size of the random sample and sieges of each
 ## sample loadout. A tool may lower them for a quick look (--empty-runs,
@@ -28,13 +35,29 @@ const TRUSTED_RUNS := 48
 static var empty_runs := 300
 static var sample_size := 300
 static var sample_runs := 8
+## Loadouts that did well under an earlier tuning (--carry): measured to
+## TRUSTED_RUNS at once, so the search does not have to find them again.
+static var carried: Array[String] = []
 
 
-## Takes the three sizes from a tool's arguments, when given.
+## Takes the three sizes from a tool's arguments, when given; --carry=HASH
+## carries the best loadouts of that sim's cache over (see `carried`).
 static func configure(args: Dictionary) -> void:
 	empty_runs = int(args.get("empty-runs", empty_runs))
 	sample_size = int(args.get("sample", sample_size))
 	sample_runs = int(args.get("sample-runs", sample_runs))
+	if not args.has("carry"):
+		return
+	var old: RefCounted = Store.new()
+	old.attach(str(args.get("store", Store.default_root())).path_join(args["carry"]))
+	carried = ranking(old, TRUSTED_RUNS).slice(0, CARRY_TOP)
+	for def in BuffCatalog.all():
+		var found := 0
+		for key in ranking(old, 2 * RANKED_RUNS):
+			if found < CARRY_PER_BUFF and key.split("+").has(String(def.id)):
+				found += 1
+				if not carried.has(key):
+					carried.append(key)
 
 
 ## Keys of the measured loadouts with at least `min_runs`, best rate first.
@@ -73,6 +96,16 @@ static func targets(store: RefCounted, climb: bool) -> Dictionary:
 		for step in LADDER:
 			if rank < step.x:
 				_raise(want, ranked[rank], step.y)
+	for key in carried:
+		_raise(want, key, TRUSTED_RUNS)
+	# Every buff's best loadouts get a well-measured rate, whatever their rank,
+	# so the climb can start from each buff's best home.
+	for def in BuffCatalog.all():
+		var found := 0
+		for key in ranked:
+			if found < CHAMPIONS and key.split("+").has(String(def.id)):
+				_raise(want, key, CHAMPION_RUNS)
+				found += 1
 	for key in _climb_from(store):
 		for neighbour: Loadout in Space.neighbours(Space.from_key(key)):
 			_raise(want, Space.key(neighbour), FIRST_RUNS)

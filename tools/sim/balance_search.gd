@@ -5,7 +5,7 @@ extends SceneTree
 ## shards may run side by side (scripts/balance_search.sh does).
 ##   godot --headless -s tools/sim/balance_search.gd -- [--shard=0] [--shards=1]
 ##       [--budget-s=45] [--no-climb] [--store=DIR]
-##       [--empty-runs=300] [--sample=300] [--sample-runs=8]
+##       [--empty-runs=300] [--sample=300] [--sample-runs=8] [--carry=HASH]
 ## --no-climb measures only the empty loadout and the random sample.
 ## Prints one RESULT line: sieges run now, loadouts and sieges in the store,
 ## and "left" (0 = the search has nothing more to do). Exit 0.

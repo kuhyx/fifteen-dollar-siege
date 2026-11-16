@@ -4,8 +4,10 @@ extends RefCounted
 ## of the code in src/core/*.gd: any change to the sim or a constant starts a
 ## fresh folder), one JSON file per shard:
 ##   ~/data/claude-scratch/fifteen-dollar-siege/balance/<sim hash>/shard-K-of-N.json
-##   {"results": {"<loadout key>": [wins, runs, sim seconds summed, push summed]}}
-## (push of one siege = 1 - SiegeSim.village_low(): how close the army came)
+##   {"results": {"<loadout key>": [wins, runs, sim seconds summed, push summed,
+##                                   outcomes]}}
+## push of one siege = 1 - SiegeSim.village_low(): how close the army came;
+## outcomes is one character per run in seed order, "1" won, "0" lost.
 ## Run r of a loadout always uses seed SEED0 + r, so a result never depends on
 ## which call or shard produced it.
 
@@ -86,10 +88,22 @@ func mean_push(key: String) -> float:
 	return float(results[key][3]) / done if done > 0 else 0.0
 
 
+## Wins among the loadout's first `count` runs (seeds SEED0 .. SEED0+count-1),
+## -1 when it has fewer runs than that.
+func wins_in_first(key: String, count: int) -> int:
+	if runs(key) < count:
+		return -1
+	return str(results[key][4]).substr(0, count).count("1")
+
+
 func add(key: String, won: bool, seconds: float, push: float) -> void:
-	var row: Array = results.get(key, [0, 0, 0.0, 0.0])
+	var row: Array = results.get(key, [0, 0, 0.0, 0.0, ""])
 	results[key] = [
-		int(row[0]) + int(won), int(row[1]) + 1, float(row[2]) + seconds, float(row[3]) + push
+		int(row[0]) + int(won),
+		int(row[1]) + 1,
+		float(row[2]) + seconds,
+		float(row[3]) + push,
+		str(row[4]) + ("1" if won else "0")
 	]
 
 
@@ -135,4 +149,4 @@ func _merge(path: String) -> void:
 	for key: String in rows:
 		var row: Array = rows[key]
 		if int(row[1]) > runs(key):
-			results[key] = [int(row[0]), int(row[1]), float(row[2]), float(row[3])]
+			results[key] = [int(row[0]), int(row[1]), float(row[2]), float(row[3]), str(row[4])]
