@@ -43,7 +43,7 @@ func take(shot: SiegeSnapshot, now: float, screen: BattleScreen) -> void:
 	for ring: Dictionary in fallen.tolls:
 		FxToll.land(effects, ring)
 		var nth := int(ring.total) / BattleToll.MILESTONE
-		FunCue.play(&"fun_toll", minf(0.9 + 0.04 * nth, 1.5))
+		FunCue.play(&"fun_toll", minf(0.9 + 0.04 * nth, 1.5), ring.pos)
 		impact.on_event({"kind": &"squad_wiped"})
 		screen.crowd.cheer(0.6)
 
@@ -90,7 +90,7 @@ func _fireworks(delta: float, screen: BattleScreen) -> void:
 		screen.plan.bell + Vector2(_rng.randf_range(-45.0, 45.0), _rng.randf_range(0.0, 25.0))
 	)
 	screen.effects.flourish(&"firework", FxFireworks.burst, KEEP_S, at, {})
-	FunCue.play(&"fun_firework", _rng.randf_range(0.9, 1.15))
+	FunCue.play(&"fun_firework", _rng.randf_range(0.9, 1.15), at)
 
 
 ## The potions wear off as the flag goes up: each unseen squad appears in a flash.
@@ -104,7 +104,7 @@ func _unmasking(delta: float, screen: BattleScreen) -> void:
 			screen.effects.spawn(event)
 			screen.crowd.unmask(item[1])
 			impact.on_event(event)
-			FunCue.play(&"reveal")
+			FunCue.play(&"reveal", 1.0, item[1])
 	_unmask = _unmask.filter(func(item: Array) -> bool: return item[0] > 0.0)
 
 

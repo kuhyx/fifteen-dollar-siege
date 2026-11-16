@@ -126,6 +126,12 @@ gets a fresh one with each main scene.
   `audio.json` through `SaveStore`, restored at boot. The pause menu draws the
   control (`DOCS-menus.md`, "Pause menu and volume"): ten steps per channel.
 
+The delights (`FunCue.play(cue, pitch, at)`, `AudioDirector.fun`) join these
+rules: they use the battle voices (a pause stops them, the menu voices go on),
+`at` (map metres) is placed against the view of the last `on_snapshot` and
+without it the cue is central, and each one counts in `heard`, like a battle
+cue asked for.
+
 Events of one kind in one snapshot become ONE sound at their mean position,
 up to 4 dB louder for a crowd. A cue then waits its `gap` before it may
 start again and never holds more than its `voices` (a new start takes its

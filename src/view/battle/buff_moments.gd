@@ -80,7 +80,7 @@ func _start(shot: SiegeSnapshot, effects: BattleEffects) -> void:
 
 func _badge(id: StringName, at: Vector2, effects: BattleEffects, slot := 0) -> void:
 	effects.flourish(&"badge", FxSigns.badge, BattleFlair.KEEP_S, at, {"id": id, "slot": slot})
-	FunCue.play(&"fun_star", 1.0)
+	FunCue.play(&"fun_star", 1.0, at)
 
 
 static func _army_heads(shot: SiegeSnapshot) -> int:

@@ -59,7 +59,7 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 | `src/core/` | buffs, loadout, map, snapshot, the sim and its systems, lab, fixtures | sim agent |
 | `tools/sim/` | balance search, report, pins, the scripted commander (headless) | sim agent |
 | `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`) | shared |
-| `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `FunCue` (the delights' cues), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit` | audio agent |
+| `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `FunCue` (the delights' cues), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit`, `LabSounds`, `MenuClicks` | audio agent |
 | `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
 | `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
 | `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera, and `BattleFlair`: the delights of the fun pass) | view agent |

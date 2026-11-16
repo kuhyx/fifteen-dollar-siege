@@ -41,7 +41,7 @@ func advance(delta: float, crowd: CrowdLayer, view: Rect2, effects: BattleEffect
 		if at != Vector2.INF:
 			effects.flourish(look[0], _painter(look[0]), look[2], at, {})
 			if look[3] != &"":
-				FunCue.play(look[3], look[4])
+				FunCue.play(look[3], look[4], at)
 
 
 static func _painter(kind: StringName) -> Callable:

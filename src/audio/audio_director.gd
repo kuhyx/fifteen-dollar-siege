@@ -1,19 +1,14 @@
 class_name AudioDirector
 extends Node
-## All the game's sound, as one node that `Main` owns.
-##   music   follows Main's signals: hub loop, battle bed, stingers (MusicDeck)
-##   menus   a cue per action: buy, un-buy, refusal, go, mode pick, pause,
-##           Lab tick, Lab done; any other button clicks
-##   battle  ONE entry point, `AudioDirector.on_snapshot(snapshot, view_rect)`:
-##           it plays the snapshot's events where they happened and steers
-##           the bed from alarm, morale and the band's riffs
-## `view_rect` is the part of the MAP on screen, in map metres (the sim's
-## units): an event left of its centre sounds on the left, one outside it
-## is quieter. Pass the map's bounds when there is no camera.
-## A bot (--autodrive) and a GUT run are muted on both buses; with no audio
-## files (no ./install.sh yet) every call is a quiet no-op.
-## Volume: `set_music_volume`, `set_sfx_volume`, `set_muted`, `toggle_muted`
-## (saved through SaveStore). `heard` counts the cues asked for, per cue.
+## All the game's sound, as one node that `Main` owns (DOCS-audio.md section 4):
+## music follows Main's signals (MusicDeck); menus get a cue per action; the
+## battle has ONE entry point, `AudioDirector.on_snapshot(snapshot, view_rect)`
+## (`view_rect`: the part of the MAP on screen, in metres: events sound left to
+## right and quieter outside it); `FunCue` cues join the battle voices through
+## `fun`. A bot (--autodrive) and a GUT run are muted on both buses; with no
+## audio files every call is a quiet no-op. Volume: `set_music_volume`,
+## `set_sfx_volume`, `set_muted`, `toggle_muted` (saved through SaveStore).
+## `heard` counts the battle and fun cues asked for, per cue.
 
 ## Seconds one band riff keeps the rock loop over the bed [design guess].
 const ROCK_HOLD_S := 8.0
@@ -41,11 +36,14 @@ var clock_s := 0.0
 ## Menu cues that sounded, newest last (tests and the dev tools read it).
 var ui_log: Array[StringName] = []
 var heard := {}
+## The process frame of the last menu cue (a press that cued does not click as well).
+var ui_frame := -1
 
 var _main: Main
 var _rng := RandomNumberGenerator.new()
-var _ui_frame := -1
-var _lab_seen := Vector2i.ZERO
+var _lab := LabSounds.new()
+var _clicks: MenuClicks  # kept: its signal hooks do not hold it
+var _view := Rect2()
 
 
 ## The director of the running game, null when there is none.
@@ -90,18 +88,31 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	clock_s += delta
 	if _main != null and _main.screen_name == &"lab":
-		_count_lab(_main.screen.get("result"))
+		_lab.count(self, _main.screen.get("result"))
 
 
 ## Plays a menu cue (pitch 1 = as rendered).
 func ui(cue: StringName, pitch: float = 1.0) -> void:
-	_ui_frame = Engine.get_process_frames()
+	ui_frame = Engine.get_process_frames()
 	if not AudioCues.CUES.has(cue) or not limiter.allow(cue, clock_s, _of(cue, "gap", 0.05)):
 		return
 	ui_log.append(cue)
 	if ui_log.size() > LOG_SIZE:
 		ui_log.pop_front()
 	_start(ui_pool, cue, {"pitch": pitch})
+
+
+## A delight's cue (`FunCue`): on the battle voices, so a pause stops it; panned
+## by `at` (map metres) against the view the battle last gave, the middle with
+## none; counted in `heard` like every battle cue.
+func fun(cue: StringName, pitch: float = 1.0, at: Vector2 = Vector2.INF) -> void:
+	heard[cue] = int(heard.get(cue, 0)) + 1
+	if not AudioCues.CUES.has(cue) or not limiter.allow(cue, clock_s, _of(cue, "gap", 0.05)):
+		return
+	var how := {"pitch": pitch}
+	if at.is_finite():
+		how["x"] = _screen_x(at.x, _view)
+	_start(pool, cue, how)
 
 
 func set_music_volume(linear: float) -> void:
@@ -136,17 +147,15 @@ func _follow(main: Main) -> void:
 	main.siege_ended.connect(
 		func(outcome: int, _clock: float) -> void: music.ending(outcome == SiegeSim.Outcome.WIN)
 	)
-	main.lab_finished.connect(_on_lab_finished)
+	main.lab_finished.connect(func(result: Dictionary) -> void: _lab.done(self, result))
 	main.loadout_changed.connect(_on_loadout_changed)
 	if main.pause_menu != null:
 		main.pause_menu.toggled.connect(_on_pause)
-	get_tree().node_added.connect(_hook)
-	for button in main.find_children("*", "BaseButton", true, false):
-		_hook(button)
+	_clicks = MenuClicks.new(self, main)
 
 
 func _on_screen(screen_name: StringName) -> void:
-	_lab_seen = Vector2i.ZERO
+	_lab.reset()
 	if screen_name == &"battle":
 		music.show_battle()
 	elif screen_name != &"result" or music.scene != &"ending":
@@ -168,41 +177,8 @@ func _on_pause(open: bool) -> void:
 	ui(&"ui_pause" if open else &"ui_resume")
 
 
-## The Lab's bell rings higher the more sieges were won.
-func _on_lab_finished(result: Dictionary) -> void:
-	var runs := maxi(int(result.get("runs", 0)), 1)
-	ui(&"ui_lab_done", lerpf(0.84, 1.12, float(result.get("wins", 0)) / runs))
-
-
-## A tick when the Lab has counted more sieges: high for a win, low for a loss.
-func _count_lab(result: Variant) -> void:
-	if not result is Dictionary:
-		return
-	var now := Vector2i(int(result.get("runs", 0)), int(result.get("wins", 0)))
-	if now.x > _lab_seen.x:
-		ui(&"ui_lab_tick", 1.12 if now.y > _lab_seen.y else 0.9)
-	_lab_seen = now
-
-
-## Every button under Main clicks, unless its press already played a cue.
-func _hook(node: Node) -> void:
-	var button := node as BaseButton
-	if button == null or _main == null or not _main.is_ancestor_of(button):
-		return
-	if not button.pressed.is_connected(_on_button):
-		button.pressed.connect(_on_button)
-
-
-func _on_button() -> void:
-	_click.call_deferred()
-
-
-func _click() -> void:
-	if _ui_frame != Engine.get_process_frames():
-		ui(&"ui_button")
-
-
 func _take(shot: SiegeSnapshot, view: Rect2) -> void:
+	_view = view
 	music.steer(shot.alarm, shot.army_morale, shot.village_morale)
 	# Same-kind events of one snapshot become ONE sound at their middle.
 	var groups := {}
@@ -225,14 +201,24 @@ func _take(shot: SiegeSnapshot, view: Rect2) -> void:
 func _place(cue: StringName, group: Dictionary, view: Rect2) -> void:
 	var count: int = group["count"]
 	var where: Vector2 = group["sum"] / count
-	var across := 0.5 if view.size.x <= 0.0 else (where.x - view.position.x) / view.size.x
+	var across := _across(where.x, view)
 	var outside := maxf(maxf(-across, across - 1.0), 0.0)
-	var screen := get_viewport().get_visible_rect()
 	var db := _of(cue, "db", 0.0)
 	db += minf(CROWD_MAX_DB, CROWD_DB * log(count) / log(2.0))
 	db -= minf(OFF_VIEW_MAX_DB, OFF_VIEW_DB * outside)
-	var x := screen.position.x + clampf(across, 0.0, 1.0) * screen.size.x
+	var x := _screen_x(where.x, view)
 	_start(pool, cue, {"x": x, "db": db, "pitch": AudioCues.pitch_for(group["event"])})
+
+
+## Where map x is across `view` (0 left edge, 1 right edge, 0.5 with no view).
+func _across(map_x: float, view: Rect2) -> float:
+	return 0.5 if view.size.x <= 0.0 else (map_x - view.position.x) / view.size.x
+
+
+## The speaker position (canvas x) of map x: the screen's width follows the view.
+func _screen_x(map_x: float, view: Rect2) -> float:
+	var screen := get_viewport().get_visible_rect()
+	return screen.position.x + clampf(_across(map_x, view), 0.0, 1.0) * screen.size.x
 
 
 func _start(voices: SfxPool, cue: StringName, how: Dictionary) -> void:

@@ -71,8 +71,11 @@ for the looks and moments of each buff alone.
   first sight (lesson L7; `test_buff_moments.gd` is red at 20 % start).
 - Hit pause is per kind on a cooldown: a monster in a long melee smashes on
   nearly every step and held the world 4 frames in 5 before.
-- The delights play through `FunCue` (the menu voice pool): not panned, they
-  do not stop on pause and are not counted in `AudioDirector.heard`.
+- The delights play through `FunCue` on the battle voice pool, so they follow
+  the audio rules: a pause stops them, one with a position (`FunCue.play(cue,
+  pitch, at)`: tally, rocket, unmasking, looks, badges) is placed left to right
+  against the view the battle last gave, and every one counts in
+  `AudioDirector.heard` (`tests/audio/test_fun_cues.gd`).
 
 ## 5. Constants (all `[design guess]`, tuned on the fun bot's frames)
 
