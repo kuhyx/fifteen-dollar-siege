@@ -15,10 +15,12 @@ readonly START_WAIT_TICKS=200 # x 0.05 s
 XVFB_PID=""
 TMP=""
 
-# shellcheck disable=SC2329  # runs from the EXIT trap
+# Idempotent: runs on every exit path (called directly, and from the EXIT trap for signals).
 cleanup() {
     [[ -z "$XVFB_PID" ]] || kill "$XVFB_PID" 2>/dev/null || true
     [[ -z "$TMP" ]] || rm -rf "$TMP"
+    XVFB_PID=""
+    TMP=""
 }
 
 main() {
@@ -39,9 +41,11 @@ main() {
     done
     if [[ ! -s "$TMP/display" ]]; then
         echo "Error: Xvfb did not start" >&2
+        cleanup
         exit 3
     fi
     DISPLAY=":$(tr -d '[:space:]' <"$TMP/display")" "$@" || code=$?
+    cleanup
     exit "$code"
 }
 

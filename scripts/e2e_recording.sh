@@ -76,10 +76,9 @@ wrap() {
 
 # Bot-marked and headless runs must pass through without a recording.
 test_never() {
-    local session="e2e-never-$$" fb="$TMP/never" cmd
-    for cmd in "--dev --autodrive=watch" "--dev --save-dir=$TMP/s" "--dev --result-file=$TMP/r"; do
-        # shellcheck disable=SC2086  # the words of $cmd are separate arguments
-        wrap "$session" 20 -- python3 -c pass $cmd "--feedback-dir=$fb"
+    local session="e2e-never-$$" fb="$TMP/never" marker
+    for marker in "--autodrive=watch" "--save-dir=$TMP/s" "--result-file=$TMP/r"; do
+        wrap "$session" 20 -- python3 -c pass --dev "$marker" "--feedback-dir=$fb"
     done
     wrap "$session" 20 -- python3 -c pass "--feedback-dir=$fb" # no --dev
     [[ ! -e "$fb/recordings" ]] || { echo "e2e_recording: a bot run was recorded" >&2; exit 1; }

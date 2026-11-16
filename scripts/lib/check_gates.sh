@@ -31,6 +31,7 @@ gate_static() {
     # The words below are split so this file never matches its own patterns.
     local ai_art='art''gate|generate\.p''y|Lo''RA' no_hook='-gcon''fig='
     local lossy='libvor''bis|libmp3''lame|ogg''enc'
+    local suppress='shellcheck dis''able|gdlint: ?dis''able|no''qa|type: ?ig''nore|warning_ig''nore'
     # R2: a script that starts godot says so muted or headless.
     must_be_empty "a godot run that is neither headless nor muted" bash -c \
         "grep -rlE '(^|[[:space:]])godot[[:space:]]+(--|\")' scripts | xargs -r grep -LE 'audio-driver Dummy|--headless'" || bad=1
@@ -41,6 +42,8 @@ gate_static() {
         grep -rlE "$lossy" scripts tools || bad=1
     # R3: no AI-art tooling outside the docs.
     must_be_empty "AI-art tooling" git grep -nE "$ai_art" -- ':!*.md' || bad=1
+    # CLAUDE.md: no lint suppression anywhere; fix the code instead.
+    must_be_empty "a lint suppression directive" git grep -nIE "$suppress" || bad=1
     # R10: dev files are reachable by path only, and stay out of every export:
     # the glue in src/dev and the shared addon mounted at addons/dev_tools.
     must_be_empty "a class_name in src/dev" grep -rn '^class_name' src/dev || bad=1
