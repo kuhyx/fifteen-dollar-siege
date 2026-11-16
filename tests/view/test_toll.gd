@@ -115,4 +115,4 @@ func test_the_screen_shows_pops_and_the_tally_for_a_bleeding_village() -> void:
 		func(fx: BattleFx) -> bool: return fx.kind == &"toll"
 	)
 	assert_gt(live_toll.size(), 0, "and one is still on screen")
-	assert_eq(AudioCues.FUN.size(), 7)
+	assert_eq(AudioCues.FUN.size(), 8)

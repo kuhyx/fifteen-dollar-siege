@@ -15,6 +15,13 @@ func test_every_buff_has_signs_or_is_stat_only() -> void:
 		assert_not_null(BuffCatalog.by_id(id), "%s is a buff" % id)
 
 
+func test_no_buff_is_chip_only_any_more() -> void:
+	for id in STAT_ONLY:
+		assert_true(BuffSigns.MOMENTS.has(id), "%s needs a moment of its own on the field" % id)
+	for id: StringName in BuffSigns.MOMENTS:
+		assert_not_null(BuffCatalog.by_id(id), "%s is a buff" % id)
+
+
 func test_every_event_a_sign_names_has_an_effect_and_a_cue() -> void:
 	for id: StringName in BuffSigns.SIGNS:
 		for event: StringName in BuffSigns.SIGNS[id][1]:

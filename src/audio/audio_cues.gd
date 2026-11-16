@@ -48,6 +48,7 @@ const FUN: Array[StringName] = [
 	&"fun_star",
 	&"fun_firework",
 	&"fun_hic",
+	&"fun_tick",
 ]
 
 const CUES := {
@@ -103,6 +104,7 @@ const CUES := {
 	&"fun_star": {"files": ["sfx/fun_star"], "gap": 0.1, "voices": 3},
 	&"fun_firework": {"files": ["sfx/fun_firework"], "gap": 0.25, "voices": 3, "jitter": 0.05},
 	&"fun_hic": {"files": ["sfx/fun_hic"], "gap": 0.6, "voices": 1, "jitter": 0.08},
+	&"fun_tick": {"files": ["sfx/centre_tick"], "gap": 0.2, "voices": 2},
 	&"ui_buy": {"files": ["ui/ui_buy"], "gap": 0.05, "voices": 2},
 	&"ui_unbuy": {"files": ["ui/ui_unbuy"], "gap": 0.05, "voices": 2},
 	&"ui_refuse": {"files": ["ui/ui_refuse"], "gap": 0.15, "voices": 1},

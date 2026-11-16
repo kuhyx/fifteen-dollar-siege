@@ -96,7 +96,7 @@ func _process(delta: float) -> void:
 	if not held:
 		_clock += delta
 		effects.advance(delta)
-		flair.update(delta)
+		flair.update(delta, self)
 	beats.tick_payoff(delta)
 	BattleAim.aim(self)
 	if payoff_active or beats.staging():
@@ -221,7 +221,7 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 	tween.push(shot, dt_sim)
 	crowd.sync(shot)
 	effects.shot = shot
-	flair.take(shot, _clock, effects)
+	flair.take(shot, _clock, self)
 	AudioDirector.on_snapshot(shot, Rect2(camera.to_map(Vector2.ZERO), size / camera.zoom))
 	for event in shot.events:
 		if shot.clock_s <= 0.0 and BattleBeats.stages(event):

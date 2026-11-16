@@ -4,7 +4,8 @@ extends RefCounted
 ## from the battle screen's own state (not from the sim): the buff's chip, the
 ## kind of figure that joins, the look the army wears, the effect of its
 ## event, the men on the field, and the cue the audio director got for that
-## event. A buff with no entry here is stat-only: its chip is all there is.
+## event. A buff with no entry here has no figure or event of its own; MOMENTS
+## holds what the view shows for it instead (nothing is chip-only any more).
 ## Signs are `[kind, events, look, heads, state]`; -1 / "" / 0 mean none.
 
 const K := SiegeSnapshot.Kind
@@ -34,6 +35,23 @@ const SIGNS := {
 	&"cardboard_armor": [NONE, [], &"cardboard", 0, NONE],
 }
 
+## The view's own moments a buff must also show (BattleEffects.seen kinds):
+## the buffs that were once only a chip, and the looks that were faint.
+const MOMENTS := {
+	&"stew": [&"badge", &"steam"],
+	&"prep_hour": [&"clock"],
+	&"prep_ten_minutes": [&"clock"],
+	&"sleepless_village": [&"badge"],
+	&"deaf_villagers": [&"badge"],
+	&"double_men": [&"count"],
+	&"fifty_men": [&"count"],
+	&"knight_armor": [&"glint"],
+	&"football_helmets": [&"glint"],
+	&"cardboard_armor": [&"scrap"],
+	&"booze": [&"hic"],
+	&"metal_bats": [&"ping"],
+}
+
 
 static func is_stat_only(id: StringName) -> bool:
 	return not SIGNS.has(id)
@@ -43,6 +61,9 @@ static func is_stat_only(id: StringName) -> bool:
 static func missing(battle: BattleScreen, id: StringName) -> String:
 	if not battle.hud.chips.ids.has(id):
 		return "no chip"
+	for moment: StringName in MOMENTS.get(id, []):
+		if int(battle.effects.seen.get(moment, 0)) == 0:
+			return "no %s moment yet" % moment
 	if is_stat_only(id):
 		return ""
 	var sign: Array = SIGNS[id]
