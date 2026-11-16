@@ -32,8 +32,10 @@ Each is a `[design guess]` unless a source is named.
   skill's "one 4-colour Lospec palette" was NOT used: twelve colours are
   what 25 distinct buffs needed.
 - **No brand, no real person.** The pep-talk man is a grey tough guy with a
-  red headband, the emperor a small man under a wide two-cornered hat, the
-  band four plain figures, the monster a stitched green head without bolts.
+  red headband, the emperor a small man under a gold-rimmed two-cornered hat
+  with a hand in his coat, the rock band one red electric guitar with notes,
+  the booze a green bottle beside a mug of beer, the shotgun a plain sawn-off
+  double barrel with shells, the monster a stitched green head without bolts.
 - **Second channels.** Bought: green frame AND check AND gold coins. Out of
   reach: dimmed art AND darker price coins. Refused: the tray shakes AND its
   rim turns red, the card shakes AND its coins flash red. Lab tick: colour
@@ -41,6 +43,9 @@ Each is a `[design guess]` unless a source is named.
 - **Progress (R4, R18).** `WinShelf` keeps the buffs a won Watch or Command
   siege was won with (Lab wins do not count); `LabBook` keeps wins and runs
   per loadout, added up over batches, keyed by the sorted buff ids.
+  `StarBook` keeps the best star count (0 to 3) per Watch and Command, never
+  lowered by a worse result (`stars.json`); the hub draws it as three stars
+  under each of those buttons (`StarRow`; the Lab has its rate ring instead).
 - **Lab slicing.** `LabRunner` steps the sims itself (a few ticks, then a
   look at the clock) instead of calling `Lab.run_one` per frame, so one slow
   siege cannot freeze a frame. `tests/test_menu_screens.gd` holds it equal to

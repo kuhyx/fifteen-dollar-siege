@@ -49,8 +49,8 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
   The browser starts it at the first touch (`DOCS-audio.md` section 6).
 - **Binaries never enter git.** `~/data/fifteen-dollar-siege_binaries/` holds
   `assets/` (the rendered audio), `builds/` (`vNN/` per round) and
-  `feedback/`. `assets` and `builds` in the repo are gitignored links made by
-  `install.sh`.
+  `feedback/` (dev bundles and `playtest-answers.jsonl`). `assets`, `builds`
+  and `feedback` in the repo are gitignored links made by `install.sh`.
 
 ## Layout
 
@@ -58,19 +58,20 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 |---|---|---|
 | `src/core/` | buffs, loadout, map, snapshot, the sim and its systems, lab, fixtures | sim agent |
 | `tools/sim/` | balance search, report, pins, the scripted commander (headless) | sim agent |
-| `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`) | shared |
+| `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`), `DebugState` (`Main.debug_state()`), `StateDump` (`--check-state=`: writes that state and a frame, then quits; the hand-off checks read it) | shared |
 | `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `FunCue` (the delights' cues), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit`, `LabSounds`, `MenuClicks` | audio agent |
 | `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
 | `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
 | `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera, and `BattleFlair`: the delights of the fun pass) | view agent |
 | `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
-| `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf, dice (`ShopDice`, `LoadoutDice`); `src/view/lab/` also holds `StarRating` and `ResultStars`; the Lab's runner, ranking, book | menu-screen agent |
+| `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf, dice (`ShopDice`, `LoadoutDice`); `src/view/lab/` also holds `StarRating`, `ResultStars`, `StarBook` (the best stars per mode, saved) and `StarRow` (the hub's three stars); the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`), `fun` (one siege per fun-pass delight); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
 | `tools/recording/` | the session recorder (Python) | shared |
 | `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
 | `tools/web/` | the browser smoke gate: isolated headless Chromium over CDP (`smoke.py`, `browser.py`, `venv.sh`) | shared |
 | `tests/` | GUT (`test_*.gd`, `view/`, `core/`), `tests/recording/` and `tests/audio/` (unittest) | with the code |
+| `scripts/handoff/` | the playtest items (`NN_name.sh`, each one yes/no question, `--check`), `saves/hub/` (the made-up save of the hub item); `scripts/playtest.sh` walks them; `scripts/lib/handoff.sh` is their shared logic | shared |
 | `scripts/` | every gate; `scripts/lib/` is shared shell | shared |
 
 ## Contracts the three agents must keep
@@ -119,6 +120,18 @@ Three layers keep a test away from `user://save`:
 the real save in any GUT process (`scripts/test_save_guard.sh` proves it with
 the hook's redirect off). Bots refuse to start without `--save-dir`.
 
+## Hand-off items (R7)
+
+Anything only kuhy can judge is one script in `scripts/handoff/` (numbered, so the
+order lives in the file names): it sets `ITEM_ID`, `ITEM_QUESTION` (ONE yes/no),
+`ITEM_ARGS` and `ITEM_SCREEN`, and calls `handoff_main`. Run for kuhy it launches
+through the repo's launcher lib (host GL fallback, class cache), muted, on a
+throwaway save (`ITEM_SAVE` copies a made-up one in), asks, and appends one JSON line
+(`time`, `item`, `answer` yes|no|skipped, `note`) to `feedback/playtest-answers.jsonl`.
+Only `08_audio.sh` plays sound, and only when kuhy runs it. A new item needs no
+registration: `playtest.sh` and the `handoff` gate both read the folder. The loadouts
+come from `SiegeFixtures` (`tests/test_handoff_launch.gd` holds the lib to them).
+
 ## Dev feedback mode (R10)
 
 `./run.sh` passes `--dev`. F12, the camera glyph (top right) or the camera in
@@ -137,6 +150,9 @@ is recorded beside the game with moments as chapters
 
 `--dev` | `--mode=watch|command|lab` with `--loadout=id,id` opens straight
 into a siege | `--seed=N` | `--speed=N` (0.1 to 64, default 2) | `--lab-runs=N` |
+`--screen=shop|result` (with `--mode`: that mode's shop, or the result of the siege
+`--loadout` and `--seed` play, instead of a siege) | `--check-state=PATH` (write
+the state and `PATH.png` after 1.5 s, quit 0: the hand-off checks) |
 `--save-dir=DIR` | `--autodrive=MODE` (a mode, `showcase`, `touch`, `reel`, `buffs` or
 `fun`) with `--result-file=`, `--screenshot-dir=`, `--expect-window=WxH`,
 `--every=S` (reel), `--shard=I/N` (buffs) |
@@ -171,6 +187,10 @@ Other gates, each one call under 60 s:
 - `scripts/art_sheet.sh <kind> <out.png> [WxH]` contact sheet of the
   code-drawn art (`buffs`, `buffs_big`, `ui`, `vignettes`, `vignette`, `shop`)
 - `scripts/check_palette.sh` no colour literal outside `src/ui/palette.gd`
+- `scripts/playtest.sh [NN ...]` kuhy's walk of `scripts/handoff/*.sh` (one yes/no each; only the
+  audio one plays sound); `scripts/handoff/NN_*.sh --check` is one item muted on a private Xvfb
+- `scripts/test_handoff.sh [format|walk|check]` the answer-file format, the walk (retry, skip, quit)
+  and every item's `--check` side by side (about 10 s)
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
 - `scripts/test_launcher.sh` `run.sh` on a broken GPU GL, plus the F12 bundle
 - `scripts/test_recording.sh` recorder unit tests
@@ -198,6 +218,7 @@ Other gates, each one call under 60 s:
 | `scripts/check.sh --group sim` | balance, buffs | ~20 s |
 | `scripts/check.sh --group build` | export, round | ~24 s |
 | `scripts/check.sh --group web` | web | ~21 s |
+| `scripts/check.sh --group handoff` | handoff | ~10 s |
 
 `scripts/check.sh <gate> ...` runs single gates, `--list` names groups and
 gates, and `--all` runs every group in turn (about 2 minutes: for people and

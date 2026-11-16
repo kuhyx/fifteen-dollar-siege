@@ -17,8 +17,9 @@
 
 | feature | how to reach it | expected outcome |
 |---|---|---|
-| Hub | start the game | three picture buttons (Watch = eye, Command = rally flag and pointing hand, Lab = flask in a win-rate ring) with their keys 1 2 3, and a menu button, all inside the viewport, no words |
+| Hub | start the game | three picture buttons (Watch = eye, Command = rally flag and pointing hand, Lab = flask in a win-rate ring) with their keys 1 2 3, three stars under Watch and Command, and a menu button, all inside the viewport, no words |
 | Shelf (progress) | hub | 25 slots, one per buff: a buff that was part of a won Watch or Command siege stands there in colour, the rest are dark outlines; survives a restart |
+| Best stars | hub, under Watch and Command | three stars per mode, lit up to the best result so far (a win is 1, at most 10 dollars 2, at most 6 dollars 3); a worse result never lowers it; survives a restart; the Lab has none |
 | Best Lab rate | hub, under the Lab button | a small ring, the best win rate so far as a number and that loadout's pictograms; an empty ring before the first Lab run; survives a restart |
 | Key hints | any menu screen | every big control shows its key on its corner (1 2 3, Backspace for back), read from the InputMap; a pad shows its accept button on the control in focus; touch shows none |
 | Pause menu | Esc, pad B or the menu button on any screen | the tree pauses; resume, hub and quit buttons; Esc closes it; the hub button returns to the hub |
@@ -58,7 +59,8 @@
 | Lab controls | the Lab screen | again (a new batch of the same loadout, added to its line), change the loadout, hub |
 | Dev annotate | `./run.sh`, then F12, the camera glyph or the pause menu's camera | the frame freezes; toolbar rect, arrow, circle, pen, text, select, undo, clear; a save writes the bundle folder and a Markdown entry under `~/data/fifteen-dollar-siege_binaries/feedback/` |
 | Session recording | `./run.sh` (kuhy's own play only) | `feedback/recordings/<session>.mkv` with moments as chapters; `scripts/recordings.sh latest` lists them |
-| Straight into a siege | `./run.sh --mode=watch --loadout=double_men,stew --seed=7` | the battle opens with that loadout and seed |
+| Playtest | `scripts/playtest.sh` | walks `scripts/handoff/NN_*.sh` in order: each opens the game (the browser for the web item) in the state to judge, asks ONE yes/no and, on a no, one line of why; answers append to `feedback/playtest-answers.jsonl`; a failed launch offers retry or skip; only the audio item plays sound; `--check` on any item is the same launch muted on a private Xvfb, exit 0 in 20 s, no question |
+| Straight into a siege | `./run.sh --mode=watch --loadout=double_men,stew --seed=7` | the battle opens with that loadout and seed; `--screen=shop` opens that mode's shop and `--screen=result` the result of that siege instead |
 
 ## Core flows
 
@@ -76,6 +78,7 @@
 | F10 | Every buff seen and heard (chip, figure, look, effect, cue), 25 frames | `scripts/test_buffs.sh` | 2026-11-16 |
 | F11 | The sim's pinned balance checks (30) | `scripts/balance_gate.sh` | 2026-11-16 |
 | F12 | The fun pass: the shop dice, a win's stars and dice, and one real siege per battle delight (shake, unmasking, looks, tally, finale, heartbeat edge) on screen | `scripts/autodrive_all.sh watch` and `scripts/autodrive_all.sh fun` | 2026-11-16 |
+| F13 | The hand-off items start: every `scripts/handoff/*.sh --check` comes up muted on a private screen on the screen it promises (the hub one with its made-up stars), the answer file keeps its format, the walk retries and skips | `scripts/test_handoff.sh` (`scripts/check.sh --group handoff`) | 2026-11-16 |
 
 On failure a bot flow prints `AUTODRIVE FAIL: <the assert that broke>`, then
 `<label>: FAILED (<why>; exit <n>, log <path>)`, keeps its run directory
