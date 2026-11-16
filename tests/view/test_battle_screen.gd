@@ -227,3 +227,12 @@ func test_the_lose_payoff_sets_the_army_on_fire() -> void:
 		assert_eq(squad.burning, squad.team == SiegeSnapshot.Team.ARMY)
 	assert_false(battle.effects.flag_up)
 	assert_signal_not_emitted(battle, "finished")
+
+
+func test_a_headless_window_still_draws_full_figures_up_close() -> void:
+	var battle := _battle(&"watch", [&"stew"])
+	battle.camera.hold(Rect2(0, 0, 40, 25))
+	await wait_frames(3)
+	assert_eq(DisplayServer.get_name(), "headless", "GUT runs headless")
+	assert_eq(battle._pixel_scale(), 1.0, "a 0x0 window has no pixel scale to use")
+	assert_false(battle.crowd.far, "a 40 m view of the field shows the full figures")

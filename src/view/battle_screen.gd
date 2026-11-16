@@ -244,7 +244,7 @@ func _on_payoff_done() -> void:
 	finished.emit(sim.outcome())
 
 
-## Real pixels per canvas unit (2 on a 4K screen): only the level of detail
-## depends on it.
+## Real pixels per canvas unit (2 on a 4K screen; 1 headless, a 0x0 window): level of detail.
 func _pixel_scale() -> float:
-	return get_viewport().get_final_transform().get_scale().x if is_inside_tree() else 1.0
+	var drawn := is_inside_tree() and DisplayServer.get_name() != "headless"
+	return get_viewport().get_final_transform().get_scale().x if drawn else 1.0
