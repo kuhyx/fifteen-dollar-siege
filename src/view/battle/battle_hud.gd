@@ -15,6 +15,9 @@ signal skip_pressed
 
 const EDGE := 28.0
 const GAP := 14
+## Canvas pixels the meters strip and the button rows take at top and bottom.
+const TOP_CLEAR := HudMeters.TOP + HudMeters.TALL + 8.0
+const BOTTOM_CLEAR := EDGE + HudButton.SIZE + 8.0
 
 var meters := HudMeters.new()
 var pause_button: HudButton
@@ -29,6 +32,13 @@ var retreat_button: HudButton
 
 var _left := HBoxContainer.new()
 var _right := HBoxContainer.new()
+
+
+## The part of a screen of `area` the HUD leaves free. The camera frames the
+## action inside it; the map itself still fills the whole screen.
+static func map_rect(area: Vector2) -> Rect2:
+	var whole := area if area.x > 1.0 else Vector2(1920.0, 1080.0)
+	return Rect2(0.0, TOP_CLEAR, whole.x, whole.y - TOP_CLEAR - BOTTOM_CLEAR)
 
 
 func setup(with_orders: bool) -> void:

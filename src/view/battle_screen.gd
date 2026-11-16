@@ -59,7 +59,7 @@ func setup(p_sim: SiegeSim, p_mode: StringName, p_speed: float) -> void:
 	speed = p_speed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	plan = MapPlan.of(sim.map())
-	camera.setup(sim.map().bounds, _view())
+	camera.setup(sim.map().bounds, BattleHud.map_rect(size))
 	pointer.camera = camera
 	add_child(world)
 	for layer: Node2D in [map_layer, crowd, effects]:
@@ -178,7 +178,7 @@ func pick_at(point: Vector2) -> Dictionary:
 
 
 func _wire() -> void:
-	resized.connect(func() -> void: camera.view = _view())
+	resized.connect(func() -> void: camera.view = BattleHud.map_rect(size))
 	hud.pause_pressed.connect(func() -> void: held = not held)
 	hud.speed_picked.connect(func(value: float) -> void: speed = value)
 	hud.auto_pressed.connect(camera.resume_auto)
@@ -236,12 +236,6 @@ func _focus() -> Rect2:
 	if payoff_active:
 		return BattleBeats.payoff_box(sim.outcome() == SiegeSim.Outcome.WIN, plan, shot)
 	return BattleCamera.action_box(shot, sim.map())
-
-
-## The canvas rectangle the map may use (the whole screen; the HUD floats).
-func _view() -> Rect2:
-	var area := size if size.x > 1.0 else Vector2(1920.0, 1080.0)
-	return Rect2(Vector2.ZERO, area)
 
 
 ## Real pixels per canvas unit (2 on a 4K screen): only the level of detail

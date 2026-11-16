@@ -5,6 +5,20 @@ extends RefCounted
 const MIN_STDDEV := 3.0
 const MIN_RANGE := 24.0
 const SAMPLES_PER_AXIS := 160
+## Milliseconds of the game's OWN work a frame may take: a quarter of a
+## 60 fps frame, so the sim and the GPU keep the rest [design guess].
+const WORK_BUDGET_MS := 4.0
+
+
+## "" when the slowest of `frames` frames kept its own work inside the
+## budget, else what went over (the bots' frame gate).
+static func budget_problem(worst_ms: float, frames: int, budget_ms := WORK_BUDGET_MS) -> String:
+	if frames <= 0:
+		return "no frame was measured"
+	if worst_ms > budget_ms:
+		var over := "a frame took %.2f ms of the game's own work" % worst_ms
+		return "%s (budget %.1f ms, %d frames)" % [over, budget_ms, frames]
+	return ""
 
 
 ## {"mean", "stddev", "range"} of the sampled luminance (0..255).

@@ -8,12 +8,14 @@ extends RefCounted
 ##   --speed=N                sim seconds per real second (default 1)
 ##   --lab-runs=N             sieges per Lab batch (default 200)
 ##   --save-dir=DIR           save root (bots and tests never use the real one)
-##   --autodrive=MODE         the bot plays MODE and exits 0 / 1
+##   --autodrive=MODE         the bot plays MODE (or `showcase`) and exits 0 / 1
 ##   --result-file=PATH --screenshot-dir=DIR --expect-window=WxH   bot outputs
 ##   --feedback-dir=DIR --session-id=ID --dev-shot=PNG --dev-tag=T dev tools
 ## Unknown arguments are kept in `unknown` (the bot fails on them).
 
 const MODES: Array[StringName] = [&"watch", &"command", &"lab"]
+## What --autodrive= takes: every mode, and the battle screen's showcase.
+const BOT_MODES: Array[StringName] = [&"watch", &"command", &"lab", &"showcase"]
 const DEFAULT_LAB_RUNS := 200
 const MAX_SPEED := 64.0
 const VALUES: Array[String] = [
@@ -81,7 +83,7 @@ func _apply(prefix: String, value: String) -> void:
 		"--mode=":
 			mode = _mode(value)
 		"--autodrive=":
-			autodrive = _mode(value)
+			autodrive = _mode(value, BOT_MODES)
 		"--loadout=":
 			loadout = Loadout.of(Array(value.split(",", false)))
 			if not loadout.is_legal():
@@ -102,8 +104,8 @@ func _apply(prefix: String, value: String) -> void:
 			expect_window = value
 
 
-func _mode(value: String) -> StringName:
-	if not MODES.has(StringName(value)):
+func _mode(value: String, known: Array[StringName] = MODES) -> StringName:
+	if not known.has(StringName(value)):
 		problem = "unknown mode '%s' (watch, command or lab)" % value
 		return &""
 	return StringName(value)
