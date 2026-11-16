@@ -3,9 +3,10 @@ extends SceneTree
 ## looked at side by side (build-game R8). Runs on a private Xvfb through
 ## scripts/art_sheet.sh, never on the live display:
 ##   godot --path . -s tools/art_sheet.gd -- <kind> <out.png> [--t=SECONDS] [--id=BUFF]
-## kinds: buffs (25 pictograms at card size and large), ui (mode, control and
-## key pictograms), vignettes (25 vignettes at one time), vignette (one buff's
-## vignette at eight times).
+## kinds: buffs (25 pictograms on card-sized panels), buffs_big (the same,
+## large), ui (mode, control and key pictograms), vignettes (25 vignettes at
+## one time), vignette (one buff's vignette at eight times), shop (the real
+## shop screen with a few buffs bought and one card on show).
 
 const SETTLE_FRAMES := 4
 
@@ -22,6 +23,13 @@ class Sheet:
 		if kind == "vignettes":  # six columns, 300 x 190 units each
 			for i in defs.size():
 				_stage(defs[i].id, at_s, Rect2(i % 6 * 300 + 4, i / 6 * 190 + 4, 276, 184))
+		elif kind == "shop":  # the real shop screen, mid-game: any window size
+			var shop := LoadoutScreen.new()
+			add_child(shop)
+			shop.preset(Loadout.of([&"knight_armor", &"moose", &"stew"]))
+			shop.focus_card(buff if buff != &"" else &"wasps")
+			shop.preview.stage.playing = false
+			shop.preview.stage.time = at_s
 		elif kind == "vignette":  # one buff at eight moments, two columns
 			for i in 8:
 				var moment := BuffVignettes.LOOP_S * i / 8.0

@@ -77,23 +77,32 @@ static func _runaways(p: VignettePen, age: float) -> void:
 
 ## The leader catches fire, burns, and is a heap of ash under rising smoke.
 static func _pyre(p: VignettePen, age: float) -> void:
-	var burn := ramp(age, 0.1, BURN_S)
+	var burn := ramp(age, 0.25, BURN_S)
 	var foot := Vector2(96, FLOOR)
+	var blaze := pulse(age, BURN_S * 0.75, BURN_S * 0.75) + 0.25 * float(burn >= 1.0)
+	_flames(p, foot, age, 5, blaze)
 	if burn < 1.0:
 		var shake := sin(age * 60.0) * 1.2 * burn
-		man(p, foot + Vector2(shake, 0), ARMY.lerp(PictoInk.DARK, burn), 0.5, 1.7 - 0.5 * burn)
+		var head := man(p, foot + Vector2(shake, 0), ARMY.lerp(PictoInk.DARK, burn), 0.5, 1.7)
+		arm(p, head, head + Vector2(-11, -9), ARMY.lerp(PictoInk.DARK, burn), 1.7)
+		arm(p, head, head + Vector2(11, -9), ARMY.lerp(PictoInk.DARK, burn), 1.7)
+		_flames(p, foot, age + 0.4, 3, blaze * 0.5)
 	else:
 		p.oval(foot + Vector2(0, -3), 15, 5, PictoInk.SLATE)
 		p.oval(foot + Vector2(3, -6), 8, 3.5, PictoInk.GREY)
-	var blaze := pulse(age, BURN_S * 0.6, BURN_S * 0.9) + 0.25 * float(burn >= 1.0)
-	for i in 5:
-		var lick := (18.0 + absf(sin(age * 9.0 + i * 1.9)) * 22.0) * blaze
-		var base := foot + Vector2(-16.0 + i * 8.0, 0)
-		p.poly([-6, 0, 0, -lick, 6, 0], PictoInk.RED, base)
-		p.poly([-3, 0, 0, -lick * 0.55, 3, 0], PictoInk.GOLD, base)
 	for i in 4:
 		var rise := fposmod(age * 0.5 + i * 0.25, 1.0)
 		var smoke := Color(PictoInk.GREY, 0.5 * (1.0 - rise) * burn)
-		p.disc(
-			foot + Vector2(sin(i * 2.0 + age) * 6.0, -14.0 - rise * 60.0), 3.0 + rise * 8.0, smoke
-		)
+		var at := foot + Vector2(sin(i * 2.0 + age) * 6.0, -14.0 - rise * 60.0)
+		p.disc(at, 3.0 + rise * 8.0, smoke)
+
+
+## A row of `count` flames on `foot`, `blaze` 0..1 high.
+static func _flames(p: VignettePen, foot: Vector2, age: float, count: int, blaze: float) -> void:
+	if blaze <= 0.02:
+		return
+	for i in count:
+		var lick := (18.0 + absf(sin(age * 9.0 + i * 1.9)) * 22.0) * blaze
+		var base := foot + Vector2((i - (count - 1) / 2.0) * 8.0, 0)
+		p.poly([-6, 0, 0, -lick, 6, 0], PictoInk.RED, base)
+		p.poly([-3, 0, 0, -lick * 0.55, 3, 0], PictoInk.GOLD, base)

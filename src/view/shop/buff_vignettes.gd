@@ -24,8 +24,9 @@ static func draw_army(canvas: CanvasItem, stage: Rect2, at_s: float, men: int) -
 	VignetteKit.ground(pen, u * VignetteKit.TUFT_GAP)
 	for i in maxi(men / MEN_PER_FIGURE, 1):
 		var rank := i % RANKS
+		var column := i / RANKS
 		var foot := Vector2(
-			34.0 + (i / RANKS) * 13.0 + rank * 5.0, VignetteKit.FLOOR - 8.0 + rank * 5.0
+			26.0 + column * 15.0 + rank * 6.0, VignetteKit.FLOOR - 12.0 + rank * 7.0
 		)
 		foot.y -= absf(sin(stride + rank)) * 1.2
 		var head := VignetteKit.man(pen, foot, VignetteKit.ARMY, stride + rank)

@@ -5,7 +5,8 @@
 # display), muted, one call under 60 s. Copy the PNG before Reading it: a hook
 # downscales files in place.
 #   scripts/art_sheet.sh <kind> <out.png> [WxH] [tool args...]
-#   kinds: buffs | ui | vignettes [--t=S] | vignette --id=<buff>
+#   kinds: buffs | buffs_big | ui | vignettes [--t=S] | vignette --id=<buff>
+#          | shop [--id=<buff>] [--t=S]
 #   default size 1920x1080; use 1280x720 and 3840x2160 for the size checks
 # ============================================================================
 
@@ -18,7 +19,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/launch.sh"
 
 main() {
     if [[ $# -lt 2 ]]; then
-        echo "usage: $0 <buffs|ui|vignettes|vignette> <out.png> [WxH] [tool args...]" >&2
+        echo "usage: $0 <buffs|buffs_big|ui|vignettes|vignette|shop> <out.png> [WxH] [args...]" >&2
         exit 2
     fi
     need godot Xvfb
