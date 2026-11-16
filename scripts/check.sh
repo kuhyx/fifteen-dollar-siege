@@ -14,6 +14,7 @@
 #                   save_guard  GUT without the hook redirect
 #                   mount    the dev tools mount script, against a fixture remote
 #                   buildlock   a gate takes the board's build lock once (fixture lock)
+#                   deploy   scripts/deploy.sh against a fixture remote and checkout
 #                   recording   the recorder's pinned requirement and this game's settings of it
 #   play   (~35 s)  test     the GUT suite
 #   bots   (~15 s)  autodrive   the bot, every mode (frames on a private Xvfb)
@@ -67,6 +68,7 @@ run_gate() {
         save_guard) scripts/test_save_guard.sh ;;
         mount) scripts/test_mount_dev_tools.sh ;;
         buildlock) scripts/test_build_lock.sh ;;
+        deploy) scripts/test_deploy.sh ;;
         recording) scripts/test_recording.sh ;;
         autodrive) scripts/autodrive_all.sh ;;
         launcher) scripts/test_launcher.sh ;;

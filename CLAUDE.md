@@ -174,6 +174,7 @@ the state and `PATH.png` after 1.5 s, quit 0: the hand-off checks) |
 - lint: `scripts/lint.sh`
 - coverage: `scripts/coverage.sh`
 - coverage-gaps: `coverage-gaps coverage.xml`
+- deploy: `scripts/deploy.sh` (fast-forwards kuhy's checkout `~/src/fifteen-dollar-siege` to origin/main, refusing a dirty tree, reruns `./install.sh`, then its smoke gate; idempotent, non-zero unless at origin/main and healthy; test: `scripts/test_deploy.sh`)
 
 Other gates, each one call under 60 s:
 
@@ -221,7 +222,7 @@ Other gates, each one call under 60 s:
 
 | Group | Gates | Time |
 |---|---|---|
-| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, mount, buildlock, recording | ~15 s |
+| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, mount, buildlock, deploy, recording | ~15 s |
 | `scripts/check.sh --group play` | test | ~35 s |
 | `scripts/check.sh --group bots` | autodrive, launcher | ~15 s |
 | `scripts/check.sh --group tools` | audio, coverage | ~43 s |
