@@ -4,17 +4,22 @@ extends Node2D
 ## a live effect (a painter from the Fx* files, a life, a target) and into
 ## what it changes for longer: the rally flag, the centre ring, the flag on
 ## the church, a scattering or burning crowd. A name in SiegeEvent.ALL
-## without a recipe here fails tests/view/test_effects.gd. Lives inside the
+## without a recipe (FxRecipes) fails tests/view/test_effects.gd. Lives inside the
 ## world node: map metres.
 
 ## Live effects at once: more than this and the oldest goes [design guess].
 const MAX_LIVE := 72
+## The effects measure their own drawing: over this many milliseconds a
+## frame they shed the oldest short ones until they fit again, so a storm of
+## events (or a slow machine) costs effects, never frames (lesson L12).
+const DRAW_BUDGET_MS := 1.0
+const MIN_LIVE := 12
+## Effects longer than this are staged moments and are never shed.
+const SHED_BELOW_S := 2.4
 ## Metres a shot looks for its target.
 const DEFAULT_REACH := 60.0
 ## Real seconds for the win flag to climb its pole [design guess].
 const FLAG_RISE_S := 1.4
-
-static var _recipes: Dictionary = {}
 
 ## The latest snapshot: targets are found in it.
 var shot := SiegeSnapshot.new()
@@ -36,48 +41,16 @@ var _clock := 0.0
 var _rally_age := 0.0
 var _flag_raised := 0.0
 var _spawned := 0
-
-
-## Event name -> [painter, life in real seconds, reach in metres].
-static func recipes() -> Dictionary:
-	if _recipes.is_empty():
-		_recipes = {
-			SiegeEvent.COMMAND: [FxSignals.order, 0.9, 0.0],
-			SiegeEvent.ALARM: [FxSignals.alarm, 1.6, 0.0],
-			SiegeEvent.BELL_RING: [FxSignals.bell, 1.2, 0.0],
-			SiegeEvent.SLING_VOLLEY: [FxShots.sling, 0.7, 70.0],
-			SiegeEvent.ARROW_VOLLEY: [FxShots.arrows, 1.1, 110.0],
-			SiegeEvent.MELEE_CLASH: [FxBursts.clash, 0.45, 0.0],
-			SiegeEvent.SQUAD_ROUT: [FxBursts.rout, 1.2, 0.0],
-			SiegeEvent.SQUAD_RALLY: [FxBursts.rally, 1.0, 0.0],
-			SiegeEvent.SQUAD_WIPED: [FxBursts.wiped, 1.6, 0.0],
-			SiegeEvent.SHOTGUN_BLAST: [FxShots.shotgun, 0.9, 30.0],
-			SiegeEvent.PUMPKIN_LAUNCH: [FxShots.pumpkin_launch, 0.8, 120.0],
-			SiegeEvent.PUMPKIN_SPLAT: [FxShots.pumpkin_splat, 2.6, 0.0],
-			SiegeEvent.HEAL: [FxSignals.heal, 1.1, 0.0],
-			SiegeEvent.WASP_SWARM: [FxBursts.wasp_swarm, 2.2, 0.0],
-			SiegeEvent.MOOSE_CHARGE: [FxBursts.moose_charge, 1.2, 45.0],
-			SiegeEvent.CART_CRASH: [FxBursts.cart_crash, 1.4, 0.0],
-			SiegeEvent.MONSTER_SMASH: [FxBursts.monster_smash, 1.0, 0.0],
-			SiegeEvent.TRUMPET_CALL: [FxSignals.trumpet, 1.2, DEFAULT_REACH],
-			SiegeEvent.BAND_RIFF: [FxSignals.riff, 1.4, 0.0],
-			SiegeEvent.REVEAL: [FxSignals.reveal, 1.0, 0.0],
-			SiegeEvent.UFO_ABDUCT: [FxSpecials.abduct, 3.0, 0.0],
-			SiegeEvent.PEP_TALK: [FxSpecials.pep, 2.6, 0.0],
-			SiegeEvent.CENTRE_HELD: [FxSignals.centre, 0.6, 0.0],
-			SiegeEvent.VICTORY: [FxSpecials.victory, 3.0, 0.0],
-			SiegeEvent.COMBUST: [FxSpecials.combust, 2.5, 0.0],
-		}
-	return _recipes
+var _room := MAX_LIVE
 
 
 static func handles(kind: StringName) -> bool:
-	return recipes().has(kind)
+	return FxRecipes.all().has(kind)
 
 
 ## Real seconds the effect of `kind` lasts (0 for an unknown one).
 static func life_of(kind: StringName) -> float:
-	return recipes()[kind][1] if handles(kind) else 0.0
+	return FxRecipes.all()[kind][1] if handles(kind) else 0.0
 
 
 func setup(plan: MapPlan, p_crowd: CrowdLayer, meter: FrameMeter) -> void:
@@ -91,7 +64,7 @@ func spawn(event: Dictionary) -> void:
 	var kind: StringName = event.get("kind", &"")
 	if not handles(kind):
 		return
-	var recipe: Array = recipes()[kind]
+	var recipe: Array = FxRecipes.all()[kind]
 	var fx := BattleFx.new()
 	_spawned += 1
 	fx.kind = kind
@@ -104,8 +77,7 @@ func spawn(event: Dictionary) -> void:
 	fx.to = _aim(fx, recipe[2])
 	_react(fx)
 	live.append(fx)
-	if live.size() > MAX_LIVE:
-		live.pop_front()
+	_shed()
 	queue_redraw()
 
 
@@ -162,8 +134,21 @@ func advance(delta: float) -> void:
 		queue_redraw()
 
 
+## Drops the oldest short effects until at most `_room` are live.
+func _shed() -> void:
+	var extra := live.size() - _room
+	var kept: Array[BattleFx] = []
+	for fx in live:
+		if extra > 0 and fx.life < SHED_BELOW_S:
+			extra -= 1
+		else:
+			kept.append(fx)
+	live = kept
+
+
 func _draw() -> void:
 	draws += 1
+	var started := Time.get_ticks_usec()
 	if _meter != null:
 		_meter.begin()
 	if _plan != null:
@@ -176,6 +161,12 @@ func _draw() -> void:
 		FxMarks.win_flag(self, _plan.bell, _flag_raised, _clock)
 	if _meter != null:
 		_meter.end()
+	var took := (Time.get_ticks_usec() - started) / 1000.0
+	if took > DRAW_BUDGET_MS:
+		_room = maxi(MIN_LIVE, live.size() * 3 / 4)
+		_shed()
+	elif took < DRAW_BUDGET_MS / 2.0:
+		_room = mini(_room + 1, MAX_LIVE)
 
 
 ## What the event changes beyond its own effect.

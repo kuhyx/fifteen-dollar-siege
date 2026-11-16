@@ -150,3 +150,51 @@ func test_the_action_is_the_army_and_whoever_it_meets() -> void:
 	assert_true(map.bounds.encloses(box), "the frame stays on the map")
 	assert_gte(box.size.x, BattleCamera.MIN_SPAN_M.x, "never closer than a street")
 	assert_eq(BattleCamera.action_box(SiegeSnapshot.new(), map), map.bounds, "nobody: the map")
+
+
+func test_the_frame_meter_adds_up_the_stretches_of_a_frame() -> void:
+	var meter := FrameMeter.new()
+	meter.begin()
+	OS.delay_usec(2000)
+	meter.end()
+	meter.begin()
+	OS.delay_usec(1000)
+	meter.end()
+	meter.end()
+	meter.next_frame()
+	assert_between(meter.last_ms, 2.9, 60.0, "two stretches, one frame")
+	assert_eq(meter.frames, 1)
+	assert_eq(meter.worst_ms, meter.last_ms)
+	assert_eq(meter.mean_ms(), meter.last_ms)
+	meter.next_frame()
+	assert_eq(meter.last_ms, 0.0, "an idle frame")
+	assert_gt(meter.worst_ms, 2.9, "the worst is kept")
+	meter.reset()
+	assert_eq(meter.worst_ms, 0.0)
+	assert_eq(meter.frames, 0)
+
+
+func test_a_stall_of_the_machine_is_not_the_game_s_own_work() -> void:
+	if FrameMeter.cpu_ms() < 0.0:
+		pass_test("no per-thread CPU clock on this system: the wall clock judges")
+		return
+	var meter := FrameMeter.new()
+	meter.cpu_clock = true
+	meter.begin()
+	OS.delay_usec(15000)
+	meter.end()
+	meter.next_frame()
+	assert_gt(meter.worst_wall_ms, 14.0, "the wall clock saw the stall")
+	assert_lt(meter.worst_ms, FrameStats.WORK_BUDGET_MS, "asleep is not work: the gate ignores it")
+	meter.reset()
+	meter.begin()
+	var until := Time.get_ticks_usec() + 40000
+	var busy := 0.0
+	while Time.get_ticks_usec() < until:
+		busy += sin(busy)
+	meter.end()
+	meter.next_frame()
+	assert_gt(meter.worst_ms, FrameStats.WORK_BUDGET_MS, "real work fails the gate on both clocks")
+	assert_ne(FrameStats.budget_problem(meter.worst_ms, 1), "")
+	assert_eq(FrameStats.budget_problem(1.0, 10), "")
+	assert_string_contains(FrameStats.budget_problem(0.0, 0), "no frame")

@@ -11,6 +11,8 @@ const PAYOFF_SEEN := 0.6
 ## (another process on the core) does not come back in the next window; a
 ## cost of the game's own does.
 const TRIES := 3
+## (FrameMeter also times on the thread's CPU clock for the bots, so a stall
+## is not counted in the first place where that clock exists.)
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 
@@ -48,6 +50,7 @@ static func smooth(bot: BotBase, battle: BattleScreen, frames: int) -> float:
 	var built := FigureLibrary.builds
 	var made := battle.crowd.allocations
 	var problem := ""
+	battle.meter.cpu_clock = FrameMeter.cpu_ms() >= 0.0
 	for attempt in TRIES:
 		battle.meter.reset()
 		await bot.frames(frames)

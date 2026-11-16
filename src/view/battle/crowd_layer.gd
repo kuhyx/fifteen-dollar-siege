@@ -7,6 +7,9 @@ extends Node2D
 ## world node, so its coordinates are map metres.
 
 const SHADER: Shader = preload("res://src/view/battle/crowd.gdshader")
+## The animation clock of every figure: ONE global shader value a frame
+## (project.godot, [shader_globals]), not one per squad.
+const CLOCK := &"siege_clock"
 ## A man drawn shorter than this many screen pixels uses the simple figure.
 const FAR_BELOW_PX := 26.0
 ## The level switches back only past this factor: no flicker at the edge.
@@ -57,13 +60,13 @@ func draw_frame(
 	tween: SnapshotTween, shot: SiegeSnapshot, clock: float, delta: float, zoom_px: float
 ) -> void:
 	_pick_level(zoom_px)
+	RenderingServer.global_shader_parameter_set(CLOCK, clock)
 	var cheering := _cheer > 0.0
 	_cheer = maxf(_cheer - delta * CHEER_FADE, 0.0)
 	for i in mini(squads.size(), shot.entity_count()):
 		var squad := squads[i]
 		var at := tween.position(i)
 		squad.pose(at, tween.velocity(i), shot.ent_state[i], shot.ent_facing[i], delta)
-		squad.set_clock(clock)
 		if cheering and squad.team == SiegeSnapshot.Team.ARMY:
 			squad.material.set_shader_parameter("cheer", _cheer)
 
@@ -97,7 +100,7 @@ func ignite(team: int) -> void:
 func scatter(pos: Vector2, team: int) -> void:
 	var nearest := nearest_squad(pos, team)
 	if nearest != null and nearest.anchor.distance_to(pos) < SCATTER_M:
-		nearest.scatter = SCATTER_KICK
+		nearest.kick(SCATTER_KICK)
 
 
 ## The army jumps for joy for a moment (the pep talk).

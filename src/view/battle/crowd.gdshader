@@ -15,7 +15,8 @@ uniform float spread = 1.0;
 uniform vec2 lag = vec2(0.0);
 // SiegeSnapshot.State: 0 idle, 1 move, 2 fight, 3 flee, 4 down, 5 hidden.
 uniform float pose = 0.0;
-uniform float clock = 0.0;
+// Animation seconds, set once a frame for every squad; stands still on pause.
+global uniform float siege_clock;
 uniform float flip = 1.0;
 // Amplitudes: bob (walk), shake (fight), lean (flee), swing (weapon arm).
 uniform vec4 motion = vec4(0.38, 0.09, 0.42, 0.9);
@@ -45,7 +46,7 @@ void vertex() {
 	vec2 home = INSTANCE_CUSTOM.xy;
 	float phase = INSTANCE_CUSTOM.z;
 	float fallen = step(0.5, INSTANCE_CUSTOM.w);
-	float t = clock + phase * 6.2831853;
+	float t = siege_clock + phase * 6.2831853;
 	float state = mix(pose, 4.0, fallen);
 	float side = phase > 0.5 ? 1.0 : -1.0;
 	vec2 v = VERTEX;

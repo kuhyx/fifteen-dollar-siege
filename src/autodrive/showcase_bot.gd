@@ -183,7 +183,9 @@ func _crowd() -> bool:
 	var worst: float = await BattleChecks.smooth(self, battle, CROWD_FRAMES)
 	var whole := battle.crowd.figures() == ShowcaseCrowd.FIGURES
 	_numbers.append("figures=%d enter_ms=%.1f" % [battle.crowd.figures(), battle.setup_ms])
-	_numbers.append("work_worst_ms=%.2f work_mean_ms=%.2f" % [worst, battle.meter.mean_ms()])
+	var meter := battle.meter
+	_numbers.append("work_worst_ms=%.2f work_mean_ms=%.2f" % [worst, meter.mean_ms()])
+	_numbers.append("wall_worst_ms=%.2f" % meter.worst_wall_ms)
 	_numbers.append("live_effects=%d drawn_ms=%.1f" % [battle.effects.live.size(), await _drawn()])
 	if not (
 		check(worst >= 0.0 and whole, "2,400 figures inside the frame budget")
