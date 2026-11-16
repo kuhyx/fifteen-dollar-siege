@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from helpers import SESSION, SYNC_MS, SYNC_UNIX, entry, sync_entry
 from recording import finalize
@@ -78,6 +79,32 @@ class FinalizeTest(unittest.TestCase):
     def test_finalize_is_repeatable(self) -> None:
         again = finalize.finalize(self.rec / f"{SESSION}.rec.json")
         self.assertEqual([e["t"] for e in again["events"]], [e["t"] for e in self.doc["events"]])
+
+
+class ProbeAndPartsTest(unittest.TestCase):
+    def test_a_file_without_a_duration_is_scanned_whole(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            video = Path(tmp) / "open.mkv"
+            make_video(video)
+            with mock.patch.object(finalize, "_ffprobe") as probe:
+                probe.side_effect = lambda *a: (
+                    {"format": {"start_time": "0.5"}} if "format=start_time,duration" in a else ffprobe(*a)
+                )
+                start, duration = finalize.probe_span(video)
+            self.assertEqual(start, 0.5)
+            self.assertGreater(duration, 3.0)
+
+    def test_a_first_frame_for_a_missing_part_is_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "feedback.jsonl").write_text(json.dumps(sync_entry()) + "\n")
+            make_video(root / "a.mkv")
+            meta = {
+                "session": SESSION, "t0_unix": T0, "video": "a.mkv", "feedback": str(root / "feedback.jsonl"),
+                "first_frame_unix": {"gone.mkv": T0},
+            }  # fmt: skip
+            (root / "x.rec.json").write_text(json.dumps(meta))
+            self.assertAlmostEqual(finalize.finalize(root / "x.rec.json")["video"]["start_s"], START, places=2)
 
 
 class GsrPartTest(unittest.TestCase):

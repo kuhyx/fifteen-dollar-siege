@@ -1,7 +1,13 @@
 """Listing and opening a recording at a moment."""
 
+import contextlib
+import io
+import json
+import os
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from helpers import ROOT  # noqa: F401
 from recording import library
@@ -80,6 +86,50 @@ class PartsTest(unittest.TestCase):
         text = library.table(PARTED)
         self.assertIn("2 parts", text)
         self.assertIn("[s2.part2.mkv]", text)
+
+
+class FilesTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name)
+
+    def write(self, name: str, doc: dict, mtime: int) -> Path:
+        path = self.dir / f"{name}.events.json"
+        path.write_text(json.dumps(doc), encoding="utf-8")
+        os.utime(path, (mtime, mtime))
+        return path
+
+    def test_sessions_are_listed_newest_first_and_load_back(self) -> None:
+        old = self.write("old", {**DOC, "session": "old"}, 1_000)
+        new = self.write("new", {**DOC, "session": "new"}, 2_000)
+        self.assertEqual(library.sessions(self.dir), [new, old])
+        self.assertEqual(library.load(new)["session"], "new")
+
+    def test_the_listing_has_one_line_per_session(self) -> None:
+        self.write("a", DOC, 1_000)
+        self.assertEqual(library.listing(self.dir), "s1  01:40.000  2 moments  v02")
+        self.assertEqual(library.listing(self.dir / "none"), "")
+
+    def test_a_png_and_an_approximate_sync_show_in_the_table(self) -> None:
+        doc = {**DOC, "sync": {"approx": True}, "events": [{"t": -1.5, "label": "x", "png": "x.png"}]}
+        lines = library.table(doc).splitlines()
+        self.assertIn("+-1 s", lines[1])
+        self.assertEqual(lines[2], "  1  -00:01.500  x  x.png")
+
+    def test_open_moment_prints_the_command_on_a_dry_run(self) -> None:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(library.open_moment(DOC, Path("/rec"), 2, dry_run=True), 0)
+        self.assertEqual(
+            out.getvalue().split(),
+            ["mpv", "--rebase-start-time=no", "--force-window=yes", "--start=39.500", "/rec/s1.mkv"],
+        )
+
+    def test_open_moment_runs_the_player_and_returns_its_exit_code(self) -> None:
+        with mock.patch.object(library.subprocess, "call", return_value=3) as call:
+            self.assertEqual(library.open_moment(DOC, Path("/rec"), None, dry_run=False), 3)
+        self.assertEqual(call.call_args.args[0][-1], "/rec/s1.mkv")
 
 
 if __name__ == "__main__":

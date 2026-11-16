@@ -201,4 +201,5 @@ centroid 2644 Hz. The demo mix (23 s) peaks at -4.1 dBFS and reads -18.7 LUFS.
 No ear has judged any of it; no blind A/B. The battle screen does not call
 `on_snapshot` yet (section 4): until it does, a siege has the sneak bed,
 `ui_go` and the stingers only. No on-screen volume control. Python coverage
-of `tools/audio` is not measured (`scripts/coverage.sh` covers the recorder).
+of `tools/audio` and the recorder is 100 % branch (`scripts/coverage.sh`, a gate of
+`scripts/check.sh`).

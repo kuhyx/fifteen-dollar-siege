@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # ============================================================================
-# Line + branch coverage of the Python in this repo (the session recorder,
-# tools/recording/) from its unit tests. Writes coverage.xml at the repo root
-# (gitignored) for `coverage-gaps coverage.xml` and prints one summary line.
+# Line + branch coverage of the Python in this repo from its unit tests: the
+# session recorder (tools/recording/, tests/recording/) and the audio tools
+# (tools/audio/, tests/audio/). One command, one number, FAILS under 100 %
+# (COVERAGE_MIN=N lowers the floor while a gap is being closed). Writes
+# coverage.xml at the repo root (gitignored) for `coverage-gaps coverage.xml`.
+# Both packages run under the audio venv's python (numpy lives only there);
+# coverage is installed into that venv at its requirements-dev.txt pin.
 # GDScript has no coverage tool; its gates are GUT and the autodrive bot.
-#   scripts/coverage.sh            report only
-#   COVERAGE_MIN=90 scripts/coverage.sh   also fail under 90 %
+#   scripts/coverage.sh
 # ============================================================================
 
 set -euo pipefail
@@ -14,25 +17,58 @@ set -euo pipefail
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
-main() {
-    need python3 coverage ffmpeg ffprobe
-    cd "$REPO_ROOT"
-    mkdir -p "$SCRATCH"
-    local data="$SCRATCH/coverage.data" out code=0 total
-    rm -f "$data"
-    out="$(cap timeout 50 coverage run --branch --data-file="$data" --source=tools/recording \
-        -m unittest discover -s tests/recording -t tests/recording -p 'test_*.py' 2>&1)" || code=$?
+readonly VENV="${SIEGE_AUDIO_VENV:-${XDG_CACHE_HOME:-$HOME/.cache}/$REPO_NAME/audio-venv}"
+readonly FLOOR="${COVERAGE_MIN:-100}"
+
+# Makes sure the venv python can `import coverage` at the repo's pin.
+ensure_coverage() {
+    local python="$1" pin
+    "$python" -c 'import coverage' 2>/dev/null && return 0
+    pin="$(grep -E '^coverage==' "$REPO_ROOT/requirements-dev.txt")"
+    if command -v uv >/dev/null; then
+        uv pip install --quiet --python "$python" "$pin"
+    else
+        "$python" -m pip install --quiet --disable-pip-version-check "$pin"
+    fi
+}
+
+# Runs one unittest tree under coverage, appending to the shared data file.
+run_tree() {
+    local python="$1" data="$2" tree="$3" out code=0
+    out="$(cap timeout 50 "$python" -m coverage run --append --branch --data-file="$data" \
+        --source=tools/recording,tools/audio \
+        -m unittest discover -s "$tree" -t "$tree" -p 'test_*.py' 2>&1)" || code=$?
     if ((code != 0)); then
         echo "$out" | tail -40 >&2
-        echo "coverage: the tests FAILED (exit $code)" >&2
+        echo "coverage: the $tree tests FAILED (exit $code)" >&2
         exit 1
     fi
-    coverage xml --data-file="$data" -o coverage.xml -q
-    total="$(coverage report --data-file="$data" --format=total)"
+}
+
+main() {
+    need ffmpeg ffprobe
+    local python="$VENV/bin/python"
+    [[ -x "$python" ]] || {
+        echo "Error: the audio venv is missing (run ./install.sh)" >&2
+        exit 1
+    }
+    ensure_coverage "$python"
+    cd "$REPO_ROOT"
+    mkdir -p "$SCRATCH"
+    local data="$SCRATCH/coverage.data" pkg total
     rm -f "$data"
-    echo "coverage: ${total}% of tools/recording (coverage.xml)"
-    if [[ -n "${COVERAGE_MIN:-}" && "$total" -lt "$COVERAGE_MIN" ]]; then
-        echo "coverage: under the ${COVERAGE_MIN}% floor" >&2
+    run_tree "$python" "$data" tests/recording
+    run_tree "$python" "$data" tests/audio
+    "$python" -m coverage xml --data-file="$data" -o coverage.xml -q
+    for pkg in recording audio; do
+        printf 'coverage: %-9s %s%%\n' "$pkg" \
+            "$("$python" -m coverage report --data-file="$data" --format=total --include="tools/$pkg/*")"
+    done
+    total="$("$python" -m coverage report --data-file="$data" --format=total)"
+    rm -f "$data"
+    echo "coverage: total     ${total}% (coverage.xml)"
+    if ((total < FLOOR)); then
+        echo "coverage: under the ${FLOOR}% floor" >&2
         exit 1
     fi
 }
