@@ -5,6 +5,8 @@
 #   - Godot 4.7.2 and the system tools the scripts call (pacman, or apt in CI)
 #   - gdtoolkit, pre-commit, ruff, coverage: exact pins from requirements-dev.txt
 #   - GUT (pinned tag) into addons/gut (gitignored)
+#   - the shared dev tools addon (kuhyx/utils, pinned tag) at addons/dev_tools
+#     (gitignored; scripts/mount_dev_tools.sh holds the pin)
 #   - Chromium (the web smoke gate; CI uses the runner's Chrome) and its pinned
 #     Python venv (tools/web/venv.sh)
 #   - Godot export templates for the installed Godot (downloaded if missing)
@@ -182,6 +184,7 @@ main() {
     ensure_godot
     ensure_python_tools
     ensure_gut
+    "$REPO_ROOT/scripts/mount_dev_tools.sh" # the shared dev tools (kuhyx/utils), pinned there
     "$REPO_ROOT/tools/web/venv.sh" >/dev/null
     ensure_templates # CI exports the Web preset for the browser smoke gate
     if ! in_ci; then

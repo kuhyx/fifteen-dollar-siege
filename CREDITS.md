@@ -26,7 +26,7 @@ data. On screen and in ids they are neutral (`emperor`, `pep_talk`,
 
 | Files here | From | Note |
 |---|---|---|
-| `src/dev/` (annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry) | `an earlier game` `src/dev/` | adapted to this game's flow and state |
+| `addons/dev_tools/` (not in this repo: mounted from `kuhyx/utils` `godot_dev_tools` at the tag pinned in `scripts/mount_dev_tools.sh`: annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry) | `an earlier game` `src/dev/` | generalised into a host interface; this game's glue is `src/dev/` |
 | `tools/recording/`, `tests/recording/`, `scripts/e2e_recording.sh`, `scripts/recordings.sh` | `an earlier game` `tools/recording/` | the moment map is rewritten for this game |
 | `src/ui/vector_glyph.gd`, `src/ui/glyph_texture.gd` | `an earlier game` `src/ui/` | unchanged |
 | `src/autodrive/frame_stats.gd`, `input_synth.gd`, `bot_shots.gd`, `bot_report.gd`, `tools/frame_check.gd`, `scripts/xvfb_run.sh`, `tests/run_tmp.gd` | `an earlier game` | small adaptations |
@@ -40,7 +40,7 @@ No asset comes from outside the repo. The 25 buff pictograms, the menu and
 key pictograms (`src/ui/pictograms/`), the 25 buff vignettes and the result
 scenes (`src/view/shop/`) are drawn in code for this game: vector shapes, no
 raster, no AI. The pictograms in `src/ui/glyphs.gd` and
-`src/dev/dev_glyphs.gd` are code-drawn placeholders.
+`addons/dev_tools/dev_glyphs.gd` (the shared dev tools) are code-drawn placeholders.
 
 ### Audio
 

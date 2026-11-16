@@ -12,6 +12,7 @@
 #                   shared   file length, md naming, no binaries, dependency
 #                            freshness, contract
 #                   save_guard  GUT without the hook redirect
+#                   mount    the dev tools mount script, against a fixture remote
 #                   recording   recorder unit tests
 #   play   (~35 s)  test     the GUT suite
 #   bots   (~15 s)  autodrive   the bot, every mode (frames on a private Xvfb)
@@ -60,6 +61,7 @@ run_gate() {
         lint) scripts/lint.sh ;;
         test) scripts/test.sh ;;
         save_guard) scripts/test_save_guard.sh ;;
+        mount) scripts/test_mount_dev_tools.sh ;;
         recording) scripts/test_recording.sh ;;
         autodrive) scripts/autodrive_all.sh ;;
         launcher) scripts/test_launcher.sh ;;

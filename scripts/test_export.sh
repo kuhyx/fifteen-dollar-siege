@@ -2,9 +2,10 @@
 
 # ============================================================================
 # Proves a release build works without the dev tools: exports the Linux preset
-# into a throwaway folder, checks the pack holds no src/dev file, then runs the
+# into a throwaway folder, checks the pack holds no src/dev glue and no
+# addons/dev_tools file, then runs the
 # exported binary's own --autodrive bot headless (muted, no window) with --dev
-# on the command line: the game must say the dev tools are not in the build
+# on the command line: the game must say the dev glue is not in the build
 # and the bot must still reach its PASS verdict.
 #   scripts/test_export.sh [watch|command|lab]     default: watch
 # Needs the export templates (install.sh).
@@ -38,7 +39,7 @@ main() {
         echo "export: the build still loads the dev tools" >&2
         exit 1
     }
-    echo "export: PASS (the Linux build plays $mode without src/dev)"
+    echo "export: PASS (the Linux build plays $mode without dev code)"
 }
 
 main "$@"

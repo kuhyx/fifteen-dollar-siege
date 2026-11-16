@@ -1,7 +1,7 @@
 name: ci
 
 # Lint, a headless import and boot (every script must parse), the greps, the
-# GUT suite, the save guard, the session recorder's unit tests, the autodrive
+# GUT suite, the dev tools mount script, the save guard, the session recorder's unit tests, the autodrive
 # bot playing every mode headless (asserts only: the frame gate needs a
 # display and stays local in scripts/autodrive_all.sh), the audio build and
 # its gate, the 100 % Python coverage gate, the Linux export, the round
@@ -55,6 +55,9 @@ jobs:
 
       - name: Save guard without the hook redirect
         run: scripts/test_save_guard.sh
+
+      - name: Dev tools mount script (default pin, fixture remote, CI copy)
+        run: scripts/test_mount_dev_tools.sh
 
       - name: Session recorder unit tests
         run: scripts/test_recording.sh

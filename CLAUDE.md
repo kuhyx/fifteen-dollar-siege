@@ -66,7 +66,8 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 | `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf, dice (`ShopDice`, `LoadoutDice`); `src/view/lab/` also holds `StarRating` and `ResultStars`; the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`), `fun` (one siege per fun-pass delight); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
-| `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
+| `src/dev/` | this game's host glue for the dev feedback mode (loaded only with `--dev`): `dev_tools.gd` (mounts the addon), `siege_host.gd`, `siege_context.gd`, `siege_telemetry.gd` | shared |
+| `addons/dev_tools/` | NOT in git: the shared dev feedback mode (`kuhyx/utils` `godot_dev_tools`), a gitignored link made by `install.sh` from `scripts/mount_dev_tools.sh` (the only place of the pinned URL and tag) | utils |
 | `tools/recording/` | the session recorder (Python) | shared |
 | `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
 | `tools/web/` | the browser smoke gate: isolated headless Chromium over CDP (`smoke.py`, `browser.py`, `venv.sh`) | shared |
@@ -90,8 +91,14 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
   changes, change `src/autodrive/autodrive.gd` and `bot_frames` in
   `scripts/lib/bot.sh` in the same commit.
 - **Dev files:** no `class_name` in `src/dev/`; game code never preloads a
-  dev file (`Main` loads `dev_tools.gd` by path). `export_presets.cfg`
-  excludes `src/dev/*`.
+  dev file or the addon (`Main` loads `dev_tools.gd` by path, which loads
+  `addons/dev_tools/dev_tools.gd` by path and hands it `siege_host.gd`). No
+  addon, no dev mode: one line on stderr, the game plays on.
+  `export_presets.cfg` excludes `src/dev/*` and `addons/dev_tools/*`. Change
+  the shared mode in `~/src/utils/godot_dev_tools` (tests: `godot_dev_tools/test.sh`),
+  tag it `godot-dev-tools-vX.Y.Z`, then bump `PIN_TAG` in
+  `scripts/mount_dev_tools.sh` and rerun `./install.sh`. Override for an
+  unreleased commit: `SIEGE_UTILS_REMOTE=file:///path SIEGE_UTILS_DEVTOOLS_REF=<hash>`.
 - **Saves:** go through `SaveStore`. Tests and bots never touch the real
   save: see "Save guard" below.
 
@@ -141,7 +148,7 @@ into a siege | `--seed=N` | `--speed=N` (0.1 to 64, default 2) | `--lab-runs=N` 
 `fun`) with `--result-file=`, `--screenshot-dir=`, `--expect-window=WxH`,
 `--every=S` (reel), `--shard=I/N` (buffs) |
 `--feedback-dir=DIR`, `--session-id=ID`, `--dev-tag=T`,
-`--dev-shot=/abs/out.png` (dev tools).
+`--dev-shot=/abs/out.png` (dev tools; the shared addon's README lists them).
 
 ## Commands
 
@@ -154,7 +161,7 @@ into a siege | `--seed=N` | `--speed=N` (0.1 to 64, default 2) | `--lab-runs=N` 
 
 Other gates, each one call under 60 s:
 
-- `./install.sh` tools, GUT, export templates, binaries links, git hooks
+- `./install.sh` tools, GUT, the dev tools mount, export templates, binaries links, git hooks
 - `scripts/autodrive_all.sh [mode ...]` the done gate (watch, command, lab,
   `touch` (a finger's whole loop, touch events only), `fun` (one real siege per
   delight of `DOCS-design-fun.md` on screen) and `showcase`: every kind, state, look and event on the battle screen plus
@@ -172,6 +179,7 @@ Other gates, each one call under 60 s:
   code-drawn art (`buffs`, `buffs_big`, `ui`, `vignettes`, `vignette`, `shop`)
 - `scripts/check_palette.sh` no colour literal outside `src/ui/palette.gd`
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
+- `scripts/test_mount_dev_tools.sh` the mount script: default pin is the GitHub URL and tag, a fixture remote
 - `scripts/test_launcher.sh` `run.sh` on a broken GPU GL, plus the F12 bundle
 - `scripts/test_recording.sh` recorder unit tests
 - `scripts/e2e_recording.sh never|sync|gap|game` recorder on Xvfb, one case
@@ -191,7 +199,7 @@ Other gates, each one call under 60 s:
 
 | Group | Gates | Time |
 |---|---|---|
-| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, recording | ~15 s |
+| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, mount, recording | ~15 s |
 | `scripts/check.sh --group play` | test | ~35 s |
 | `scripts/check.sh --group bots` | autodrive, launcher | ~15 s |
 | `scripts/check.sh --group tools` | audio, coverage | ~43 s |

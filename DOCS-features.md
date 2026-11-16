@@ -56,7 +56,7 @@
 | Lab | hub -> flask -> go | N sieges (default 200) run in slices, the frame never waits: a ring fills with the win rate, the rate stands in it as a number, every siege drops a tick (tall green = won, short red = lost), an outer ring and two numbers show the runs done, a number the mean seconds |
 | Lab ranking | the Lab screen, right side | every loadout tried, best first: place number, its pictograms, a bar and the rate; the one on the bench is framed; survives a restart |
 | Lab controls | the Lab screen | again (a new batch of the same loadout, added to its line), change the loadout, hub |
-| Dev annotate | `./run.sh`, then F12, the camera glyph or the pause menu's camera | the frame freezes; toolbar rect, arrow, circle, pen, text, select, undo, clear; a save writes the bundle folder and a Markdown entry under `~/data/fifteen-dollar-siege_binaries/feedback/` |
+| Dev annotate | `./run.sh`, then F12, the camera glyph or the pause menu's camera | the frame freezes; toolbar rect, arrow, circle, pen, text, select, undo, clear; a save writes the bundle folder and a Markdown entry under `~/data/fifteen-dollar-siege_binaries/feedback/`; the mode is the shared addon (`kuhyx/utils` `godot_dev_tools`), mounted by `install.sh` |
 | Session recording | `./run.sh` (kuhy's own play only) | `feedback/recordings/<session>.mkv` with moments as chapters; `scripts/recordings.sh latest` lists them |
 | Straight into a siege | `./run.sh --mode=watch --loadout=double_men,stew --seed=7` | the battle opens with that loadout and seed |
 

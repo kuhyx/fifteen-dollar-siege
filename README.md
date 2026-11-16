@@ -44,7 +44,8 @@ Agents: read `CLAUDE.md` first (run rules, contracts, the save guard).
 | `src/core/` | buffs, loadout rules, the sim, the Lab: pure logic |
 | `src/view/`, `src/ui/` | the flow, the screens, the pictograms |
 | `src/autodrive/` | the bot behind `--autodrive=<mode>` |
-| `src/dev/`, `tools/recording/` | dev feedback mode and the session recorder |
+| `src/dev/` | this game's side of the dev feedback mode (host glue); the mode itself is `kuhyx/utils` `godot_dev_tools`, mounted at `addons/dev_tools` by `install.sh` |
+| `tools/recording/` | the session recorder |
 | `tests/`, `scripts/` | GUT and unittest suites, every gate |
 | `DOCS-design.md` | goal, rules, Core API, constant sources |
 | `DOCS-features.md` | feature map and the five core flows |
