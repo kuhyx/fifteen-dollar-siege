@@ -190,7 +190,8 @@ Other gates, each one call under 60 s:
 | Group | Gates | Time |
 |---|---|---|
 | `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, recording | ~15 s |
-| `scripts/check.sh --group play` | test, autodrive, launcher | ~42 s |
+| `scripts/check.sh --group play` | test | ~35 s |
+| `scripts/check.sh --group bots` | autodrive, launcher | ~15 s |
 | `scripts/check.sh --group tools` | audio, coverage | ~43 s |
 | `scripts/check.sh --group sim` | balance, buffs | ~20 s |
 | `scripts/check.sh --group build` | export, round | ~24 s |

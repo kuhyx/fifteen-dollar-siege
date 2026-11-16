@@ -99,3 +99,10 @@ func _play_with(commander: BotCommander, ids: Array, sim_seed: int) -> Dictionar
 			sim.command(order["kind"], order["pos"])
 		sim.step(SiegeSim.STEP_S * 5)
 	return {"hash": sim.state_hash()}
+
+
+func test_the_pinned_win_still_wins_under_the_bots_orders() -> void:
+	var played := _play(SiegeFixtures.WIN_IDS, SiegeFixtures.WIN_SEED, true)
+	assert_true(played["won"], "the winning fixture wins when the commander plays it")
+	var lost := _play(SiegeFixtures.LOSE_IDS, SiegeFixtures.LOSE_SEED, false)
+	assert_false(lost["won"], "and the losing one loses")

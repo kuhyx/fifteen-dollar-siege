@@ -10,6 +10,9 @@ const DECIDE_LIMIT_FRAMES := 6000
 const SMOOTH_FRAMES := 40
 ## Frames a staged beat plays before the bot takes its frame.
 const BEAT_LOOK_FRAMES := 20
+## Where the burst rallies: the point tools/sim/bot_orders.gd pins the fixtures
+## with (shipped code never preloads tools/sim, so the number is repeated).
+const BURST_RALLY_AT := Vector2(200.0, 90.0)
 ## Frames the camera takes to turn to what an order changed.
 const CAMERA_SETTLE_FRAMES := 30
 
@@ -100,9 +103,8 @@ static func to_result(
 static func give_orders(bot: BotBase, battle: BattleScreen, commander: BotCommander) -> bool:
 	if commander != null:
 		return await _advise(bot, battle, commander)
-	var flag := BotCommander.flag_for(battle.sim.map())
 	return (
-		await _perform(bot, battle, {"kind": SiegeSim.Command.RALLY, "pos": flag})
+		await _perform(bot, battle, {"kind": SiegeSim.Command.RALLY, "pos": BURST_RALLY_AT})
 		and await bot.shot("rally")
 		and await _perform(bot, battle, {"kind": SiegeSim.Command.RETREAT, "pos": Vector2.ZERO})
 		and await _perform(bot, battle, {"kind": SiegeSim.Command.CHARGE, "pos": Vector2.ZERO})

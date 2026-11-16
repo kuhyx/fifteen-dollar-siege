@@ -13,8 +13,8 @@
 #                            freshness, contract
 #                   save_guard  GUT without the hook redirect
 #                   recording   recorder unit tests
-#   play   (~25 s)  test     the GUT suite
-#                   autodrive   the bot, every mode (frames on a private Xvfb)
+#   play   (~35 s)  test     the GUT suite
+#   bots   (~15 s)  autodrive   the bot, every mode (frames on a private Xvfb)
 #                   launcher    run.sh on a broken GPU GL + the F12 bundle
 #   tools  (~35 s)  audio    audio tool tests, rendered files current, offline
 #                            analysis, the boot probe

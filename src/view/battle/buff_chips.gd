@@ -15,6 +15,8 @@ const BIG_CHIP := 112.0
 ## Where the large row stands, as a share of the height: above the army.
 const BIG_AT := 0.27
 const GAP := 10.0
+## Between two warmed sizes: finer than a pictogram's size step (a third of an octave).
+const WARM_STEP := 1.1
 ## The first chip's top, under the meters strip.
 const TOP := HudMeters.TOP + HudMeters.TALL + 12.0
 
@@ -30,8 +32,25 @@ func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
+## The meshes of every size between small and large are built when the screen
+## opens, not when a chip first shrinks to one (lesson L7).
+func _ready() -> void:
+	warm()
+
+
+func warm() -> void:
+	var scale_px := get_viewport().get_final_transform().get_scale().x
+	var side := CHIP
+	while side <= BIG_CHIP * WARM_STEP:
+		for id in ids:
+			BuffPictograms.of(id).mesh_for(side / VectorGlyph.UNITS * scale_px)
+		side *= WARM_STEP
+
+
 func setup(loadout: Loadout) -> void:
 	ids = loadout.ids.duplicate()
+	if is_inside_tree():
+		warm()
 	queue_redraw()
 
 

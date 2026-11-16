@@ -6,7 +6,7 @@
 # through the real buttons, plays to the result once to WIN and once to LOSE,
 # presses Esc and asserts the pause menu, and saves a frame at every beat.
 # `showcase` feeds the battle screen scripted snapshots instead: every kind,
-# state, look and event the stub sim cannot show, plus the 2,400-figure
+# state, look and event at once (no real siege shows them all), plus the 2,400-figure
 # frame gate. `touch` plays hub -> shop -> buy -> go -> battle (rally flag,
 # speed, pause, resume) -> result -> again with ONLY touch events (R17).
 # The modes run in parallel (own Xvfb, save dir and log each) on a fixed

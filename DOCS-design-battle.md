@@ -72,9 +72,8 @@ All of it is already in the frozen contract; this is how the view reads it.
 - `pos` is where the effect is drawn. Volleys, the shotgun, the moose and the
   trumpet aim at the nearest enemy entity within reach of `pos`, else at the
   other side's ground. `team` picks the colour and the enemy (default: army).
-- `PUMPKIN_SPLAT.from`, `COMMAND.command`, `CENTRE_HELD.progress` are read.
-  Send `CENTRE_HELD` with `progress` 0 when the hold is broken: the ring keeps
-  the last value.
+- `PUMPKIN_SPLAT.from` and `COMMAND.command` are read. The hold ring and the
+  HUD ring read `SiegeSnapshot.centre_hold`, never `CENTRE_HELD.progress`.
 - `UFO_ABDUCT` and `PEP_TALK` in the FIRST snapshot (clock 0) are staged: they
   play one after the other, the sim is not stepped meanwhile, Space / Enter /
   pad A / a tap / the skip button cuts one short. Later they are plain effects.

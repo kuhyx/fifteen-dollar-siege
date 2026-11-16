@@ -8,7 +8,7 @@ name: ci
 # builder and the Web build in a headless Chrome (scripts/test_web.sh). The
 # shared gates (file length, markdown naming, dependency freshness, repo
 # contract) have their own workflows. Locally the same gates run in groups
-# under 60 s: scripts/check.sh --group fast|play|tools|sim|build|web.
+# under 60 s: scripts/check.sh --group fast|play|bots|tools|sim|build|web.
 on:
   push:
     branches: [main]

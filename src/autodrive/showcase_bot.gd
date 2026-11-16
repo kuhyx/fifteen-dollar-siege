@@ -1,6 +1,6 @@
 class_name ShowcaseBot
 extends BotBase
-## The --autodrive=showcase bot: what the stub sim cannot show yet, shown.
+## The --autodrive=showcase bot: every kind, state, look and event, shown.
 ## It opens the REAL battle screen through Main with a scripted ShowcaseSim
 ## and takes one frame per group: every Kind in every State, each look of
 ## the army, every event's effect, both staged beats, both payoffs, and the
