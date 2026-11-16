@@ -7,6 +7,8 @@ extends BotBase
 
 const DEFAULT_EVERY_S := 5.0
 const LIMIT_FRAMES := 9000
+## Frames after the payoff's first frame, for the second one (the finale).
+const PAYOFF_LATE_FRAMES := 24
 
 
 func _ready() -> void:
@@ -49,6 +51,8 @@ func _watch(every_s: float) -> void:
 	if check(limit > 0, "the siege never ended"):
 		await BattleChecks.payoff_seen(self, battle)
 		await _frame(battle, "payoff")
+		await frames(PAYOFF_LATE_FRAMES)
+		await _frame(battle, "payoff_late")
 
 
 func _frame(battle: BattleScreen, label: String) -> void:

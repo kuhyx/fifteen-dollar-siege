@@ -21,6 +21,8 @@ const BOTTOM_CLEAR := EDGE + HudButton.SIZE + 8.0
 
 var meters := HudMeters.new()
 var chips := BuffChips.new()
+## The red heartbeat frame of an army about to break.
+var edge := DangerEdge.new()
 var pause_button: HudButton
 ## One per SiegeActions.SPEEDS entry (x1, x2, x4, x8).
 var speed_buttons: Array[HudButton] = []
@@ -39,6 +41,7 @@ func setup(with_orders: bool, loadout := Loadout.new()) -> void:
 	SiegeActions.ensure()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(edge)
 	add_child(meters)
 	chips.setup(loadout)
 	add_child(chips)
@@ -82,6 +85,7 @@ func buttons() -> Dictionary:
 ## Shows the state of the screen on the controls and the meters.
 func show_state(shot: SiegeSnapshot, state: Dictionary, delta: float) -> void:
 	meters.show_levels(shot, state.get("centre", 0.0), delta)
+	edge.show_state(shot, delta)
 	var staged: bool = state.get("staged", false)
 	chips.advance(delta, staged)
 	_left.visible = not staged

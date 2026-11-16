@@ -18,7 +18,7 @@ const MODES: Array[StringName] = [&"watch", &"command", &"lab"]
 ## What --autodrive= takes: every mode, the battle screen's showcase and the
 ## touch-only pass (R17).
 const BOT_MODES: Array[StringName] = [
-	&"watch", &"command", &"lab", &"showcase", &"touch", &"reel", &"buffs"
+	&"watch", &"command", &"lab", &"showcase", &"touch", &"reel", &"buffs", &"fun"
 ]
 const DEFAULT_LAB_RUNS := 200
 ## A siege lasts about 100 sim seconds and the first 30 are a march: x2 is

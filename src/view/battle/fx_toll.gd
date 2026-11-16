@@ -33,7 +33,8 @@ static func toll(canvas: CanvasItem, fx: BattleFx) -> void:
 	var height := NUMBER_PX * px * scale
 	var total := int(fx.data.get("total", 0))
 	var width := SevenSegment.width(total, height)
-	var rise := 36.0 * px * ease(fx.progress(), 0.4)
+	var lane := (total / BattleToll.MILESTONE) % 3
+	var rise := (36.0 + lane * 70.0) * px * ease(fx.progress(), 0.4)
 	var top_left := fx.pos + Vector2(-width / 2.0, -26.0 * px - height - rise)
 	var ring := 24.0 * px + 80.0 * px * ease(fx.progress(), 0.3)
 	var gold := Color(Palette.COIN, fx.fading(0.3))

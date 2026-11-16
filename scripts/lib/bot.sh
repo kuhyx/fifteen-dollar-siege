@@ -15,12 +15,13 @@ readonly BOT_ENGINE_FLAGS=(--audio-driver Dummy --fixed-fps 60 --disable-vsync)
 bot_frames() {
     case "$1" in
         watch) echo 19 ;;
-        command) echo 22 ;;
+        command) echo 23 ;;
         lab) echo 13 ;;
         showcase) echo 24 ;;
         touch) echo 4 ;;
+        fun) echo 5 ;;
         *)
-            echo "Error: unknown mode '$1' (watch, command, lab, showcase or touch)" >&2
+            echo "Error: unknown mode '$1' (watch, command, lab, showcase, touch or fun)" >&2
             return 2
             ;;
     esac

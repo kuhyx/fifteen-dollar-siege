@@ -116,3 +116,7 @@ func test_the_screen_shows_pops_and_the_tally_for_a_bleeding_village() -> void:
 	)
 	assert_gt(live_toll.size(), 0, "and one is still on screen")
 	assert_eq(AudioCues.FUN.size(), 8)
+
+
+func test_the_rare_moments_outlive_the_shedding_threshold() -> void:
+	assert_gt(BattleFlair.KEEP_S, BattleEffects.SHED_BELOW_S, "a busy frame must not shed them")

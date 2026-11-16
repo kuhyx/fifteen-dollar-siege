@@ -16,6 +16,17 @@ const RING_PX := 30.0
 const LINE_PX := 3.0
 const POINTER_PX := 14.0
 
+## Bigger figures wear a bigger ring, so the monster is found in a melee.
+const RING_SCALE := {
+	SiegeSnapshot.Kind.MONSTER: 1.9,
+	SiegeSnapshot.Kind.EMPEROR: 1.3,
+}
+
+
+## The ring's radius in canvas pixels for a hero of `kind`.
+static func ring_px(kind: int) -> float:
+	return RING_PX * float(RING_SCALE.get(kind, 1.0))
+
 
 static func is_hero(squad: SquadVisual) -> bool:
 	return squad != null and squad.alive > 0 and squad.kind in KINDS
@@ -36,7 +47,7 @@ static func paint(canvas: CanvasItem, crowd: CrowdLayer, clock: float, zoom: flo
 	for squad in crowd.squads:
 		if not is_hero(squad):
 			continue
-		var reach := RING_PX * px * breath
+		var reach := ring_px(squad.kind) * px * breath
 		var ring := Palette.COIN
 		var edge := Color(WorldPalette.SOOT, 0.8)
 		canvas.draw_arc(squad.anchor, reach, 0.0, TAU, 32, edge, (LINE_PX + 3.0) * px, true)

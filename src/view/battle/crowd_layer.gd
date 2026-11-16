@@ -173,6 +173,21 @@ func cheer(metres: float) -> void:
 	_cheer = metres
 
 
+## The potion wears off: the army squad nearest `pos` stops shimmering and is
+## drawn like any other (the sim still calls it hidden).
+func unmask(pos: Vector2) -> void:
+	var best: SquadVisual = null
+	for squad in squads:
+		var unseen := squad.state == SiegeSnapshot.State.HIDDEN
+		var shimmering: bool = squad.material.get_shader_parameter("shimmer") > 0.0
+		if squad.team != SiegeSnapshot.Team.ARMY or not unseen or not shimmering:
+			continue
+		if best == null or squad.anchor.distance_to(pos) < best.anchor.distance_to(pos):
+			best = squad
+	if best != null:
+		best.material.set_shader_parameter("shimmer", 0.0)
+
+
 func nearest_squad(pos: Vector2, team: int) -> SquadVisual:
 	var best: SquadVisual = null
 	for squad in squads:

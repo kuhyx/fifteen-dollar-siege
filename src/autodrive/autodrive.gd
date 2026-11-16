@@ -18,7 +18,7 @@ const LOSE_IDS := SiegeFixtures.LOSE_IDS
 ## One buy too many for WIN_IDS (16 dollars): must be refused.
 const ONE_TOO_MANY := &"stew"
 ## The bots with a script of their own.
-const OTHER_BOTS: Array[StringName] = [&"showcase", &"touch", &"reel", &"buffs"]
+const OTHER_BOTS: Array[StringName] = [&"showcase", &"touch", &"reel", &"buffs", &"fun"]
 const DECIDE_LIMIT_FRAMES := 6000
 
 ## State hashes of the sieges played (the RESULT line).
@@ -47,6 +47,8 @@ func _other_bot() -> BotBase:
 			return TouchBot.new()
 		&"reel":
 			return ReelBot.new()
+		&"fun":
+			return FunBot.new()
 	return BuffsBot.new()
 
 

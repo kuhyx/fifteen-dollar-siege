@@ -91,10 +91,25 @@ static func to_result(
 	var ok := (
 		bot.check(battle.sim.outcome() == want, "the siege ends in %s" % tag)
 		and bot.check(showing, "the payoff shows before the result")
+		and bot.check(_delights_fired(battle, wins), "the fun pass's delights fired in a %s" % tag)
 		and await bot.shot("payoff_" + tag)
 		and await bot.on_screen(&"result")
 	)
 	return ok and await MenuBeats.result(bot, wins, want, bot.main.loadout.ids)
+
+
+## The fun pass's delights (DOCS-design-fun.md) that every real siege must
+## show: pops where heads fell, the tally bell and the finale at a win, the
+## heartbeat edge at a loss.
+static func _delights_fired(battle: BattleScreen, wins: bool) -> bool:
+	var seen := battle.effects.seen
+	if wins:
+		return (
+			int(seen.get(&"pop", 0)) > 0
+			and int(seen.get(&"toll", 0)) > 0
+			and int(seen.get(&"firework", 0)) >= 2
+		)
+	return int(seen.get(&"pop", 0)) > 0 and battle.hud.edge.beats > 0
 
 
 ## Command mode. A won siege is played by the commander (rally, charge, and a
@@ -107,6 +122,7 @@ static func give_orders(bot: BotBase, battle: BattleScreen, commander: BotComman
 		await _perform(bot, battle, {"kind": SiegeSim.Command.RALLY, "pos": BURST_RALLY_AT})
 		and await bot.shot("rally")
 		and await _perform(bot, battle, {"kind": SiegeSim.Command.RETREAT, "pos": Vector2.ZERO})
+		and await bot.shot("retreat")
 		and await _perform(bot, battle, {"kind": SiegeSim.Command.CHARGE, "pos": Vector2.ZERO})
 	)
 
