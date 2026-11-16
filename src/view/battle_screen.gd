@@ -59,7 +59,8 @@ func setup(p_sim: SiegeSim, p_mode: StringName, p_speed: float) -> void:
 	speed = p_speed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	plan = MapPlan.of(sim.map())
-	camera.setup(sim.map().bounds, BattleHud.map_rect(size))
+	camera.setup(sim.map().bounds, Rect2(Vector2.ZERO, size))
+	_fit()
 	pointer.camera = camera
 	add_child(world)
 	for layer: Node2D in [map_layer, crowd, effects]:
@@ -177,7 +178,7 @@ func pick_at(point: Vector2) -> Dictionary:
 
 
 func _wire() -> void:
-	resized.connect(func() -> void: camera.view = BattleHud.map_rect(size))
+	resized.connect(_fit)
 	hud.pause_pressed.connect(func() -> void: held = not held)
 	hud.speed_picked.connect(func(value: float) -> void: speed = value)
 	hud.auto_pressed.connect(camera.resume_auto)
@@ -221,6 +222,10 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 		effects.spawn(event)
 		if event.get("kind") in [SiegeEvent.BELL_RING, SiegeEvent.ALARM]:
 			hud.meters.ringing = RING_S
+
+
+func _fit() -> void:
+	camera.fit_screen(size, BattleHud.TOP_CLEAR, BattleHud.BOTTOM_CLEAR)
 
 
 func _on_payoff_done() -> void:

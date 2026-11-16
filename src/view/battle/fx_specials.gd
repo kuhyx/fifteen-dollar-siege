@@ -51,9 +51,11 @@ static func pep(canvas: CanvasItem, fx: BattleFx) -> void:
 	canvas.draw_line(crate.position, crate.end, WorldPalette.WOOD_DARK, 0.5)
 	var flex := 1.0 + 0.08 * sin(fx.age * 12.0)
 	var hero := FigureLibrary.spec(SiegeSnapshot.Kind.BAT_MEN, _plain).near[0]
-	var stand := Transform2D(0.0, Vector2(2.2, 2.2 * flex), 0.0, fx.pos + Vector2(0, -3.0))
+	var stand := Transform2D(0.0, Vector2(3.0, 3.0 * flex), 0.0, fx.pos + Vector2(0, -3.0))
 	canvas.draw_mesh(hero, null, stand)
-	canvas.draw_rect(Rect2(fx.pos + Vector2(-1.5, -9.9 * flex), Vector2(3.0, 0.7)), Palette.BAD)
+	canvas.draw_rect(
+		Rect2(fx.pos + Vector2(-2.1, -3.0 - 10.3 * flex), Vector2(4.2, 0.9)), Palette.BAD
+	)
 	for i in 3:
 		var part := fmod(fx.progress() * 2.0 + i / 3.0, 1.0)
 		var ring := Color(Palette.COIN, (1.0 - part) * fx.fading())
@@ -62,7 +64,7 @@ static func pep(canvas: CanvasItem, fx: BattleFx) -> void:
 		var rise := fmod(fx.progress() * 1.6 + fx.chance(i), 1.0)
 		var at := fx.pos + fx.jitter(i, 55.0) + Vector2(0, -6.0 - 14.0 * rise)
 		var box := Rect2(at - Vector2.ONE * 2.5, Vector2.ONE * 5.0)
-		var heart := Color(Palette.ARMY.lightened(0.3), (1.0 - rise) * fx.fading())
+		var heart := Color(Palette.BAD.lightened(0.15), (1.0 - rise * rise) * fx.fading())
 		canvas.draw_texture_rect(Glyphs.texture(&"morale"), box, false, heart)
 
 

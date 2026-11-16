@@ -98,11 +98,14 @@ func test_the_camera_starts_with_the_whole_map_and_maps_both_ways() -> void:
 
 func test_the_wheel_zooms_about_the_cursor_and_drag_pans() -> void:
 	var camera := _camera()
-	var cursor := Vector2(400, 300)
+	camera.hold(Rect2(200, 100, 200, 112))
+	camera.resume_auto()
+	var cursor := Vector2(700, 400)
 	var under := camera.to_map(cursor)
+	var before_zoom := camera.zoom
 	camera.zoom_at(cursor, BattleCamera.WHEEL_STEP)
 	assert_false(camera.auto, "a hand on the camera stops the auto framing")
-	assert_gt(camera.zoom, 2.7)
+	assert_gt(camera.zoom, before_zoom)
 	assert_almost_eq(camera.to_map(cursor), under, Vector2(0.01, 0.01), "the spot stays put")
 	var before := camera.to_map(Vector2(960, 540))
 	camera.pan(Vector2(-100, 0))
@@ -110,11 +113,21 @@ func test_the_wheel_zooms_about_the_cursor_and_drag_pans() -> void:
 	for i in 80:
 		camera.zoom_at(cursor, BattleCamera.WHEEL_STEP)
 	assert_almost_eq(camera.zoom, BattleCamera.MAX_ZOOM, 0.001, "zoom has a ceiling")
+	camera.pan(Vector2(99999, 99999))
+	assert_almost_eq(
+		camera.to_map(Vector2.ZERO),
+		Vector2.ZERO,
+		Vector2(0.01, 0.01),
+		"the map's corner stops at the screen's"
+	)
+	camera.pan(Vector2(-99999, -99999))
+	assert_almost_eq(camera.to_map(Vector2(1920, 1080)), Vector2(600, 400), Vector2(0.01, 0.01))
 	for i in 200:
 		camera.zoom_at(cursor, 1.0 / BattleCamera.WHEEL_STEP)
 	assert_gt(camera.zoom, 2.0, "and a floor near the whole map")
-	camera.pan(Vector2(99999, 99999))
-	assert_true(Rect2(0, 0, 600, 400).has_point(camera.center), "the map never leaves the view")
+	assert_almost_eq(
+		camera.center, Vector2(300, 200), Vector2(0.01, 0.01), "a small map sits in the middle"
+	)
 
 
 func test_auto_framing_glides_to_the_action_and_comes_back_on_request() -> void:
@@ -123,9 +136,10 @@ func test_auto_framing_glides_to_the_action_and_comes_back_on_request() -> void:
 	assert_almost_eq(camera.zoom, 2.7, 0.001, "not there yet: it glides")
 	for i in 240:
 		camera.update(1.0 / 60.0)
-	assert_almost_eq(camera.center, Vector2(80, 200), Vector2(1, 1))
 	assert_gt(camera.zoom, 6.0)
-	camera.pan(Vector2(50, 0))
+	assert_almost_eq(camera.center.y, 200.0, 1.0)
+	assert_almost_eq(camera.to_map(Vector2(0, 540)).x, 0.0, 1.0, "no void beside the map's edge")
+	camera.pan(Vector2(-50, 0))
 	var held := camera.center
 	camera.frame(Rect2(300, 100, 200, 200))
 	camera.update(1.0)
@@ -135,6 +149,18 @@ func test_auto_framing_glides_to_the_action_and_comes_back_on_request() -> void:
 	for i in 240:
 		camera.update(1.0 / 60.0)
 	assert_almost_eq(camera.center, Vector2(400, 200), Vector2(1, 1))
+
+
+func test_the_hud_strips_stay_clear_of_the_action() -> void:
+	var camera := _camera()
+	camera.fit_screen(Vector2(1920, 1080), 118.0, 132.0)
+	camera.hold(Rect2(250, 150, 100, 60))
+	var top := camera.to_canvas(Vector2(300, 150)).y
+	var bottom := camera.to_canvas(Vector2(300, 210)).y
+	assert_gte(top, 118.0 - 0.01, "the top of the action is under the meters")
+	assert_lte(bottom, 1080.0 - 132.0 + 0.01, "its bottom is above the buttons")
+	camera.fit_screen(Vector2.ZERO, 118.0, 132.0)
+	assert_eq(camera.screen.size, Vector2(1920, 1080), "no size yet: the base size")
 
 
 func test_the_action_is_the_army_and_whoever_it_meets() -> void:

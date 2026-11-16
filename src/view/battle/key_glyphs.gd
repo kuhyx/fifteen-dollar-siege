@@ -87,12 +87,16 @@ static func _symbol(g: VectorGlyph, id: String) -> void:
 			_cap(g)
 			g.rect(52, 58, 44, 12)
 			g.polygon(PackedVector2Array([Vector2(54, 42), Vector2(54, 86), Vector2(28, 64)]))
-		"escape":
-			_cap(g)
-			g.ring(Vector2(70, 70), 24, 15)
-			g.rect(28, 28, 44, 44, true)
-			g.line(Vector2(34, 34), Vector2(66, 66), 10)
-			g.polygon(PackedVector2Array([Vector2(28, 28), Vector2(56, 30), Vector2(30, 56)]))
+		"escape":  # a small keyboard with its top-left key filled
+			g.frame(2, 22, 124, 84, 7)
+			for row in 3:
+				for column in 5:
+					var x := 14.0 + column * 21.0
+					var y := 32.0 + row * 22.0
+					if row == 0 and column == 0:
+						g.rect(x - 2.0, y - 2.0, 20, 20)
+					else:
+						g.frame(x, y, 16, 16, 4)
 		"mouse_left":
 			g.frame(30, 8, 68, 112, 9)
 			g.rect(39, 17, 22, 40)

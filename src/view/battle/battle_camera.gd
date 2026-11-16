@@ -21,8 +21,10 @@ const ENGAGE_M := 70.0
 const LEAD_M := 60.0
 
 var bounds := Rect2(0.0, 0.0, 600.0, 400.0)
-## The canvas rectangle the map is shown in.
+## The canvas rectangle the action is framed in (the screen without the
+## HUD's strips), and the whole screen: the map is drawn on all of it.
 var view := Rect2(0.0, 0.0, 1920.0, 1080.0)
+var screen := Rect2(0.0, 0.0, 1920.0, 1080.0)
 var center := Vector2.ZERO
 var zoom := 1.0
 var auto := true
@@ -34,8 +36,16 @@ var _goal_zoom := 1.0
 func setup(p_bounds: Rect2, p_view: Rect2) -> void:
 	bounds = p_bounds
 	view = p_view
+	screen = p_view
 	frame(bounds)
 	snap()
+
+
+## A screen of `area` canvas pixels whose top and bottom strips belong to
+## the HUD: the action is framed between them.
+func fit_screen(area: Vector2, top: float, bottom: float) -> void:
+	screen = Rect2(Vector2.ZERO, area if area.x > 1.0 else Vector2(1920.0, 1080.0))
+	view = Rect2(0.0, top, screen.size.x, screen.size.y - top - bottom)
 
 
 ## Pixels per metre that show the whole map.
@@ -58,9 +68,24 @@ func transform() -> Transform2D:
 
 ## Aims the auto camera at `box` (map metres). It glides there in `update`.
 func frame(box: Rect2) -> void:
-	_goal_center = box.get_center().clamp(bounds.position, bounds.end)
 	var wanted := minf(view.size.x / maxf(box.size.x, 1.0), view.size.y / maxf(box.size.y, 1.0))
 	_goal_zoom = clampf(wanted, fit_zoom() * MIN_FIT, MAX_ZOOM)
+	_goal_center = on_map(box.get_center(), _goal_zoom)
+
+
+## `point` moved so that, at `at_zoom`, the screen shows no more of the
+## nothing beyond the map than it must (a map narrower than the screen sits
+## in the middle).
+func on_map(point: Vector2, at_zoom: float) -> Vector2:
+	var low := bounds.position + (view.get_center() - screen.position) / at_zoom
+	var high := bounds.end - (screen.end - view.get_center()) / at_zoom
+	var out := point
+	for axis in 2:
+		if low[axis] <= high[axis]:
+			out[axis] = clampf(point[axis], low[axis], high[axis])
+		else:
+			out[axis] = (low[axis] + high[axis]) / 2.0
+	return out
 
 
 ## Jumps to where `frame` aimed.
@@ -89,14 +114,13 @@ func zoom_at(canvas_point: Vector2, factor: float) -> void:
 	auto = false
 	var held := to_map(canvas_point)
 	zoom = clampf(zoom * factor, fit_zoom() * MIN_FIT, MAX_ZOOM)
-	center += held - to_map(canvas_point)
-	center = center.clamp(bounds.position, bounds.end)
+	center = on_map(center + held - to_map(canvas_point), zoom)
 
 
 ## Moves the map with the pointer by `canvas_delta` pixels.
 func pan(canvas_delta: Vector2) -> void:
 	auto = false
-	center = (center - canvas_delta / zoom).clamp(bounds.position, bounds.end)
+	center = on_map(center - canvas_delta / zoom, zoom)
 
 
 func resume_auto() -> void:
