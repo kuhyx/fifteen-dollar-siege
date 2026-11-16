@@ -41,13 +41,16 @@ gate_static() {
         grep -rlE "$lossy" scripts tools || bad=1
     # R3: no AI-art tooling outside the docs.
     must_be_empty "AI-art tooling" git grep -nE "$ai_art" -- ':!*.md' || bad=1
-    # R10: dev files are reachable by path only, and stay out of every export.
+    # R10: dev files are reachable by path only, and stay out of every export:
+    # the glue in src/dev and the shared addon mounted at addons/dev_tools.
     must_be_empty "a class_name in src/dev" grep -rn '^class_name' src/dev || bad=1
-    dev_filters="$(grep -c 'exclude_filter=.*src/dev/\*' export_presets.cfg || true)"
-    if [[ "$dev_filters" -ne "$(grep -c '^\[preset\.[0-9]*\]$' export_presets.cfg)" ]]; then
-        echo "static: an export preset does not exclude src/dev/*" >&2
-        bad=1
-    fi
+    for dev_filter in 'src/dev/' 'addons/dev_tools/'; do
+        dev_filters="$(grep -c "exclude_filter=.*${dev_filter}\*" export_presets.cfg || true)"
+        if [[ "$dev_filters" -ne "$(grep -c '^\[preset\.[0-9]*\]$' export_presets.cfg)" ]]; then
+            echo "static: an export preset does not exclude ${dev_filter}*" >&2
+            bad=1
+        fi
+    done
     # L11: GUT only ever starts through scripts/test.sh and its config.
     must_be_empty "a GUT call that skips .gutconfig.json" grep -rn -- "$no_hook" scripts || bad=1
     # One palette: no colour literal outside src/ui/palette.gd.

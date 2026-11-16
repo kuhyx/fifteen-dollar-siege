@@ -1,6 +1,7 @@
 # generated / fetched
 .godot/
 addons/gut/
+addons/dev_tools
 __pycache__/
 .ruff_cache/
 .coverage

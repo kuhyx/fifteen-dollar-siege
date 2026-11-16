@@ -72,7 +72,8 @@ Agents: read `CLAUDE.md` first (run rules, contracts, the save guard).
 | `src/view/`, `src/ui/` | the flow, the screens, the pictograms |
 | `src/audio/`, `tools/audio/` | the sound director and the music and effects rendered from code |
 | `src/autodrive/` | the bot behind `--autodrive=<mode>` |
-| `src/dev/`, `tools/recording/` | dev feedback mode; this game's settings of the session recorder (`game_recording` from `kuhyx/utils`) |
+| `src/dev/` | this game's side of the dev feedback mode (host glue); the mode itself is `kuhyx/utils` `godot_dev_tools`, mounted at `addons/dev_tools` by `install.sh` |
+| `tools/recording/` | this game's settings of the session recorder (`game_recording` from `kuhyx/utils`) |
 | `scripts/handoff/`, `scripts/playtest.sh` | the playtest items and their runner |
 | `tests/`, `scripts/` | GUT and unittest suites, every gate |
 | `DOCS-design.md` | goal, rules, Core API, constant sources |

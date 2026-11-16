@@ -8,11 +8,11 @@
 # ============================================================================
 
 readonly FIRST=(smoke)
-readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio coverage balance buffs handoff)
+readonly PARALLEL=(lint test save_guard mount recording autodrive launcher static shared audio coverage balance buffs handoff)
 readonly LAST=(export round web)
 # group name -> its gates. Every gate is in exactly one group.
 readonly GROUP_NAMES=(fast play bots tools sim build web handoff)
-readonly GROUP_FAST=(smoke lint static shared save_guard recording)
+readonly GROUP_FAST=(smoke lint static shared save_guard mount recording)
 readonly GROUP_PLAY=(test)
 readonly GROUP_BOTS=(autodrive launcher)
 readonly GROUP_TOOLS=(audio coverage)

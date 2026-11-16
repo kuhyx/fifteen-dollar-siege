@@ -5,8 +5,9 @@
 #   scripts/export.sh web   <dir>   ->  <dir>/index.html (+ pck, wasm)
 #   scripts/export.sh linux <dir>   ->  <dir>/fifteen-dollar-siege.x86_64
 # The Web build is single-threaded (nothreads template). Both presets leave
-# out src/dev, tests, tools and scripts (export_presets.cfg): the script fails
-# if the pack still contains a dev file. A prototype round (builds/vNN/ with
+# out src/dev, the mounted addons/dev_tools, tests, tools and scripts
+# (export_presets.cfg): the script fails if the pack still holds a dev file.
+# A prototype round (builds/vNN/ with
 # a NOTES line, R17) is scripts/build_round.sh. Publishing is skill
 # `itch-publish`.
 # ============================================================================
@@ -44,11 +45,11 @@ main() {
         echo "export $1: FAILED (log $log)" >&2
         exit 1
     fi
-    if grep -qa 'src/dev/dev_tools' "$out/$pack"; then
-        echo "export $1: FAILED ($pack contains src/dev; check export_presets.cfg)" >&2
+    if grep -qaE 'src/dev/(dev_tools|siege_host)|addons/dev_tools/' "$out/$pack"; then
+        echo "export $1: FAILED ($pack holds dev code; check export_presets.cfg)" >&2
         exit 1
     fi
-    echo "export $1: ok $(du -sh "$out" | cut -f1) in $out (no src/dev in the pack)"
+    echo "export $1: ok $(du -sh "$out" | cut -f1) in $out (no dev code in the pack)"
 }
 
 main "$@"
