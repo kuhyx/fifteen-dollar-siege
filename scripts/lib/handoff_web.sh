@@ -92,6 +92,11 @@ check_web() {
         sleep 0.1
     done
     pkill -f -- "--user-data-dir=$profile" 2>/dev/null || true
+    # The browser writes its profile while it exits: wait it out, or the cleanup's rm races it.
+    tick=0
+    while ((tick++ < BOOT_WAIT_TICKS)) && pgrep -f -- "--user-data-dir=$profile" >/dev/null; do
+        sleep 0.1
+    done
     grep -q '"GET /index.pck HTTP/1.1" 200' "$HANDOFF_TMP/server.log" || {
         echo "$ITEM_ID: the browser never fetched the game's data (log $HANDOFF_TMP/server.log)" >&2
         tail -n 5 "$HANDOFF_TMP/server.log" >&2
