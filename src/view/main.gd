@@ -102,8 +102,14 @@ func start_siege(p_loadout: Loadout) -> void:
 		lab.edit_pressed.connect(func() -> void: open_loadout(mode))
 		_show(lab, &"lab")
 		return
+	open_battle(SiegeSim.create(loadout, sim_seed))
+
+
+## Shows the battle screen for `sim` (the showcase bot brings its own).
+func open_battle(sim: SiegeSim) -> void:
 	var battle := BattleScreen.new()
-	battle.setup(SiegeSim.create(loadout, sim_seed), mode, options.speed)
+	battle.loadout = loadout
+	battle.setup(sim, mode, options.speed)
 	battle.decided.connect(_on_decided.bind(battle))
 	battle.finished.connect(open_result)
 	battle.command_given.connect(

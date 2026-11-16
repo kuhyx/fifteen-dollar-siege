@@ -5,11 +5,14 @@
 # muted, once per mode (watch, command, lab). Each run buys a legal loadout
 # through the real buttons, plays to the result once to WIN and once to LOSE,
 # presses Esc and asserts the pause menu, and saves a frame at every beat.
+# `showcase` feeds the battle screen scripted snapshots instead: every kind,
+# state, look and event the stub sim cannot show, plus the 2,400-figure
+# frame gate.
 # The modes run in parallel (own Xvfb, save dir and log each) on a fixed
 # 1/60 s frame step: the bot's waits count frames, so load only slows the run.
 # Exit 0 only if every mode has the bot's PASS verdict (bot_judge) and every
 # frame it saved is readable and not blank (fail closed).
-#   scripts/autodrive_all.sh [mode ...]     default: watch command lab
+#   scripts/autodrive_all.sh [mode ...]     default: watch command lab showcase
 #   BOT_SIZE=1280x720   window size (default 1920x1080)
 #   BOT_SPEED=16        sim seconds per second
 #   GATE_MAX_S=40       also fail when the whole gate took longer
@@ -28,7 +31,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/launch.sh"
 # shellcheck source=scripts/lib/bot.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/bot.sh"
 
-readonly ALL_MODES=(watch command lab)
+readonly ALL_MODES=(watch command lab showcase)
 readonly RUN_TIMEOUT="${RUN_TIMEOUT:-45}"
 readonly SIZE="${BOT_SIZE:-1920x1080}"
 readonly SPEED="${BOT_SPEED:-16}"

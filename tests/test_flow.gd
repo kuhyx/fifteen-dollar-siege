@@ -116,6 +116,9 @@ func test_command_mode_sends_orders_to_the_sim() -> void:
 	click.pressed = true
 	click.position = battle.map_to_canvas(Vector2(150, 100))
 	battle._gui_input(click)
+	var release := click.duplicate() as InputEventMouseButton
+	release.pressed = false
+	battle._gui_input(release)
 	battle.retreat_button.pressed.emit()
 	assert_eq(battle.commands_sent, 2)
 	assert_signal_emit_count(main, "command_given", 2)

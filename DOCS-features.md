@@ -26,9 +26,13 @@
 | Budget refusal | click a card that costs more than is left | the tray shakes and its rim turns red, the card shakes; cost and loadout unchanged; nothing is written |
 | Vignette | hover, focus or tap a card | the preview plays that buff's looping vector scene (2.4 s); its pictogram and price stand under it; with no card on show the army marches there |
 | Remembered loadout | open a mode's loadout again | last time's picks for that mode are bought already |
-| Watch | hub -> eye -> go | dots march; army morale, village morale and alarm bars and a clock; it ends by itself |
-| Command | hub -> flag -> go | as Watch, plus: a click on the map plants a rally flag, charge and retreat buttons send orders |
-| Payoff | the sim decides | on the battle screen: a green flag on the village (win) or flames on the army (lose), before the result opens |
+| Watch | hub -> eye -> go | every man and villager is a drawn figure on a map with a church; two morale bars, an alarm bell, a hold-the-centre ring and a clock; it ends by itself |
+| Speed and hold | battle: Space / 1 2 3 4, or the buttons bottom left | the sim stands still or runs at x1, x2, x4, x8; each button shows its key |
+| Camera | battle: wheel or pinch, drag; 0 or the view-finder button | zoom and pan by hand; back to framing the action by itself |
+| Command | hub -> flag -> go | as Watch, plus: a click on the map plants a rally flag (a drag only pans), Enter / Backspace or the buttons charge and retreat |
+| Staged beats | a siege whose first snapshot has `ufo_abduct` or `pep_talk` | they play before the clock starts; Space, Enter, a tap or the skip button cuts one short |
+| Payoff | the sim decides | on the battle screen: the camera goes to the church and the army's flag climbs its tower (win), or the army burns (lose), before the result opens |
+| Showcase | `scripts/autodrive_all.sh showcase` | 22 frames: every kind in every state, six looks, every event, both beats, both payoffs, 2,400 figures inside the frame budget |
 | Result | after the payoff | first a scene alone: the flag climbs over the village and the men cheer, or the leader burns to ash; the bought buffs line up under it (new ones on the shelf spark); after 1.4 s or any press three controls: the same loadout again (1), change the loadout (2), hub (3) |
 | Lab | hub -> flask -> go | N sieges (default 200) run in slices, the frame never waits: a ring fills with the win rate, the rate stands in it as a number, every siege drops a tick (tall green = won, short red = lost), an outer ring and two numbers show the runs done, a number the mean seconds |
 | Lab ranking | the Lab screen, right side | every loadout tried, best first: place number, its pictograms, a bar and the rate; the one on the bench is framed; survives a restart |
@@ -46,6 +50,7 @@
 | F3 | Lab: a batch per loadout seen arriving, 100 % for the winner and 0 % for the loser (stub rule), both ranked, edit and again lead on | `scripts/autodrive_all.sh lab` | 2026-11-16, stub sim |
 | F4 | `run.sh` starts on a broken GPU GL and F12 saves a complete bundle | `scripts/test_launcher.sh` | 2026-11-16, scaffold |
 | F5 | The exported Linux build plays without the dev tools | `scripts/test_export.sh` | 2026-11-16, scaffold |
+| F6 | Battle screen: every kind, state, look and event is drawn; no frame of 2,400 figures over budget | `scripts/autodrive_all.sh showcase` | 2026-11-16, battle view |
 
 On failure a bot flow prints `AUTODRIVE FAIL: <the assert that broke>`, then
 `<label>: FAILED (<why>; exit <n>, log <path>)`, keeps its run directory

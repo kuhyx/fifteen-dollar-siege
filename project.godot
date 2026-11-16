@@ -55,3 +55,10 @@ ui_cancel={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_globals]
+
+siege_clock={
+"type": "float",
+"value": 0.0
+}

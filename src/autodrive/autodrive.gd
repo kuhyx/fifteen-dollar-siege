@@ -17,6 +17,8 @@ const LOSE_IDS: Array[StringName] = [&"pep_talk", &"stew"]
 ## One buy too many for WIN_IDS (16 dollars): must be refused.
 const ONE_TOO_MANY := &"stew"
 const DECIDE_LIMIT_FRAMES := 6000
+## Frames of a siege the frame gate judges (BattleChecks.smooth).
+const SMOOTH_FRAMES := 40
 
 var _mode: StringName
 var _hashes: PackedStringArray = []
@@ -25,6 +27,11 @@ var _hashes: PackedStringArray = []
 func _ready() -> void:
 	main = get_parent() as Main
 	_mode = main.options.autodrive
+	if _mode == &"showcase":  # the battle screen's own tour: another bot
+		var tour := ShowcaseBot.new()
+		tour.main = main
+		add_child(tour)
+		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_run.call_deferred()
 
@@ -137,8 +144,10 @@ func _siege_round(wins: bool) -> bool:
 	var ok := (
 		check(men == SiegeSim.army_size(main.loadout), "the army has %d men" % men)
 		and await shot("battle_" + tag)
+		and BattleChecks.hud_ok(self, battle)
 		and (_mode != &"command" or await _give_orders(battle))
 		and (not wins or await _pause_freezes(battle))
+		and await BattleChecks.smooth(self, battle, SMOOTH_FRAMES) >= 0.0
 	)
 	return ok and await _to_result(battle, wins)
 
@@ -152,8 +161,7 @@ func _to_result(battle: BattleScreen, wins: bool) -> bool:
 	if not await wait_for(decided, DECIDE_LIMIT_FRAMES, "the siege to be decided"):
 		return false
 	_hashes.append(str(battle.sim.state_hash()))
-	await frames(8)
-	var showing := main.screen_name == &"battle" and battle.payoff_active
+	var showing: bool = await BattleChecks.payoff_seen(self, battle)
 	var ok := (
 		check(battle.sim.outcome() == want, "the siege ends in %s" % tag)
 		and check(showing, "the payoff shows before the result")
