@@ -8,6 +8,9 @@ const FILE := "audio.json"
 const DEFAULT_MUSIC := 0.7
 const DEFAULT_SFX := 1.0
 
+## The volume control moves in this many equal steps (0 is off, STEPS is full).
+const STEPS := 10
+
 ## Linear, 0 (off) .. 1 (the files' own level).
 var music := DEFAULT_MUSIC
 var sfx := DEFAULT_SFX
@@ -31,3 +34,13 @@ static func _volume(value: Variant, fallback: float) -> float:
 	if value is float or value is int:
 		return clampf(float(value), 0.0, 1.0)
 	return fallback
+
+
+## The control step (0..STEPS) nearest a linear volume.
+static func step_of(linear: float) -> int:
+	return clampi(roundi(linear * STEPS), 0, STEPS)
+
+
+## The linear volume of a control step.
+static func linear_of(step: int) -> float:
+	return clampf(float(step) / STEPS, 0.0, 1.0)

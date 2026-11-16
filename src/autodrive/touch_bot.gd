@@ -133,6 +133,11 @@ func _menu(battle: BattleScreen) -> bool:
 	var opened := main.pause_menu.is_open() and await shot("touch_menu")
 	if not check(opened, "the menu button opens the pause menu"):
 		return false
+	var music := main.pause_menu.volume[VolumeRow.MUSIC] as VolumeRow
+	var level := music.level()
+	await tap(music.quieter)
+	if not check(music.level() == level - 1, "a tap on quieter lowers the music"):
+		return false
 	await tap(main.pause_menu.buttons["resume"])
 	return check(not main.pause_menu.is_open() and not battle.held, "a tap on resume closes it")
 

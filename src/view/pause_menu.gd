@@ -3,8 +3,9 @@ extends CanvasLayer
 ## Esc / pad B / the menu button: the tree pauses, the screen dims and one
 ## card of pictogram buttons appears: resume, back to the hub, quit. Resume
 ## has the focus and shows the key or pad button that closes the menu, read
-## from the InputMap for the device in use. Dev mode adds its own entries
-## with `add_entry` (the camera). No words.
+## from the InputMap for the device in use. Under them sit the music and
+## effects volume (`VolumeRow`: speaker buttons and a bar of steps). Dev mode
+## adds its own entries with `add_entry` (the camera). No words.
 
 signal toggled(open: bool)
 signal hub_pressed
@@ -22,6 +23,8 @@ var buttons: Dictionary = {}
 var row: HBoxContainer
 ## The panel the buttons sit on.
 var card: PanelContainer
+## Channel (&"music", &"effects") -> its volume row.
+var volume: Dictionary = {}
 ## The key picture in the corner of the resume button.
 var close_hint: KeyHint
 
@@ -44,14 +47,20 @@ func _init() -> void:
 	panel.set_corner_radius_all(GlyphButton.RADIUS + PADDING / 2)
 	card.add_theme_stylebox_override("panel", panel)
 	middle.add_child(card)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", PADDING)
+	card.add_child(column)
 	row = HBoxContainer.new()
 	row.add_theme_constant_override("separation", PADDING)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	card.add_child(row)
+	column.add_child(row)
 	var resume := add_entry("resume", &"resume", "Resume", close)
 	add_entry("hub", &"home", "Back to the hub", _on_hub)
 	add_entry("quit", &"quit", "Quit the game", func() -> void: quit_pressed.emit())
 	close_hint = KeyHint.attach(resume, CLOSE_ACTION, BADGE_PX, false)
+	for channel: StringName in [VolumeRow.MUSIC, VolumeRow.EFFECTS]:
+		volume[channel] = VolumeRow.make(channel)
+		column.add_child(volume[channel])
 	_shade.hide()
 
 
@@ -79,6 +88,8 @@ func is_open() -> bool:
 func open() -> void:
 	if is_open():
 		return
+	for channel: StringName in volume:
+		(volume[channel] as VolumeRow).refresh()
 	_shade.show()
 	get_tree().paused = true
 	(buttons["resume"] as Button).grab_focus()

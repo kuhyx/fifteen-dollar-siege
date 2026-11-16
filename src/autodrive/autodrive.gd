@@ -94,6 +94,7 @@ func _hub_beat() -> bool:
 	ok = (
 		check(main.pause_menu.is_open() and get_tree().paused, "Esc opens the pause menu")
 		and all_inside(main.pause_menu.buttons, "pause button")
+		and await VolumeBeat.run(self)
 	)
 	if not ok or not await shot("pause"):
 		return false
