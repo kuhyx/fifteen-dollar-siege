@@ -34,6 +34,7 @@ const BOXES := {
 	&"events_calls": Rect2(336, 126, 188, 148),
 	&"orders": Rect2(0, 0, 600, 400),
 	&"swarm": Rect2(0, 0, 600, 400),
+	&"hiding": Rect2(300, 110, 260, 180),
 	&"crowd": Rect2(0, 0, 600, 400),
 	&"fight": Rect2(214, 180, 72, 40),
 }
@@ -72,6 +73,8 @@ static func build(sim: ShowcaseSim, scene: StringName) -> void:
 			_host(sim, Vector2(330, 200), Vector2(400, 200), 6)
 		&"swarm":
 			_swarm(sim)
+		&"hiding":
+			_hiding(sim)
 		&"beats":
 			_host(sim, sim.show_map.army_spawn, sim.show_map.village_center, 10)
 			sim.fire(0.0, SiegeEvent.UFO_ABDUCT, sim.show_map.village_center)
@@ -92,6 +95,16 @@ static func _swarm(sim: ShowcaseSim) -> void:
 	sim.add(SiegeSnapshot.Kind.WASPS, ARMY, 6, fight, c + Vector2(-110, 60))
 	sim.add(SiegeSnapshot.Kind.VILLAGERS, VILLAGE, 40, SiegeSnapshot.State.FLEE, c, PI)
 	sim.add(SiegeSnapshot.Kind.MEN, ARMY, 10, SiegeSnapshot.State.MOVE, c + Vector2(-160, 10))
+
+
+## The village in hiding: squads of villagers indoors, the army at the edge.
+static func _hiding(sim: ShowcaseSim) -> void:
+	var c := sim.show_map.village_center
+	for i in 12:
+		var at := c + Vector2.from_angle(i * 0.9) * (30.0 + i * 4.0)
+		sim.add(SiegeSnapshot.Kind.VILLAGERS, VILLAGE, 40 + i * 8, SiegeSnapshot.State.HIDDEN, at)
+	sim.add(SiegeSnapshot.Kind.MEN, ARMY, 10, SiegeSnapshot.State.MOVE, c + Vector2(-100, 0))
+	sim.add(SiegeSnapshot.Kind.MEN, ARMY, 10, SiegeSnapshot.State.MOVE, c + Vector2(-100, 20))
 
 
 ## Every scripted tick of a living scene (the crowd, the fight).

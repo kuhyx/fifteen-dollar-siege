@@ -57,3 +57,18 @@ static func orders(bot: ShowcaseBot) -> bool:
 			bot, battle.effects, back, "retreat chevrons", BattleChecks.CHEVRON_FLOOR
 		)
 	)
+
+
+## The village in hiding: eyes in the windows of the houses, measured.
+static func hiding(bot: ShowcaseBot) -> bool:
+	var battle: BattleScreen = await bot.open(&"hiding")
+	await bot.watch(battle, 40)
+	var at := battle.map_to_canvas(battle.sim.map().village_center)
+	var village := Rect2(at - Vector2(300, 220), Vector2(600, 440))
+	return (
+		bot.check(FxHiding.any(battle.crowd), "villagers are hiding")
+		and await BattleChecks.reads_at_a_glance(
+			bot, battle.effects, village, "hiding eyes", BattleChecks.HIDING_FLOOR
+		)
+		and await bot.shot("hiding")
+	)

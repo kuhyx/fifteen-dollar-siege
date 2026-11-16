@@ -19,6 +19,8 @@ const FLAG_FLOOR := 5000
 const CHEVRON_FLOOR := 1500
 ## The same for the wasps' cloud on the whole-map view.
 const CLOUD_FLOOR := 4000
+## The eyes in the windows of a village in hiding.
+const HIDING_FLOOR := 2000
 ## The share of soft (antialiased) edges a battle frame must have: on the
 ## Compatibility renderer there is no MSAA 2D, so the edges are feathered by
 ## hand (tests/view/test_antialias.gd). A staircase frame scores about 0.37.

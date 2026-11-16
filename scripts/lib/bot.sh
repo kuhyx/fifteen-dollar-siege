@@ -17,7 +17,7 @@ bot_frames() {
         watch) echo 17 ;;
         command) echo 19 ;;
         lab) echo 13 ;;
-        showcase) echo 23 ;;
+        showcase) echo 24 ;;
         *)
             echo "Error: unknown mode '$1' (watch, command, lab or showcase)" >&2
             return 2

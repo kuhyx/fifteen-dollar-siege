@@ -140,7 +140,7 @@ func advance(delta: float) -> void:
 	for fx in live:
 		fx.age += delta
 	live = live.filter(func(fx: BattleFx) -> bool: return fx.age < fx.life)
-	var swarming := crowd != null and crowd.has_swarm()
+	var swarming := crowd != null and (crowd.has_swarm() or FxHiding.any(crowd))
 	if (
 		not live.is_empty()
 		or has_rally()
@@ -178,6 +178,8 @@ func _draw() -> void:
 		fx.painter.call(self, fx)
 	if crowd != null:
 		FxSwarm.paint(self, crowd, _clock, view_zoom)
+		if _plan != null:
+			FxHiding.paint(self, crowd, _plan, _clock, view_zoom)
 		FxSwarm.night(self, crowd, _plan.map.bounds.grow(60.0) if _plan != null else Rect2(), veil)
 	if flag_up and _plan != null:
 		FxMarks.win_flag(self, _plan.bell, _flag_raised, _clock)

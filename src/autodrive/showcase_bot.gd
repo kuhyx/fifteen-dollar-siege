@@ -71,6 +71,7 @@ func _play() -> bool:
 			return false
 	return (
 		await ShowcaseFar.swarm(self)
+		and await ShowcaseFar.hiding(self)
 		and await ShowcaseFar.orders(self)
 		and await _beats()
 		and await _ending(true)
