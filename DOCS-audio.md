@@ -219,6 +219,6 @@ centroid 2644 Hz. The demo mix (23 s) peaks at -4.1 dBFS and reads -18.7 LUFS.
 ## 8. Not done
 
 No ear has judged any of it; no blind A/B. Python coverage of `tools/audio`
-and the recorder is 100 % branch (`scripts/coverage.sh`, a gate of
+and the recorder's settings is 100 % branch (`scripts/coverage.sh`, a gate of
 `scripts/check.sh`); the web harness (`tools/web`) is a browser end-to-end
 check and has no unit tests.

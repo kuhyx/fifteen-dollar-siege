@@ -27,7 +27,7 @@ main() {
     fi
     for file in "${changed[@]}"; do
         case "$file" in
-            tools/recording/* | tests/recording/* | scripts/test_recording.sh) recorder=1 ;;
+            tools/recording/* | tests/recording/* | scripts/test_recording.sh | scripts/lib/recording.sh) recorder=1 ;;
             *.md | .github/* | CREDITS* | .gitignore) ;;
             *.gd | *.tscn | *.tres | *.godot | *.cfg | .gutconfig.json | scripts/test.sh) game=1 ;;
             *)

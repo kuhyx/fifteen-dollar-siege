@@ -67,10 +67,10 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf, dice (`ShopDice`, `LoadoutDice`); `src/view/lab/` also holds `StarRating`, `ResultStars`, `StarBook` (the best stars per mode, saved) and `StarRow` (the hub's three stars); the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`), `fun` (one siege per fun-pass delight); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
-| `tools/recording/` | the session recorder (Python) | shared |
+| `tools/recording/` | this game's settings of the session recorder (`siege_recording.py`: prefix `SIEGE`, binaries folder, moment map), the pinned requirement and its venv builder (`build.sh`); the recorder itself is the `game_recording` package of `kuhyx/utils` | shared |
 | `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
 | `tools/web/` | the browser smoke gate: isolated headless Chromium over CDP (`smoke.py`, `browser.py`, `venv.sh`) | shared |
-| `tests/` | GUT (`test_*.gd`, `view/`, `core/`), `tests/recording/` and `tests/audio/` (unittest) | with the code |
+| `tests/` | GUT (`test_*.gd`, `view/`, `core/`), `tests/recording/` (the recorder settings and the e2e helpers) and `tests/audio/` (unittest) | with the code |
 | `scripts/handoff/` | the playtest items (`NN_name.sh`, each one yes/no question, `--check`), `saves/hub/` (the made-up save of the hub item); `scripts/playtest.sh` walks them; `scripts/lib/handoff.sh` is their shared logic | shared |
 | `scripts/` | every gate; `scripts/lib/` is shared shell | shared |
 
@@ -144,7 +144,7 @@ arms it). A save writes `<stamp>/` with `screenshot.png`, `annotated.png`,
 `~/data/fifteen-dollar-siege_binaries/feedback/`. The feedback inbox turns
 each bundle into a todo task. F9 wipes the saved loadouts. kuhy's own dev play
 is recorded beside the game with moments as chapters
-(`scripts/recordings.sh latest`); bots, tests and muted runs never are.
+(`scripts/recordings.sh latest`); bots, tests and muted runs never are. The recorder is the `game_recording` package of `kuhyx/utils`, pinned by tag in `tools/recording/requirements.txt`.
 
 ## Game CLI (after `--`)
 
@@ -193,9 +193,10 @@ Other gates, each one call under 60 s:
   and every item's `--check` side by side (about 10 s)
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
 - `scripts/test_launcher.sh` `run.sh` on a broken GPU GL, plus the F12 bundle
-- `scripts/test_recording.sh` recorder unit tests
-- `scripts/e2e_recording.sh never|sync|gap|game` recorder on Xvfb, one case
+- `scripts/test_recording.sh` the pinned recorder requirement and this game's settings of it (the recorder's own tests live in `kuhyx/utils`)
+- `scripts/e2e_recording.sh never|sync|gap|game` the real launcher path and the recorder on Xvfb, one case
   per call
+- `tools/recording/build.sh` the recorder venv (`install.sh` runs it): `game_recording` at its `kuhyx/utils` tag. Before a tag is pushed, prove locally with `SIEGE_UTILS_REMOTE=file:///path/to/utils-checkout SIEGE_UTILS_RECORDING_REF=<commit>`
 - `scripts/export.sh <web|linux> <out_dir>` one export
 - `scripts/build_round.sh <NN> "<note>"` one prototype round: `builds/vNN/`
   (Web at the top, `linux/`, a `NOTES` line), never overwritten (R17)

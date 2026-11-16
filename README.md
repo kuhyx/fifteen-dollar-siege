@@ -38,6 +38,8 @@ keeps the best stars per mode, the buffs you have won with, and the best Lab rat
 A pad works through focus and its face buttons; touch works through the same
 buttons (the menu button stands in for `Esc`).
 
+`run.sh` records your play (the recorder is `game_recording` from `kuhyx/utils`, installed by `./install.sh`); `scripts/recordings.sh latest` lists the moments.
+
 ## Playtest
 
 ```bash
@@ -70,7 +72,7 @@ Agents: read `CLAUDE.md` first (run rules, contracts, the save guard).
 | `src/view/`, `src/ui/` | the flow, the screens, the pictograms |
 | `src/audio/`, `tools/audio/` | the sound director and the music and effects rendered from code |
 | `src/autodrive/` | the bot behind `--autodrive=<mode>` |
-| `src/dev/`, `tools/recording/` | dev feedback mode and the session recorder |
+| `src/dev/`, `tools/recording/` | dev feedback mode; this game's settings of the session recorder (`game_recording` from `kuhyx/utils`) |
 | `scripts/handoff/`, `scripts/playtest.sh` | the playtest items and their runner |
 | `tests/`, `scripts/` | GUT and unittest suites, every gate |
 | `DOCS-design.md` | goal, rules, Core API, constant sources |

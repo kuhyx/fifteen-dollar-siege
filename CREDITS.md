@@ -20,6 +20,7 @@ data. On screen and in ids they are neutral (`emperor`, `pep_talk`,
 |---|---|---|---|
 | Godot Engine | 4.7.2 | MIT | system package / CI download |
 | GUT (Godot Unit Test) | 9.7.1 | MIT | `install.sh` clones the tag into `addons/gut` (gitignored) |
+| `game_recording`, the session recorder (from `kuhyx/utils`, ported from `an earlier game` `tools/recording/`) | `game-recording-v0.1.0` | MIT | `tools/recording/build.sh` installs the pinned git tag into a cached venv |
 | gdtoolkit, pre-commit, ruff, coverage | `requirements-dev.txt` | MIT / MIT / MIT / Apache-2.0 | `install.sh` |
 
 ## Code ported from another repo
@@ -27,7 +28,7 @@ data. On screen and in ids they are neutral (`emperor`, `pep_talk`,
 | Files here | From | Note |
 |---|---|---|
 | `src/dev/` (annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry) | `an earlier game` `src/dev/` | adapted to this game's flow and state |
-| `tools/recording/`, `tests/recording/`, `scripts/e2e_recording.sh`, `scripts/recordings.sh` | `an earlier game` `tools/recording/` | the moment map is rewritten for this game |
+| `tests/recording/` e2e helpers, `scripts/e2e_recording.sh`, `scripts/recordings.sh` | `an earlier game` `tools/recording/` | adapted to this game |
 | `src/ui/vector_glyph.gd`, `src/ui/glyph_texture.gd` | `an earlier game` `src/ui/` | unchanged |
 | `src/autodrive/frame_stats.gd`, `input_synth.gd`, `bot_shots.gd`, `bot_report.gd`, `tools/frame_check.gd`, `scripts/xvfb_run.sh`, `tests/run_tmp.gd` | `an earlier game` | small adaptations |
 | `scripts/check_*.sh`, `scripts/todo_hooks.sh`, the shared-gate workflows | `herosi` | shims over `~/src/utils` |

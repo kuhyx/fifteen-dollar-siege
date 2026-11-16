@@ -1,2 +1,2 @@
-# Python is only the session recorder (tools/recording/, tests/recording/).
+# Python here: the recorder's settings (tools/recording/, tests/recording/) and the audio tools.
 line-length = 120
