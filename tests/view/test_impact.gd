@@ -92,3 +92,21 @@ func test_every_fun_cue_is_on_the_sheet_and_plays_through_funcue() -> void:
 		assert_true(AudioCues.CUES.has(cue), "%s needs a cue row" % cue)
 	FunCue.play(&"fun_toll")
 	assert_true(true, "no director: a quiet no-op")
+
+
+func test_a_melee_full_of_smashes_does_not_strangle_the_sim() -> void:
+	# A monster smashes on almost every sim step. The world may be held for a
+	# heartbeat at a blow, never most of the time, and the camera must calm
+	# between blows: x16 may not play like x3.
+	var impact := BattleImpact.new()
+	var running := 0
+	var calm := 0
+	for frame in 300:
+		impact.on_event(_blow(SiegeEvent.MONSTER_SMASH))
+		if not impact.frozen():
+			running += 1
+		if impact.trauma < 0.3:
+			calm += 1
+		impact.update(1.0 / 60.0)
+	assert_gte(running, 255, "the sim steps on at least 85 % of the frames")
+	assert_gt(calm, 60, "and the camera settles between blows")

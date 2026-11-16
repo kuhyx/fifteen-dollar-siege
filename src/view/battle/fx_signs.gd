@@ -4,7 +4,8 @@ extends RefCounted
 ## pictogram pops over the field, steam rises off a fed army, a clock sweeps,
 ## the army number rolls up. Sizes are screen pixels (`fx.zoom` turns them to
 ## metres), so a moment reads at any zoom and its pictogram mesh is the
-## size `BuffChips.warm` already built. Painters are func(canvas, fx).
+## size `BuffChips.warm` already built (a badge never starts smaller than a
+## chip: nothing is triangulated on first sight, lesson L7). Painters are func(canvas, fx).
 
 ## Canvas pixels: the badge's picture, a clock's radius, the number's height.
 const BADGE_PX := BuffChips.BIG_CHIP
@@ -16,7 +17,7 @@ const NUMBER_PX := 56.0
 static func badge(canvas: CanvasItem, fx: BattleFx) -> void:
 	var px := 1.0 / maxf(fx.zoom, 0.001)
 	var pop := minf(fx.progress() * 7.0, 1.0)
-	var grow := 0.35 + 0.65 * ease(pop, 0.35) + 0.12 * sin(pop * PI)
+	var grow := 0.5 + 0.5 * ease(pop, 0.35) + 0.12 * sin(pop * PI)
 	var side := BADGE_PX * px * grow
 	var centre := fx.pos + Vector2(0.0, -50.0 * px - 12.0 * px * fx.progress())
 	var plate := Color(Palette.PANEL, 0.9 * fx.fading(0.3))

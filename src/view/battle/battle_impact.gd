@@ -12,6 +12,9 @@ const MAX_HOLD_S := 0.12
 const CALM_PER_S := 1.7
 ## Shake frequency, radians per real second.
 const BUZZ := 70.0
+## Real seconds before the same kind of blow may kick again: a monster in a
+## long melee smashes on nearly every step and must not hold the world.
+const COOLDOWN_S := 0.6
 
 ## Event name -> [trauma, hold seconds] [design guess].
 const HEAVY := {
@@ -29,11 +32,16 @@ const HEAVY := {
 var trauma := 0.0
 var hold := 0.0
 
+var _now := 0.0
+var _last := {}
+
 
 func on_event(event: Dictionary) -> void:
-	var kick: Array = HEAVY.get(event.get("kind", &""), [])
-	if kick.is_empty():
+	var kind: StringName = event.get("kind", &"")
+	var kick: Array = HEAVY.get(kind, [])
+	if kick.is_empty() or _now - float(_last.get(kind, -INF)) < COOLDOWN_S:
 		return
+	_last[kind] = _now
 	trauma = minf(trauma + float(kick[0]), 1.0)
 	hold = minf(maxf(hold, float(kick[1])), MAX_HOLD_S)
 
@@ -44,6 +52,7 @@ func frozen() -> bool:
 
 
 func update(delta: float) -> void:
+	_now += delta
 	trauma = maxf(trauma - CALM_PER_S * delta, 0.0)
 	hold = maxf(hold - delta, 0.0)
 

@@ -101,3 +101,24 @@ func test_every_new_moment_draws_to_the_end_of_its_life() -> void:
 	await get_tree().process_frame
 	assert_gt(battle.effects.draws, 0)
 	assert_eq(AudioCues.FUN.size(), 8)
+
+
+func test_a_badge_builds_no_pictogram_mesh_on_first_sight() -> void:
+	# Lesson L7: nothing is triangulated mid-siege. The chips warm every size
+	# between a chip and a large chip; a badge must stay inside that range.
+	var ids: Array[StringName] = [&"stew", &"sleepless_village", &"deaf_villagers"]
+	var battle := _battle(ids)
+	var before := {}
+	for id in ids:
+		before[id] = BuffPictograms.of(id)._meshes.size()
+	for id in ids:
+		battle.effects.flourish(&"badge", FxSigns.badge, 2.5, Vector2(300, 300), {"id": id})
+	for step in 40:
+		battle.effects.advance(0.001 if step < 8 else 0.07)  # the pop-in frames first
+		var zoom: float = [3.0, 6.0, 12.0, 22.0][step % 4]
+		battle.world.scale = Vector2.ONE * zoom
+		battle.effects.view_zoom = zoom
+		battle.effects.queue_redraw()
+		await get_tree().process_frame
+	for id in ids:
+		assert_eq(BuffPictograms.of(id)._meshes.size(), before[id], "%s built a mesh" % id)
