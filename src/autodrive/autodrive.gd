@@ -27,10 +27,10 @@ var _hashes: PackedStringArray = []
 func _ready() -> void:
 	main = get_parent() as Main
 	_mode = main.options.autodrive
-	if _mode == &"showcase":  # the battle screen's own tour: another bot
-		var tour := ShowcaseBot.new()
-		tour.main = main
-		add_child(tour)
+	if _mode in [&"showcase", &"touch"]:  # the battle's tour, a finger's loop: other bots
+		var other: BotBase = ShowcaseBot.new() if _mode == &"showcase" else TouchBot.new()
+		other.main = main
+		add_child(other)
 		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_run.call_deferred()

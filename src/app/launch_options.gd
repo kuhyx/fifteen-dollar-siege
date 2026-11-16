@@ -14,8 +14,9 @@ extends RefCounted
 ## Unknown arguments are kept in `unknown` (the bot fails on them).
 
 const MODES: Array[StringName] = [&"watch", &"command", &"lab"]
-## What --autodrive= takes: every mode, and the battle screen's showcase.
-const BOT_MODES: Array[StringName] = [&"watch", &"command", &"lab", &"showcase"]
+## What --autodrive= takes: every mode, the battle screen's showcase and the
+## touch-only pass (R17).
+const BOT_MODES: Array[StringName] = [&"watch", &"command", &"lab", &"showcase", &"touch"]
 const DEFAULT_LAB_RUNS := 200
 const MAX_SPEED := 64.0
 const VALUES: Array[String] = [
