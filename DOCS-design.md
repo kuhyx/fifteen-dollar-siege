@@ -145,9 +145,9 @@ drains linearly toward the loser. The win conditions of section 3 are not
 simulated yet. `tests/core/test_siege_sim.gd` marks which assertions are
 stub-only (their names say "stub").
 
-The screens in `src/view/` are placeholders: every buff card shows the same
-star, tinted per card; the battle is dots. `Glyphs` holds placeholder
-pictograms. There is no sound yet (R4 baseline: music at boot, win and
+The battle screen is a placeholder (dots) and `Glyphs` holds placeholder
+pictograms. The hub, the shop, the Lab and the result screen are real
+(`DOCS-menus.md`). There is no sound yet (R4 baseline: music at boot, win and
 combust cues are the art and audio agents' work).
 
 ## 7. View contract
@@ -162,6 +162,10 @@ combust cues are the art and audio agents' work).
   `state`, optional `position`) for the dev select tool, and `Main` answers
   `debug_state()` for `snapshot.json`.
 - No loading screen: Lab runs sieges inside a 6 ms per-frame budget.
+- Every big menu control shows the key that presses it, drawn from the
+  InputMap without letters (`KeyHint`, `KeyGlyph`); a key that cannot be
+  drawn fails `tests/test_menu_keys.gd` (lesson L6).
+- Touch needs no hover: a tap puts a card on show, a second tap buys it.
 
 ## 8. Sources (the sim agent fills this: one row per tuning constant)
 

@@ -36,5 +36,8 @@ These files were first written by kuhy for an earlier game of his.
 
 ## Art, music, sound
 
-None yet. The pictograms in `src/ui/glyphs.gd` and `src/dev/dev_glyphs.gd`
-are code-drawn placeholders.
+No asset comes from outside the repo. The 25 buff pictograms, the menu and
+key pictograms (`src/ui/pictograms/`), the 25 buff vignettes and the result
+scenes (`src/view/shop/`) are drawn in code for this game: vector shapes, no
+raster, no AI. The pictograms in `src/ui/glyphs.gd` and
+`src/dev/dev_glyphs.gd` are code-drawn placeholders. No music or sound yet.
