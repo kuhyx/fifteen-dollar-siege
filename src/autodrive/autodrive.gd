@@ -7,10 +7,10 @@ extends BotBase
 ## Lives outside src/dev so an exported build can run it too.
 ## scripts/lib/bot.sh `bot_frames` holds the number of beats per mode.
 
-## 15 dollars, 300 men: the stub sim wins at 8 dollars or more.
-const WIN_IDS: Array[StringName] = [&"double_men", &"fifty_men", &"knight_armor", &"pep_talk"]
-## 2 dollars: the stub sim loses.
-const LOSE_IDS: Array[StringName] = [&"pep_talk", &"stew"]
+## The pinned sieges of the real sim (src/core/siege_fixtures.gd): a loadout
+## and seed that win, a loadout and seed that lose.
+const WIN_IDS := SiegeFixtures.WIN_IDS
+const LOSE_IDS := SiegeFixtures.LOSE_IDS
 ## One buy too many for WIN_IDS (16 dollars): must be refused.
 const ONE_TOO_MANY := &"stew"
 const DECIDE_LIMIT_FRAMES := 6000
@@ -51,6 +51,7 @@ func _play() -> void:
 		return
 	for wins: bool in [true, false]:
 		var ids := WIN_IDS if wins else LOSE_IDS
+		main.options.sim_seed = SiegeFixtures.WIN_SEED if wins else SiegeFixtures.LOSE_SEED
 		if not await _buy(ids, "win" if wins else "lose"):
 			return
 		var played: bool
@@ -192,7 +193,7 @@ func _pause_freezes(battle: BattleScreen) -> bool:
 	return check(battle.sim.clock_s() > before, "the siege runs again after the menu closes")
 
 
-## Lab: the batch finishes and every run agrees with the stub rule.
+## Lab: the batch finishes and sides with the pinned fixture.
 func _lab_round(wins: bool) -> bool:
 	if not await on_screen(&"lab"):
 		return false
@@ -201,14 +202,14 @@ func _lab_round(wins: bool) -> bool:
 	if not await wait_for(done, DECIDE_LIMIT_FRAMES, "the lab batch"):
 		return false
 	var runs: int = lab.result["runs"]
-	var expected := runs if wins else 0
+	var mostly_won: bool = lab.result["wins"] * 2 > runs
 	var seconds: float = lab.result["mean_seconds"]
 	_hashes.append("%d/%d" % [lab.result["wins"], runs])
 	await frames(3)
 	var ok := (
 		check(runs == main.options.lab_runs, "the lab ran %d sieges" % runs)
-		and check(lab.result["wins"] == expected, "the lab counts %d wins" % expected)
-		and check(seconds > 15.0 and seconds < 25.0, "mean seconds near 20: %s" % seconds)
+		and check(mostly_won == wins, "the lab sides with the fixture: %s" % _hashes[-1])
+		and check(seconds > 30.0 and seconds < 300.0, "mean seconds of a siege: %s" % seconds)
 		and inside(lab.home_button, "the lab home button")
 		and await shot("lab_win" if wins else "lab_lose")
 	)

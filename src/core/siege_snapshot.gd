@@ -39,6 +39,8 @@ var army_morale := 1.0
 var village_morale := 1.0
 ## 0 (asleep) .. 1 (the whole village knows).
 var alarm := 0.0
+## 0 .. 1: how much of the 30 s the army has held the plaza (1 = won by it).
+var centre_hold := 0.0
 
 ## Position in map metres.
 var ent_pos := PackedVector2Array()
@@ -52,6 +54,8 @@ var ent_count := PackedInt32Array()
 var ent_state := PackedByteArray()
 ## Facing, radians (0 = +x).
 var ent_facing := PackedFloat32Array()
+## The squad's own morale, 0 .. 1 (it routs near 0.2; specials stay at 1).
+var ent_morale := PackedFloat32Array()
 
 ## What happened since the previous snapshot: {kind: StringName, pos: Vector2,
 ## ...optional data}. Drained once per snapshot; drives VFX and SFX.

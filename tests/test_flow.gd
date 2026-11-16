@@ -13,7 +13,7 @@ func before_each() -> void:
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
 	main.options.speed = 32.0
-	main.options.sim_seed = 5
+	main.options.sim_seed = SiegeFixtures.WIN_SEED
 	main.options.lab_runs = 6
 	main.screen_changed.connect(func(screen: StringName) -> void: seen.append(screen))
 
@@ -70,8 +70,8 @@ func test_cards_buy_within_the_budget_and_refuse_beyond_it() -> void:
 func test_watch_plays_itself_to_the_result_and_back_to_the_hub() -> void:
 	main.open_loadout(&"watch")
 	watch_signals(main)
-	(main.screen as LoadoutScreen).toggle(&"double_men")
-	(main.screen as LoadoutScreen).toggle(&"fifty_men")
+	for id in SiegeFixtures.WIN_IDS:
+		(main.screen as LoadoutScreen).toggle(id)
 	(main.screen as LoadoutScreen).go_button.pressed.emit()
 	assert_eq(main.screen_name, &"battle")
 	assert_signal_emitted(main, "siege_started")
@@ -86,7 +86,8 @@ func test_watch_plays_itself_to_the_result_and_back_to_the_hub() -> void:
 
 func test_a_cheap_loadout_combusts() -> void:
 	main.mode = &"watch"
-	main.start_siege(Loadout.of([&"stew"]))
+	main.options.sim_seed = SiegeFixtures.LOSE_SEED
+	main.start_siege(Loadout.of(SiegeFixtures.LOSE_IDS))
 	await _battle_until_done()
 	assert_eq(main.screen_name, &"result")
 	assert_false((main.screen as ResultScreen).won())
@@ -95,7 +96,7 @@ func test_a_cheap_loadout_combusts() -> void:
 
 func test_the_payoff_plays_before_the_result_opens() -> void:
 	main.mode = &"watch"
-	main.start_siege(Loadout.of([&"double_men", &"fifty_men"]))
+	main.start_siege(Loadout.of(SiegeFixtures.WIN_IDS))
 	var battle := main.screen as BattleScreen
 	watch_signals(battle)
 	await wait_until(func() -> bool: return battle.payoff_active, 20.0)
@@ -144,9 +145,9 @@ func test_lab_runs_the_batch_and_shows_the_win_rate() -> void:
 	await wait_until(func() -> bool: return lab.done, 20.0)
 	assert_true(lab.done)
 	assert_eq(lab.result["runs"], 6)
-	assert_eq(lab.result["wins"], 6)
-	assert_eq(lab.win_rate(), 1.0)
-	assert_eq(lab.result, Lab.run_batch(main.loadout, 6, 5), "the screen agrees with Lab")
+	assert_almost_eq(lab.win_rate(), lab.result["wins"] / 6.0, 0.0001)
+	var seed0 := SiegeFixtures.WIN_SEED
+	assert_eq(lab.result, Lab.run_batch(main.loadout, 6, seed0), "the screen agrees with Lab")
 	assert_signal_emitted(main, "lab_finished")
 	lab.home_button.pressed.emit()
 	assert_eq(main.screen_name, &"hub")
