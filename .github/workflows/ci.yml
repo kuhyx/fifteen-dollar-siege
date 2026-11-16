@@ -15,20 +15,26 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   GODOT_VERSION: "4.7.2"
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.x" }
+        # game_recording (kuhyx/utils) needs 3.14 or newer; the freshness gate wants the
+        # newest stable, pinned exactly.
+        with: { python-version: "3.15.2" }
 
       - name: Install Godot
         run: |
-          curl -fsSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL --retry 3 -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q godot.zip
           sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           rm godot.zip
@@ -41,6 +47,8 @@ jobs:
           path: ~/.local/share/godot/export_templates
           key: godot-export-templates-${{ env.GODOT_VERSION }}
 
+      # Installs what the gates call: Xvfb (test_buffs.sh), ffmpeg, jq, curl, unzip, the
+      # pinned shellcheck, and checks the runner's Chrome for the web gate.
       - name: Install project tooling, GUT, the recorder venv, the audio build and the web venv
         run: ./install.sh
 

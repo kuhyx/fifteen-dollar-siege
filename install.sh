@@ -7,8 +7,8 @@
 #   - GUT (pinned tag) into addons/gut (gitignored)
 #   - the shared dev tools addon (kuhyx/utils, pinned tag) at addons/dev_tools
 #     (gitignored; scripts/mount_dev_tools.sh holds the pin)
-#   - Chromium (the web smoke gate; CI uses the runner's Chrome) and its pinned
-#     Python venv (tools/web/venv.sh)
+#   - Chromium (the web smoke gate; CI uses the runner's Google Chrome and
+#     checks it is there) and its pinned Python venv (tools/web/venv.sh)
 #   - Godot export templates for the installed Godot (downloaded if missing)
 #   - the music and sound effects, rendered from code into assets/audio/
 #     (tools/audio/build.sh: its own Python venv with the pinned music toolkit)
@@ -17,8 +17,10 @@
 #   - ~/data/fifteen-dollar-siege_binaries with assets/ builds/ feedback/, and
 #     the gitignored links assets, builds and feedback -> .../<name>
 #   - git hooks (skip with SKIP_HOOKS=1; never in CI)
-# CI=1 (GitHub Actions) installs only what the CI gates use (plus the export
-# templates and the web venv: the web smoke gate runs there too).
+# CI=1 (GitHub Actions) installs only what the CI gates use: the CORE_TOOLS (Xvfb
+# for scripts/test_buffs.sh, ffmpeg for the audio gates, jq for the hand-off tests,
+# curl + unzip for the export templates), shellcheck at the version the repo lints
+# clean with, the export templates and the web venv (the web smoke gate runs there too).
 # ============================================================================
 
 set -euo pipefail
@@ -29,12 +31,20 @@ readonly GUT_TAG="v9.7.1"
 readonly BINARIES="${SIEGE_BINARIES:-$HOME/data/fifteen-dollar-siege_binaries}"
 readonly TEMPLATE_FILES=(linux_release.x86_64 web_nothreads_release.zip)
 # tool:pacman package:apt package. The first group is what CI needs too.
-readonly CORE_TOOLS=(git:git:git shellcheck:shellcheck:shellcheck ffmpeg:ffmpeg:ffmpeg)
-readonly DESKTOP_TOOLS=(
-    Xvfb:xorg-server-xvfb:xvfb glxinfo:mesa-utils:mesa-utils xdotool:xdotool:xdotool
-    xprop:xorg-xprop:x11-utils mpv:mpv:mpv pactl:libpulse:pulseaudio-utils
-    curl:curl:curl unzip:unzip:unzip jq:jq:jq chromium:chromium:chromium
+readonly CORE_TOOLS=(
+    git:git:git shellcheck:shellcheck:shellcheck ffmpeg:ffmpeg:ffmpeg
+    Xvfb:xorg-server-xvfb:xvfb curl:curl:curl unzip:unzip:unzip jq:jq:jq
 )
+readonly DESKTOP_TOOLS=(
+    glxinfo:mesa-utils:mesa-utils xdotool:xdotool:xdotool
+    xprop:xorg-xprop:x11-utils mpv:mpv:mpv pactl:libpulse:pulseaudio-utils
+    chromium:chromium:chromium
+)
+# Ubuntu's shellcheck (0.9) flags SC2119 and SC2015 that 0.11 does not; CI lints with this one.
+readonly CI_SHELLCHECK_VERSION="0.11.0"
+readonly CI_SHELLCHECK="shellcheck-py==${CI_SHELLCHECK_VERSION}.1"
+# The browsers tools/web/browser.py tries; the CI runner ships google-chrome.
+readonly BROWSERS=(chromium google-chrome-stable google-chrome chromium-browser)
 
 in_ci() {
     [[ -n "${CI:-}" ]]
@@ -89,7 +99,12 @@ ensure_godot() {
 # Exact pins: uv tools on kuhy's machine (Arch's Python is PEP 668 managed), pip in CI.
 ensure_python_tools() {
     if in_ci; then
-        python3 -m pip install --quiet -r "$REPO_ROOT/requirements-dev.txt"
+        python3 -m pip install --quiet -r "$REPO_ROOT/requirements-dev.txt" "$CI_SHELLCHECK"
+        # The pip copy must win over the distro's on PATH, or lint runs the old one.
+        [[ "$(shellcheck --version)" == *"version: ${CI_SHELLCHECK_VERSION}"* ]] || {
+            echo "Error: shellcheck on PATH is not ${CI_SHELLCHECK_VERSION}" >&2
+            exit 1
+        }
         echo "done python tools (pip)"
         return
     fi
@@ -107,6 +122,19 @@ ensure_python_tools() {
             echo "done $spec"
         fi
     done <"$REPO_ROOT/requirements-dev.txt"
+}
+
+# CI cannot apt-install a browser (chromium is a snap there): fail early, with the cause.
+ensure_browser() {
+    local name
+    for name in "${BROWSERS[@]}"; do
+        command -v "$name" >/dev/null && {
+            echo "ok   browser $name"
+            return
+        }
+    done
+    echo "Error: no browser for the web gate (${BROWSERS[*]}); the CI runner image should have google-chrome" >&2
+    exit 1
 }
 
 ensure_gut() {
@@ -191,7 +219,9 @@ main() {
     "$REPO_ROOT/scripts/mount_dev_tools.sh" # the shared dev tools (kuhyx/utils), pinned there
     "$REPO_ROOT/tools/web/venv.sh" >/dev/null
     ensure_templates # CI exports the Web preset for the browser smoke gate
-    if ! in_ci; then
+    if in_ci; then
+        ensure_browser
+    else
         ensure_tools "${DESKTOP_TOOLS[@]}"
         link_binaries
         install_hooks
