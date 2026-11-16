@@ -144,7 +144,7 @@ oldest short ones until they fit.
 | `CrowdLayer.FAR_BELOW_PX`, `LOD_SLACK`, `MAN_M` | 26 px, 1.15, 3.4 m |
 | `CrowdLayer.SCATTER_M`, `SCATTER_KICK`, `CHEER_FADE` | 30 m, 1.2, 0.5 m/s |
 | `SquadVisual.LAG_S`, `SETTLE_S` | 0.3 s, 0.35 s |
-| `SquadVisual.FLEE_SPREAD`, `FIGHT_SPREAD`, `MOVE_SPREAD` | 1.6, 0.9, 1.1 |
+| `CrowdScatter.FLEE_SPREAD`, `FIGHT_SPREAD`, `MOVE_SPREAD` | 1.6, 0.9, 1.1 |
 | `SquadVisual.DEPTH_PER_M`, `BattleFx.MIN_STAR_M` | 2 draw-order steps per metre, 0.3 m |
 | `FigureLibrary.MOVES` | per kind: spacing, bob, shake, lean, swing, buzz, hover, down turn |
 | `FigureParts` sizes, `FigureBeasts.MONSTER_SCALE` | a man 3.4 m tall; 1.6 |

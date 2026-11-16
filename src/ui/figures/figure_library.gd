@@ -22,7 +22,7 @@ const MOVES := {
 	SiegeSnapshot.Kind.MEDICS: [2.0, 0.36, 0.05, 0.28, 0.3, 0.0, 0.0, 1.5],
 	SiegeSnapshot.Kind.MONSTER: [4.0, 0.3, 0.14, 0.2, 0.55, 0.0, 0.0, 1.5],
 	SiegeSnapshot.Kind.MOOSE: [4.4, 0.55, 0.12, 0.16, 0.0, 0.0, 0.0, 1.5],
-	SiegeSnapshot.Kind.WASPS: [0.6, 0.1, 0.1, 0.0, 0.0, 0.9, 0.3, 3.1],
+	SiegeSnapshot.Kind.WASPS: [0.8, 0.1, 0.1, 0.0, 0.0, 1.4, 0.4, 3.1],
 	SiegeSnapshot.Kind.GOLF_CARTS: [3.8, 0.1, 0.08, 0.1, 0.0, 0.0, 0.0, 2.6],
 	SiegeSnapshot.Kind.CATAPULT: [5.2, 0.04, 0.05, 0.0, 1.5, 0.0, 0.0, 0.45],
 	SiegeSnapshot.Kind.ROCK_BAND: [3.4, 0.28, 0.08, 0.2, 0.7, 0.0, 0.0, 1.5],

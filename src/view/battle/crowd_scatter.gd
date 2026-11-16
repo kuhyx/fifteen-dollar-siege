@@ -6,6 +6,10 @@ extends RefCounted
 ## his spot while his squad walks, shrinks or scatters.
 
 const GOLDEN := 2.39996323
+## How much wider or tighter a squad stands in a state [design guess].
+const FLEE_SPREAD := 1.6
+const FIGHT_SPREAD := 0.9
+const MOVE_SPREAD := 1.1
 
 
 ## `capacity` places in the unit disc, evenly spread (a sunflower), sorted
@@ -47,6 +51,18 @@ static func fall_order(entity: int, capacity: int) -> PackedInt32Array:
 ## The disc a squad of `heads` fills, `spacing` metres apart.
 static func radius(spacing: float, heads: int) -> float:
 	return spacing * sqrt(float(maxi(heads, 0)))
+
+
+## The factor a squad's disc takes in `state`.
+static func state_spread(state: int) -> float:
+	match state:
+		SiegeSnapshot.State.FLEE:
+			return FLEE_SPREAD
+		SiegeSnapshot.State.FIGHT:
+			return FIGHT_SPREAD
+		SiegeSnapshot.State.MOVE:
+			return MOVE_SPREAD
+	return 1.0
 
 
 ## A fixed number in 0..1 for (seed, salt).

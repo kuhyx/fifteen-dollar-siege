@@ -11,6 +11,8 @@ render_mode unshaded;
 
 uniform vec2 anchor = vec2(0.0);
 uniform float spread = 1.0;
+// Stretches home and buzz: a swarm of wasps grows with the far-zoom boost.
+uniform float grow = 1.0;
 // Metres a figure with phase 1 trails behind a moving anchor.
 uniform vec2 lag = vec2(0.0);
 // SiegeSnapshot.State: 0 idle, 1 move, 2 fight, 3 flee, 4 down, 5 hidden.
@@ -79,7 +81,7 @@ void vertex() {
 		}
 		if (state < 3.5 || state > 4.5) {
 			shift.y -= abs(sin(t * 9.0)) * cheer + sin(t * 1.5) * hover;
-			shift += vec2(sin(t * 17.0 + phase * 50.0), cos(t * 13.0 + phase * 31.0)) * buzz;
+			shift += vec2(sin(t * 17.0 + phase * 50.0), cos(t * 13.0 + phase * 31.0)) * buzz * grow;
 			tilt += sin(t * 1.7) * 0.22 * wobble;
 			home += vec2(sin(t * 0.9 + phase * 20.0), cos(t * 0.7)) * 0.12 * wobble;
 		}
@@ -89,5 +91,5 @@ void vertex() {
 	}
 	float glint = 0.3 + 0.18 * sin(t * 3.0);
 	COLOR.a *= fade * mix(1.0, glint, shimmer);
-	VERTEX = v + shift + (1.0 - fallen) * (anchor + home * spread - lag * phase);
+	VERTEX = v + shift + (1.0 - fallen) * (anchor + home * spread * grow - lag * phase);
 }

@@ -133,7 +133,8 @@ func advance(delta: float) -> void:
 	for fx in live:
 		fx.age += delta
 	live = live.filter(func(fx: BattleFx) -> bool: return fx.age < fx.life)
-	if not live.is_empty() or has_rally() or flag_up or centre_progress > 0.0:
+	var swarming := crowd != null and crowd.has_swarm()
+	if not live.is_empty() or has_rally() or flag_up or centre_progress > 0.0 or swarming:
 		queue_redraw()
 
 
@@ -161,6 +162,8 @@ func _draw() -> void:
 	for fx in live:
 		fx.zoom = view_zoom
 		fx.painter.call(self, fx)
+	if crowd != null:
+		FxSwarm.paint(self, crowd, _clock, view_zoom)
 	if flag_up and _plan != null:
 		FxMarks.win_flag(self, _plan.bell, _flag_raised, _clock)
 	if _meter != null:

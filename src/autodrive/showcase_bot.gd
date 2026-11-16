@@ -55,8 +55,8 @@ func _run() -> void:
 
 func _play() -> bool:
 	for scene in GRIDS:
-		var grid: BattleScreen = await _open(scene)
-		await _watch(grid, POSE_FRAMES)
+		var grid: BattleScreen = await open(scene)
+		await watch(grid, POSE_FRAMES)
 		if not (
 			check(not grid.crowd.far, "%s: full figures up close" % scene) and await shot(scene)
 		):
@@ -64,13 +64,14 @@ func _play() -> bool:
 	if not await _looks():
 		return false
 	for scene in EVENT_SCENES:
-		var battle: BattleScreen = await _open(scene)
+		var battle: BattleScreen = await open(scene)
 		var due := func() -> bool:
 			return _saw(battle) and battle.sim.clock_s() >= ShowcaseScript.SHOT_S
 		if not (await wait_for(due, 300, "the effects of %s" % scene) and await shot(scene)):
 			return false
 	return (
-		await _orders()
+		await ShowcaseFar.swarm(self)
+		and await ShowcaseFar.orders(self)
 		and await _beats()
 		and await _ending(true)
 		and await _ending(false)
@@ -79,7 +80,7 @@ func _play() -> bool:
 
 
 ## Opens the battle screen on a showcase scene, the way a siege opens it.
-func _open(scene: StringName, mode: StringName = &"watch") -> BattleScreen:
+func open(scene: StringName, mode: StringName = &"watch") -> BattleScreen:
 	var sim := ShowcaseSim.make(scene)
 	main.mode = mode
 	main.open_battle(sim)
@@ -101,14 +102,14 @@ func _saw(battle: BattleScreen) -> bool:
 	return true
 
 
-func _watch(battle: BattleScreen, count: int) -> void:
+func watch(battle: BattleScreen, count: int) -> void:
 	for i in count:
 		_saw(battle)
 		await get_tree().process_frame
 
 
 func _looks() -> bool:
-	var battle: BattleScreen = await _open(&"looks")
+	var battle: BattleScreen = await open(&"looks")
 	for look: String in LOOKS:
 		var wanted := FigureLook.of(Loadout.of(LOOKS[look]))
 		battle.dress(Loadout.of(LOOKS[look]))
@@ -124,56 +125,16 @@ func _looks() -> bool:
 	return true
 
 
-## Command mode at whole-map zoom: a click plants the flag, the buttons
-## charge and retreat; each order must change enough pixels to be seen.
-func _orders() -> bool:
-	var battle: BattleScreen = await _open(&"orders", &"command")
-	var flag := Vector2(250, 110)
-	await click_at(battle.map_to_canvas(flag))
-	await _watch(battle, 14)
-	var planted := battle.commands_sent == 1 and battle.effects.has_rally()
-	var near := battle.map_to_canvas(flag)
-	var spot := Rect2(near + Vector2(-90, -170), Vector2(240, 210))
-	if not (
-		check(planted, "a click plants the rally flag")
-		and await BattleChecks.reads_at_a_glance(
-			self, battle.effects, spot, "rally flag", BattleChecks.FLAG_FLOOR
-		)
-		and await shot("orders_rally")
-	):
-		return false
-	await click(battle.charge_button)
-	await _watch(battle, 20)
-	var way := Rect2(battle.map_to_canvas(Vector2(300, 150)), Vector2(200, 160))
-	if not (
-		check(not battle.effects.has_rally(), "a charge pulls the flag")
-		and await BattleChecks.reads_at_a_glance(
-			self, battle.effects, way, "charge chevrons", BattleChecks.CHEVRON_FLOOR
-		)
-		and await shot("orders_charge")
-	):
-		return false
-	await click(battle.retreat_button)
-	await _watch(battle, 8)
-	var back := Rect2(battle.map_to_canvas(Vector2(80, 150)), Vector2(380, 160))
-	return (
-		check((battle.sim as ShowcaseSim).show_orders == 3, "three orders reached the sim")
-		and await BattleChecks.reads_at_a_glance(
-			self, battle.effects, back, "retreat chevrons", BattleChecks.CHEVRON_FLOOR
-		)
-	)
-
-
 ## The staged beats: the clock stands still, Space skips, then the siege runs.
 func _beats() -> bool:
-	var battle: BattleScreen = await _open(&"beats")
-	await _watch(battle, 80)
+	var battle: BattleScreen = await open(&"beats")
+	await watch(battle, 80)
 	var ufo: bool = battle.beats.current.get("kind") == SiegeEvent.UFO_ABDUCT
 	var held := battle.sim.clock_s() == 0.0 and battle.hud.skip_button.is_visible_in_tree()
 	if not (check(ufo and held, "the UFO beat holds the clock") and await shot("beat_ufo")):
 		return false
 	InputSynth.key_tap(KEY_SPACE)
-	await _watch(battle, 60)
+	await watch(battle, 60)
 	var pep: bool = battle.beats.current.get("kind") == SiegeEvent.PEP_TALK
 	if not (check(pep, "Space skips to the pep talk") and await shot("beat_pep")):
 		return false
@@ -184,7 +145,7 @@ func _beats() -> bool:
 ## A decided siege: the payoff frame is taken BEFORE the result opens.
 func _ending(won: bool) -> bool:
 	var tag := "payoff_win" if won else "payoff_lose"
-	var battle: BattleScreen = await _open(tag)
+	var battle: BattleScreen = await open(tag)
 	var seen: bool = await BattleChecks.payoff_seen(self, battle)
 	_saw(battle)
 	var show := battle.effects.flag_raised() >= 0.99 if won else battle.crowd.squads[0].burning
@@ -199,7 +160,7 @@ func _ending(won: bool) -> bool:
 
 ## The frame gate on 2,400 figures, then a close look at a fight.
 func _crowd() -> bool:
-	var battle: BattleScreen = await _open(&"crowd")
+	var battle: BattleScreen = await open(&"crowd")
 	await frames(20)
 	var worst: float = await BattleChecks.smooth(self, battle, CROWD_FRAMES)
 	var whole := battle.crowd.figures() == ShowcaseCrowd.FIGURES
@@ -213,8 +174,8 @@ func _crowd() -> bool:
 		and await shot("crowd_2400")
 	):
 		return false
-	battle = await _open(&"fight")
-	await _watch(battle, 70)
+	battle = await open(&"fight")
+	await watch(battle, 70)
 	return (
 		check(battle.crowd.squads[0].fallen() == 3, "the fallen lie in the fight")
 		and await shot("fight_close")

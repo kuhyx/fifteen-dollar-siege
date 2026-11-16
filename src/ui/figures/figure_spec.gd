@@ -66,6 +66,15 @@ static func from(
 	return spec
 
 
+## Hands the crowd shader this figure's amplitudes.
+func apply(material: ShaderMaterial) -> void:
+	material.set_shader_parameter("motion", motion)
+	material.set_shader_parameter("pivot", pivot)
+	material.set_shader_parameter("buzz", buzz)
+	material.set_shader_parameter("hover", hover)
+	material.set_shader_parameter("down_turn", down_turn)
+
+
 ## The meshes a squad of `heads` draws with, at one level of detail.
 func meshes(is_far: bool, heads: int) -> Array[ArrayMesh]:
 	var whole := whole_far if is_far else whole_near

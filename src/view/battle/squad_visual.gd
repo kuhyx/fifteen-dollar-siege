@@ -10,9 +10,6 @@ const FLOATS := CrowdMesh.FLOATS
 const LAG_S := 0.3
 ## Seconds for spread, fade and flames to settle [design guess].
 const SETTLE_S := 0.35
-const FLEE_SPREAD := 1.6
-const FIGHT_SPREAD := 0.9
-const MOVE_SPREAD := 1.1
 ## Draw-order steps per metre of depth, and how far under a fallen squad goes.
 const DEPTH_PER_M := 2.0
 const UNDER := 100000
@@ -29,6 +26,8 @@ var spread := 0.0
 var fade := 1.0
 var burning := false
 var material := ShaderMaterial.new()
+## Times the spread is stretched (wasps grow with the far-zoom boost).
+var grow := 1.0
 ## Extra spread from a rout (`kick`), decaying.
 var scatter := 0.0
 
@@ -64,11 +63,7 @@ func build(parent: RID, shader: Shader, heads: int, far: bool, rect: Rect2) -> v
 	_spots.resize(capacity)
 	spread = spread_goal()
 	material.shader = shader
-	material.set_shader_parameter("motion", spec.motion)
-	material.set_shader_parameter("pivot", spec.pivot)
-	material.set_shader_parameter("buzz", spec.buzz)
-	material.set_shader_parameter("hover", spec.hover)
-	material.set_shader_parameter("down_turn", spec.down_turn)
+	spec.apply(material)
 	var shapes := spec.meshes(far, heads)
 	for variant in shapes.size():
 		_buffers.append(CrowdMesh.buffer(_homes, _phases, variant, shapes.size()))
@@ -87,6 +82,13 @@ func set_heads(heads: int) -> void:
 	while alive < target:
 		_pin(_order[capacity - alive - 1], false)
 		alive += 1
+
+
+func set_grow(factor: float) -> void:
+	if is_equal_approx(grow, factor):
+		return
+	grow = factor
+	material.set_shader_parameter("grow", factor)
 
 
 func set_far(far: bool) -> void:
@@ -171,15 +173,12 @@ func _both(uniform: String, value: Variant) -> void:
 
 ## The disc the squad wants to fill for its heads and its state.
 func spread_goal() -> float:
-	var wide := 1.0 + scatter
-	match state:
-		SiegeSnapshot.State.FLEE:
-			wide *= FLEE_SPREAD
-		SiegeSnapshot.State.FIGHT:
-			wide *= FIGHT_SPREAD
-		SiegeSnapshot.State.MOVE:
-			wide *= MOVE_SPREAD
-	return CrowdScatter.radius(spec.spacing, maxi(alive, 1) if capacity > 1 else 0) * wide
+	var heads := maxi(alive, 1) if capacity > 1 else 0
+	return (
+		CrowdScatter.radius(spec.spacing, heads)
+		* (1.0 + scatter)
+		* CrowdScatter.state_spread(state)
+	)
 
 
 ## 0 hides the squad: villagers in hiding are indoors.
@@ -205,7 +204,7 @@ func is_down(individual: int) -> bool:
 func place(individual: int) -> Vector2:
 	if _down[individual] == 1:
 		return _spots[individual]
-	return anchor + _homes[individual] * spread - _lag * _phases[individual]
+	return anchor + _homes[individual] * spread * grow - _lag * _phases[individual]
 
 
 ## Sets every figure of the squad on fire (flames grow in `pose`).

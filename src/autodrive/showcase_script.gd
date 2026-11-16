@@ -33,6 +33,7 @@ const BOXES := {
 	&"events_melee": Rect2(96, 104, 200, 84),
 	&"events_calls": Rect2(336, 126, 188, 148),
 	&"orders": Rect2(0, 0, 600, 400),
+	&"swarm": Rect2(0, 0, 600, 400),
 	&"crowd": Rect2(0, 0, 600, 400),
 	&"fight": Rect2(214, 180, 72, 40),
 }
@@ -69,6 +70,8 @@ static func build(sim: ShowcaseSim, scene: StringName) -> void:
 			_calls(sim)
 		&"orders":
 			_host(sim, Vector2(330, 200), Vector2(400, 200), 6)
+		&"swarm":
+			_swarm(sim)
 		&"beats":
 			_host(sim, sim.show_map.army_spawn, sim.show_map.village_center, 10)
 			sim.fire(0.0, SiegeEvent.UFO_ABDUCT, sim.show_map.village_center)
@@ -79,6 +82,16 @@ static func build(sim: ShowcaseSim, scene: StringName) -> void:
 			ShowcaseCrowd.build(sim)
 		&"fight":
 			ShowcaseCrowd.build_fight(sim)
+
+
+## Two swarms of wasps over the village, with villagers running from them.
+static func _swarm(sim: ShowcaseSim) -> void:
+	var c := sim.show_map.village_center
+	var fight := SiegeSnapshot.State.FIGHT
+	sim.add(SiegeSnapshot.Kind.WASPS, ARMY, 30, fight, c + Vector2(-70, 0))
+	sim.add(SiegeSnapshot.Kind.WASPS, ARMY, 6, fight, c + Vector2(-110, 60))
+	sim.add(SiegeSnapshot.Kind.VILLAGERS, VILLAGE, 40, SiegeSnapshot.State.FLEE, c, PI)
+	sim.add(SiegeSnapshot.Kind.MEN, ARMY, 10, SiegeSnapshot.State.MOVE, c + Vector2(-160, 10))
 
 
 ## Every scripted tick of a living scene (the crowd, the fight).

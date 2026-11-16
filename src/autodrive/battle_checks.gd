@@ -17,6 +17,8 @@ const TRIES := 3
 ## seen (FrameDiff): the rally flag, one set of charge or retreat chevrons.
 const FLAG_FLOOR := 5000
 const CHEVRON_FLOOR := 1500
+## The same for the wasps' cloud on the whole-map view.
+const CLOUD_FLOOR := 4000
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 

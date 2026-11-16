@@ -68,13 +68,16 @@ func draw_frame(
 ) -> void:
 	_pick_level(zoom_px)
 	RenderingServer.global_shader_parameter_set(CLOCK, clock)
-	RenderingServer.global_shader_parameter_set(BOOST, boost_for(zoom_px))
+	var boost := boost_for(zoom_px)
+	RenderingServer.global_shader_parameter_set(BOOST, boost)
 	var cheering := _cheer > 0.0
 	_cheer = maxf(_cheer - delta * CHEER_FADE, 0.0)
 	for i in mini(squads.size(), shot.entity_count()):
 		var squad := squads[i]
 		var at := tween.position(i)
 		squad.pose(at, tween.velocity(i), shot.ent_state[i], shot.ent_facing[i], delta)
+		if squad.kind == SiegeSnapshot.Kind.WASPS:
+			squad.set_grow(boost)
 		if cheering and squad.team == SiegeSnapshot.Team.ARMY:
 			squad.material.set_shader_parameter("cheer", _cheer)
 
@@ -83,6 +86,14 @@ func draw_frame(
 ## metre): 1 once a man is tall enough, more as the camera goes out.
 static func boost_for(zoom_px: float) -> float:
 	return clampf(MIN_MAN_PX / maxf(zoom_px * MAN_M, 0.001), 1.0, MAX_BOOST)
+
+
+## True while any swarm of wasps is in the air.
+func has_swarm() -> bool:
+	for squad in squads:
+		if FxSwarm.is_flying(squad):
+			return true
+	return false
 
 
 ## Individuals drawn, standing or fallen.
