@@ -2,7 +2,7 @@ class_name Palette
 extends RefCounted
 ## THE palette: the only file with a colour literal (scripts/check_palette.sh
 ## fails the gate on one anywhere else in src/ or tools/). Every colour is a
-## frozen token of the shared design system (unified-design-system,
+## frozen token of the shared design system (`kuhyx/utils` `unified-design-system/`,
 ## DOCS-tokens.md, the same hex in every repo) or a mix of two of them, found
 ## by search against the colours this game used before. GDScript cannot fold
 ## a mix into a constant, so the mixed values are written out and `MIXES`
