@@ -16,7 +16,10 @@
 
 | feature | how to reach it | expected outcome |
 |---|---|---|
-| Hub | start the game | three pictogram buttons (eye, flag, bar chart) and a menu button, all inside the viewport, no words |
+| Hub | start the game | three picture buttons (Watch = eye, Command = rally flag and pointing hand, Lab = flask in a win-rate ring) with their keys 1 2 3, and a menu button, all inside the viewport, no words |
+| Shelf (progress) | hub | 25 slots, one per buff: a buff that was part of a won Watch or Command siege stands there in colour, the rest are dark outlines; survives a restart |
+| Best Lab rate | hub, under the Lab button | a small ring, the best win rate so far as a number and that loadout's pictograms; an empty ring before the first Lab run; survives a restart |
+| Key hints | any menu screen | every big control shows its key on its corner (1 2 3, Backspace for back), read from the InputMap; a pad shows its accept button on the control in focus; touch shows none |
 | Pause menu | Esc, pad B or the menu button on any screen | the tree pauses; resume, hub and quit buttons; Esc closes it; the hub button returns to the hub |
 | Loadout | hub -> a mode button | 25 pictogram cards on five price shelves (5 dollars down to 1), each with its price as coin slots; a tray of 15 budget coins; the army size as a number and one figure per ten men; a green go button; no words |
 | Buy / sell | click a card (touch: tap to look, tap again to buy) | coins fly from the tray into the card's slots, the card gets a green frame and a check; a second click sends the coins back; cards the dollars left do not reach are dimmed; the army number follows `fifty_men` / `double_men` |
@@ -26,8 +29,10 @@
 | Watch | hub -> eye -> go | dots march; army morale, village morale and alarm bars and a clock; it ends by itself |
 | Command | hub -> flag -> go | as Watch, plus: a click on the map plants a rally flag, charge and retreat buttons send orders |
 | Payoff | the sim decides | on the battle screen: a green flag on the village (win) or flames on the army (lose), before the result opens |
-| Result | after the payoff | a green flag or a red flame, one home button -> hub |
-| Lab | hub -> bar chart -> go | N sieges run without a hitch; a ring and a percent number show the win rate, a bar the runs done, a number the mean seconds |
+| Result | after the payoff | first a scene alone: the flag climbs over the village and the men cheer, or the leader burns to ash; the bought buffs line up under it (new ones on the shelf spark); after 1.4 s or any press three controls: the same loadout again (1), change the loadout (2), hub (3) |
+| Lab | hub -> flask -> go | N sieges (default 200) run in slices, the frame never waits: a ring fills with the win rate, the rate stands in it as a number, every siege drops a tick (tall green = won, short red = lost), an outer ring and two numbers show the runs done, a number the mean seconds |
+| Lab ranking | the Lab screen, right side | every loadout tried, best first: place number, its pictograms, a bar and the rate; the one on the bench is framed; survives a restart |
+| Lab controls | the Lab screen | again (a new batch of the same loadout, added to its line), change the loadout, hub |
 | Dev annotate | `./run.sh`, then F12, the camera glyph or the pause menu's camera | the frame freezes; toolbar rect, arrow, circle, pen, text, select, undo, clear; a save writes the bundle folder and a Markdown entry under `~/data/fifteen-dollar-siege_binaries/feedback/` |
 | Session recording | `./run.sh` (kuhy's own play only) | `feedback/recordings/<session>.mkv` with moments as chapters; `scripts/recordings.sh latest` lists them |
 | Straight into a siege | `./run.sh --mode=watch --loadout=double_men,stew --seed=7` | the battle opens with that loadout and seed |
@@ -36,9 +41,9 @@
 
 | id | goal | command | last green |
 |---|---|---|---|
-| F1 | Watch: buy through the cards, win once, combust once, pause works | `scripts/autodrive_all.sh watch` | 2026-11-16, scaffold |
-| F2 | Command: the same plus rally, retreat and charge reach the sim | `scripts/autodrive_all.sh command` | 2026-11-16, scaffold |
-| F3 | Lab: a batch per loadout, 100 % for the winner and 0 % for the loser (stub rule) | `scripts/autodrive_all.sh lab` | 2026-11-16, scaffold |
+| F1 | Watch: the shop tour (vignette, buy, sell, touch, a refused buy), win once, combust once, the result's edit and retry controls, pause works | `scripts/autodrive_all.sh watch` | 2026-11-16, stub sim |
+| F2 | Command: the same plus rally, retreat and charge reach the sim | `scripts/autodrive_all.sh command` | 2026-11-16, stub sim |
+| F3 | Lab: a batch per loadout seen arriving, 100 % for the winner and 0 % for the loser (stub rule), both ranked, edit and again lead on | `scripts/autodrive_all.sh lab` | 2026-11-16, stub sim |
 | F4 | `run.sh` starts on a broken GPU GL and F12 saves a complete bundle | `scripts/test_launcher.sh` | 2026-11-16, scaffold |
 | F5 | The exported Linux build plays without the dev tools | `scripts/test_export.sh` | 2026-11-16, scaffold |
 

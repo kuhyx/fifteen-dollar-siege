@@ -32,6 +32,8 @@ var menu_button: GlyphButton
 var last_outcome := SiegeSim.Outcome.RUNNING
 
 var _holder: Control
+## Buffs the last won siege put on the hub's shelf for the first time.
+var _fresh: Array[StringName] = []
 
 
 func _ready() -> void:
@@ -96,6 +98,8 @@ func start_siege(p_loadout: Loadout) -> void:
 		lab.setup(loadout, options.lab_runs, sim_seed)
 		lab.finished.connect(func(result: Dictionary) -> void: lab_finished.emit(result))
 		lab.home_pressed.connect(open_hub)
+		lab.again_pressed.connect(func() -> void: start_siege(loadout))
+		lab.edit_pressed.connect(func() -> void: open_loadout(mode))
 		_show(lab, &"lab")
 		return
 	var battle := BattleScreen.new()
@@ -110,8 +114,10 @@ func start_siege(p_loadout: Loadout) -> void:
 
 func open_result(outcome: int) -> void:
 	var result := ResultScreen.new()
-	result.setup(outcome)
+	result.setup(outcome, loadout, _fresh)
 	result.home_pressed.connect(open_hub)
+	result.retry_pressed.connect(func() -> void: start_siege(loadout))
+	result.edit_pressed.connect(func() -> void: open_loadout(mode))
 	_show(result, &"result")
 
 
@@ -168,6 +174,9 @@ func _siege_state(battle: BattleScreen) -> Dictionary:
 
 func _on_decided(outcome: int, battle: BattleScreen) -> void:
 	last_outcome = outcome as SiegeSim.Outcome
+	_fresh.clear()
+	if last_outcome == SiegeSim.Outcome.WIN:
+		_fresh = WinShelf.record(loadout)
 	siege_ended.emit(outcome, battle.sim.clock_s())
 
 

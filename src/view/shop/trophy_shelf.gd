@@ -1,0 +1,64 @@
+class_name TrophyShelf
+extends Control
+## The hub's progress you can see: 25 slots on two boards, one per buff. A
+## buff that has been part of a won siege stands there in colour; the others
+## are dark outlines waiting. A buff won with for the first time gets a spark.
+
+const SLOT := 120.0
+const GAP := 16.0
+const PER_ROW := 13
+const BOARD_H := 12.0
+const ROW_PITCH := 170.0
+const WAITING := Color(0.17, 0.19, 0.25)
+
+## Buffs won with (filled slots).
+var won: Array[StringName] = []:
+	set(value):
+		won = value
+		queue_redraw()
+## Buffs that are new on the shelf: drawn with a spark.
+var fresh: Array[StringName] = []:
+	set(value):
+		fresh = value
+		queue_redraw()
+
+
+static func wide() -> float:
+	return PER_ROW * (SLOT + GAP) - GAP
+
+
+static func high() -> float:
+	return ROW_PITCH + SLOT + BOARD_H + 4.0
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+## The slot of buff number `index` (catalogue order), in this control's space.
+func slot(index: int) -> Rect2:
+	var corner := Vector2((index % PER_ROW) * (SLOT + GAP), (index / PER_ROW) * ROW_PITCH)
+	return Rect2(corner, Vector2.ONE * SLOT)
+
+
+func _draw() -> void:
+	var defs := BuffCatalog.all()
+	var board := PictoInk.WOOD.darkened(0.45)
+	for row in 2:
+		var count := mini(defs.size() - row * PER_ROW, PER_ROW)
+		var plank := Rect2(
+			-12.0, row * ROW_PITCH + SLOT + 4.0, count * (SLOT + GAP) - GAP + 24.0, BOARD_H
+		)
+		draw_rect(plank, board)
+	for i in defs.size():
+		var id := defs[i].id
+		var box := slot(i).grow(-8.0)
+		var picture := BuffPictograms.of(id)
+		if won.has(id):
+			picture.draw(self, box)
+		else:
+			picture.draw_flat(self, box, WAITING)
+		if fresh.has(id):
+			UiPictograms.of(&"spark").draw(
+				self, Rect2(box.position - Vector2(6, 6), Vector2(40, 40))
+			)

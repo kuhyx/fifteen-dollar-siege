@@ -2,8 +2,11 @@ extends BotBase
 ## The --autodrive=<watch|command|lab> bot: plays one mode through the real
 ## main scene with synthesized clicks and keys, and exits 0 only when every
 ## assert held. One run: hub (buttons on screen, Esc opens the pause menu),
-## a siege bought to WIN, a siege bought to LOSE (each to its result screen,
-## the payoff frame taken BEFORE the result opens), then Esc -> hub button.
+## the shop tour (vignette, buy, sell, touch, a refused buy), a siege bought
+## to WIN, a siege bought to LOSE (each to its result screen, the payoff
+## frame taken BEFORE the result opens, then the result's own controls: edit
+## after the win, retry after the loss), then Esc -> hub button. The beats on
+## the menu-side screens live in menu_beats.gd.
 ## Lives outside src/dev so an exported build can run it too.
 ## scripts/lib/bot.sh `bot_frames` holds the number of beats per mode.
 
@@ -86,9 +89,11 @@ func _hub_beat() -> bool:
 	return check(not main.pause_menu.is_open() and not get_tree().paused, "Esc closes the menu")
 
 
-## Hub -> this mode's loadout screen -> buys exactly `ids` through the cards.
+## Hub (or the result's edit control) -> this mode's loadout screen -> buys
+## exactly `ids` through the cards.
 func _buy(ids: Array[StringName], tag: String) -> bool:
-	await click((main.screen as HubScreen).buttons[_mode])
+	if main.screen_name == &"hub":
+		await click((main.screen as HubScreen).buttons[_mode])
 	if not await on_screen(&"loadout"):
 		return false
 	var shop := main.screen as LoadoutScreen
@@ -100,14 +105,19 @@ func _buy(ids: Array[StringName], tag: String) -> bool:
 		return false
 	for id: StringName in shop.loadout.ids.duplicate():  # last time's picks
 		await click(shop.cards[id])
+	if tag == "win" and not await MenuBeats.shop_tour(self, shop):
+		return false
 	for id in ids:
 		await click(shop.cards[id])
 	if shop.loadout.remaining() == 0:
 		await click(shop.cards[ONE_TOO_MANY])
+		if not await MenuBeats.refusal(self, shop, ONE_TOO_MANY):
+			return false
 	var want := Loadout.of(ids)
 	ok = (
 		check(shop.loadout.ids == want.ids, "the cards bought %s" % [shop.loadout.ids])
 		and check(shop.loadout.is_legal(), "a buy over the budget is refused")
+		and await MenuBeats.settled(self, shop)
 	)
 	if not ok or not await shot("loadout_" + tag):
 		return false
@@ -136,7 +146,7 @@ func _siege_round(wins: bool) -> bool:
 
 
 ## Waits for the decision, takes the payoff frame BEFORE any result UI opens
-## (lesson L13), then checks the result screen and goes home.
+## (lesson L13), then plays the result screen's own payoff and controls.
 func _to_result(battle: BattleScreen, wins: bool) -> bool:
 	var tag := "win" if wins else "lose"
 	var want := SiegeSim.Outcome.WIN if wins else SiegeSim.Outcome.LOSE
@@ -152,18 +162,7 @@ func _to_result(battle: BattleScreen, wins: bool) -> bool:
 		and await shot("payoff_" + tag)
 		and await on_screen(&"result")
 	)
-	if not ok:
-		return false
-	var result := main.screen as ResultScreen
-	ok = (
-		check(result.outcome == want, "the result screen shows %s" % tag)
-		and inside(result.home_button, "the home button")
-		and await shot("result_" + tag)
-	)
-	if not ok:
-		return false
-	await click(result.home_button)
-	return await on_screen(&"hub")
+	return ok and await MenuBeats.result(self, wins, want, main.loadout.ids)
 
 
 ## Command mode: a rally click on the map, then retreat and charge buttons.
@@ -192,11 +191,14 @@ func _pause_freezes(battle: BattleScreen) -> bool:
 	return check(battle.sim.clock_s() > before, "the siege runs again after the menu closes")
 
 
-## Lab: the batch finishes and every run agrees with the stub rule.
+## Lab: the batch arrives tick by tick, finishes, every run agrees with the
+## stub rule, the loadout is ranked, and the Lab's own controls lead on.
 func _lab_round(wins: bool) -> bool:
 	if not await on_screen(&"lab"):
 		return false
 	var lab := main.screen as LabScreen
+	if not await MenuBeats.lab_running(self, lab, "win" if wins else "lose"):
+		return false
 	var done := func() -> bool: return lab.done
 	if not await wait_for(done, DECIDE_LIMIT_FRAMES, "the lab batch"):
 		return false
@@ -209,13 +211,10 @@ func _lab_round(wins: bool) -> bool:
 		check(runs == main.options.lab_runs, "the lab ran %d sieges" % runs)
 		and check(lab.result["wins"] == expected, "the lab counts %d wins" % expected)
 		and check(seconds > 15.0 and seconds < 25.0, "mean seconds near 20: %s" % seconds)
-		and inside(lab.home_button, "the lab home button")
+		and await MenuBeats.lab_ranked(self, lab, wins)
 		and await shot("lab_win" if wins else "lab_lose")
 	)
-	if not ok:
-		return false
-	await click(lab.home_button)
-	return await on_screen(&"hub")
+	return ok and await MenuBeats.lab_leave(self, lab, wins)
 
 
 ## The pause menu's way back: start a siege, Esc, the hub button.
