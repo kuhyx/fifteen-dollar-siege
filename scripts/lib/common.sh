@@ -50,3 +50,20 @@ need_gut() {
         exit 1
     }
 }
+
+# The todo board puts a `godot` shim on PATH that queues every launch on one
+# machine-wide build lock. A gate that runs godots side by side, each under a
+# `timeout`, would then queue its own runs behind each other and let the wait
+# eat the timeouts (the autodrive gate failed "a blank frame" that never
+# drew). So an entry script calls this first: when godot is such a shim and
+# the lock is not held yet, the script reruns ONCE under that lock (waiting
+# with no timeout), and every godot inside skips it. Elsewhere a no-op.
+#   hold_build_lock "$0" "$@"
+hold_build_lock() {
+    [[ "${TODOIMPL_BUILD_LOCK_HELD:-}" != 1 ]] || return 0
+    local shim lock
+    shim="$(command -v godot)" || return 0
+    lock="$(head -c 512 "$shim" | sed -n 's/^exec \(.*\/buildlock\.sh\) godot .*/\1/p')"
+    [[ -n "$lock" && -x "$lock" ]] || return 0
+    exec "$lock" bash "$@"
+}

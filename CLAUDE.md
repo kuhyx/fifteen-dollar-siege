@@ -199,6 +199,7 @@ Other gates, each one call under 60 s:
 - `scripts/test_handoff.sh [format|walk|check]` the answer-file format, the walk (retry, skip, quit)
   and every item's `--check` side by side (about 10 s)
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
+- `scripts/test_build_lock.sh` a gate under the todo board's `godot` build-lock shim takes the lock once (`hold_build_lock` in `scripts/lib/common.sh`), so no timeout counts the queue
 - `scripts/test_mount_dev_tools.sh` the mount script: default pin is the GitHub URL and tag, a fixture remote
 - `scripts/test_launcher.sh` `run.sh` on a broken GPU GL, plus the F12 bundle
 - `scripts/test_recording.sh` the pinned recorder requirement and this game's settings of it (the recorder's own tests live in `kuhyx/utils`)
@@ -220,7 +221,7 @@ Other gates, each one call under 60 s:
 
 | Group | Gates | Time |
 |---|---|---|
-| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, mount, recording | ~15 s |
+| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, mount, buildlock, recording | ~15 s |
 | `scripts/check.sh --group play` | test | ~35 s |
 | `scripts/check.sh --group bots` | autodrive, launcher | ~15 s |
 | `scripts/check.sh --group tools` | audio, coverage | ~43 s |

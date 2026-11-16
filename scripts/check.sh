@@ -13,6 +13,7 @@
 #                            freshness, contract
 #                   save_guard  GUT without the hook redirect
 #                   mount    the dev tools mount script, against a fixture remote
+#                   buildlock   a gate takes the board's build lock once (fixture lock)
 #                   recording   the recorder's pinned requirement and this game's settings of it
 #   play   (~35 s)  test     the GUT suite
 #   bots   (~15 s)  autodrive   the bot, every mode (frames on a private Xvfb)
@@ -42,6 +43,7 @@ set -euo pipefail
 
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+hold_build_lock "$0" "$@"
 # shellcheck source=scripts/lib/check_gates.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/check_gates.sh"
 # shellcheck source=scripts/lib/check_groups.sh
@@ -64,6 +66,7 @@ run_gate() {
         test) scripts/test.sh ;;
         save_guard) scripts/test_save_guard.sh ;;
         mount) scripts/test_mount_dev_tools.sh ;;
+        buildlock) scripts/test_build_lock.sh ;;
         recording) scripts/test_recording.sh ;;
         autodrive) scripts/autodrive_all.sh ;;
         launcher) scripts/test_launcher.sh ;;

@@ -27,6 +27,7 @@ set -euo pipefail
 
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+hold_build_lock "$0" "$@"
 # shellcheck source=scripts/lib/launch.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/launch.sh"
 # shellcheck source=scripts/lib/bot.sh
@@ -45,7 +46,7 @@ RUN_DIR=""
 
 # One mode: prints the bot's RESULT/FAIL lines, returns non-zero on failure.
 run_mode() {
-    local mode="$1" code=0 dir="$RUN_DIR/$1" shots=() want
+    local mode="$1" code=0 dir="$RUN_DIR/$1" shots=() want why
     want="$(bot_frames "$mode")" || return 1
     mkdir -p "$dir/shots"
     bot_run "$SIZE" "$RUN_TIMEOUT" "$dir/log.txt" "$dir/result" "$dir/save" "$mode" \
@@ -60,9 +61,12 @@ run_mode() {
         echo "autodrive $mode: FAILED (${#shots[@]} frames, expected $want)" >&2
         return 1
     fi
-    if ! frames_ok "${shots[@]}" >"$dir/frames.txt" 2>&1; then
+    frames_ok "${shots[@]}" >"$dir/frames.txt" 2>&1 || code=$?
+    if [[ "$code" -ne 0 ]]; then
         cat "$dir/frames.txt" >&2
-        echo "autodrive $mode: FAILED (a blank or unreadable frame)" >&2
+        why="a blank or unreadable frame"
+        [[ "$code" -ne 124 && "$code" -ne 137 ]] || why="the frame check timed out"
+        echo "autodrive $mode: FAILED ($why)" >&2
         return 1
     fi
     mkdir -p "$SHOT_ROOT/$mode"
