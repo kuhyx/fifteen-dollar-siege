@@ -79,6 +79,7 @@ func test_the_screen_shakes_on_a_smash_and_the_mapping_follows() -> void:
 	var battle := BattleScreen.new()
 	battle.setup(sim, &"watch", 1.0)
 	add_child_autofree(battle)
+	battle.set_process(false)  # the test owns the clock: no real-time frames on top
 	assert_gt(battle.flair.impact.trauma, 0.0, "the smash reached the impact")
 	battle._process(0.016)
 	var offset := battle.flair.impact.offset(battle._clock)

@@ -105,6 +105,7 @@ func test_the_screen_shows_pops_and_the_tally_for_a_bleeding_village() -> void:
 	var battle := BattleScreen.new()
 	battle.setup(sim, &"watch", 1.0)
 	add_child_autofree(battle)
+	battle.set_process(false)  # the test owns the clock: no real-time frames on top
 	sim.loss = 60
 	for tick in 12:
 		battle._take(sim.snapshot(), 0.1)

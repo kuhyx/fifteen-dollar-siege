@@ -12,6 +12,7 @@ func _battle(ids: Array) -> BattleScreen:
 	battle.loadout = Loadout.of(ids)
 	battle.setup(SiegeSim.create(battle.loadout, 5), &"watch", 1.0)
 	add_child_autofree(battle)
+	battle.set_process(false)  # the test owns the clock: no real-time frames on top
 	return battle
 
 
