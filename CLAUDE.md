@@ -49,8 +49,8 @@ the real sim, view and art against it.
 |---|---|---|
 | `src/core/` | buffs, loadout, map, snapshot, sim, lab | sim agent |
 | `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves) | shared |
-| `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` | view and art agents |
-| `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, key glyphs and hints | menu-screen agent |
+| `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
+| `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
 | `src/view/` | `Main` flow and the five screens, `PauseMenu` | view agent |
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf; the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bot (ships in builds too) | whoever changes the flow |
@@ -137,12 +137,13 @@ Other gates, each one call under 60 s:
 
 - `./install.sh` tools, GUT, export templates, binaries links, git hooks
 - `scripts/autodrive_all.sh [mode ...]` the done gate (watch, command, lab,
-  and `showcase`: every kind, state, look and event on the battle screen plus
+  `touch` (a finger's whole loop, touch events only) and `showcase`: every kind, state, look and event on the battle screen plus
   the 2,400-figure frame gate); frames land in
   `~/data/claude-scratch/fifteen-dollar-siege/<checkout>/shots/<mode>/`
 - `scripts/screenshot.sh <out_dir> [mode] [WxH]` one mode's frames
 - `scripts/art_sheet.sh <kind> <out.png> [WxH]` contact sheet of the
   code-drawn art (`buffs`, `buffs_big`, `ui`, `vignettes`, `vignette`, `shop`)
+- `scripts/check_palette.sh` no colour literal outside `src/ui/palette.gd`
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
 - `scripts/test_launcher.sh` `run.sh` on a broken GPU GL, plus the F12 bundle
 - `scripts/test_recording.sh` recorder unit tests

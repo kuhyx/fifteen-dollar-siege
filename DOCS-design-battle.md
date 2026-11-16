@@ -37,7 +37,7 @@ transform and lies there for the rest of the siege; a healed head stands up.
 | FIGHT | shake, lunge, the weapon arm swings; the squad closes up |
 | FLEE | lean into the run, quick steps; the squad scatters |
 | DOWN | the whole squad lies, darker |
-| HIDDEN | army: a faint glint the player can see. Village: not drawn (indoors) |
+| HIDDEN | army: a faint glint the player can see. Village: not drawn in the open; the nearest house shows eyes in a window (`FxHiding`, one pair per 12 people, at most 4 per house) |
 
 **Teams differ in outline, not only in colour.** Army: a block body, widest at
 the shoulders, round head, blue. Village: a tunic, widest at the hem, pointed
@@ -48,7 +48,18 @@ figure of MEN, BAT_MEN and SHOTGUNNER; `booze` makes them sway; BAT_MEN always
 carry the metal bat. `BattleScreen.loadout` is set by `Main` before `setup`.
 
 **Two levels of detail** follow the zoom: below 26 screen pixels per man the
-simple mesh is drawn.
+simple mesh is drawn. **Far zoom:** below 18 real pixels a man the shader
+scales every figure up about its feet (`figure_boost`, at most 4x), so the
+whole-map view still shows men (team by colour and outline). The auto camera
+never zooms out past 6 px/m (`follow`): a wide fight shows its army. **Roofs:**
+the shader and `place` move every figure off the houses, the church and the
+tents (`CrowdScatter.clear_of`, the buildings in a float texture). **Wasps**
+are a cloud: their spread grows with the boost and `FxSwarm` draws a haze and
+swirling strokes of at least 44 px. **Antialiasing:** MSAA 2D does nothing on
+the Compatibility renderer (docs: Forward+ and Mobile only; a frame with it on
+is pixel-identical), so every figure shape carries a one-pixel feather fringe
+(`FigureBuilder`, pushed out in the shader) and the map uses antialiased draw
+calls.
 
 ## 2. What the view expects from the sim
 
@@ -85,6 +96,7 @@ defines them. Default keys have symbol caps, so no letter is drawn.
 | Rally flag (Command) | | A: middle of the view | click or tap the map |
 | Charge, retreat (Command) | Enter, Backspace | Y, X | buttons |
 | Skip a staged beat | Space, Enter | A | tap, skip button |
+| Skip the payoff (after 0.3 s) | any key | any button | any tap |
 | Pause menu | Esc | B | menu button |
 
 A press released on the same spot is a tap; a press that moves 10 px is a
@@ -93,7 +105,7 @@ drag and gives no order. The HUD's hold stops the sim, not the camera.
 ## 4. Showcase and the frame gate
 
 `scripts/autodrive_all.sh showcase` opens the real battle screen through
-`Main.open_battle` on a scripted `ShowcaseSim` and saves 22 frames: every Kind
+`Main.open_battle` on a scripted `ShowcaseSim` and saves 24 frames: every Kind
 in every State (five grids), six looks, every event (three scenes, the orders,
 two beats, two payoffs), the 2,400-figure crowd and a close fight. It fails
 when a kind/state pair or an event name was never on screen.
@@ -112,15 +124,24 @@ oldest short ones until they fit.
 
 ## 5. Decisions and deviations
 
-- **Palette.** Team, good, bad and coin colours come from the shared
-  `Palette`; `WorldPalette` adds the ground and figure colours. The
+- **Palette.** One `Palette` (`src/ui/palette.gd`) built from the unified
+  design system's frozen tokens, each colour a token or a recorded mix of two
+  (`Palette.MIXES`, held by `tests/test_palette.gd`); no colour literal exists
+  elsewhere (`scripts/check_palette.sh`). `WorldPalette` and `PictoInk` are
+  names for it. The
   procedural-art skill's "exactly four Lospec colours" rule is NOT followed:
   the shared palette already had more, and two teams, flames, pumpkins and a
   HUD do not fit in four.
 - **Figures stand upright on a top-down map** (board-game meeples), about
   1.9 times life size, so a kind reads at a glance. `[design guess]`
-- **No letters on key badges.** A binding without a picture shows the UNKNOWN
-  cap and `tests/view/test_hud.gd` fails on it.
+- **No letters on key badges.** ONE `KeyHint` / `KeyGlyph` draws every key hint of
+  the game from the InputMap for the device in use (`InputDevice`); a binding
+  without a picture draws nothing and `tests/test_key_hints.gd` fails on it,
+  on every screen and for keys and a pad.
+- **Payoff, then result: one beat.** At a loss the village dims and a night
+  veil falls so the burning army is the only bright thing; at a win the army
+  and its flag stay bright. Any press after 0.3 s skips; the result opens with
+  its controls up on the scene's end state. `[design guess]`
 - **`ShowcaseSim` extends `SiegeSim`** and overrides its seven public calls.
   It breaks if `SiegeSim.new()` ever needs arguments.
 
@@ -137,7 +158,12 @@ oldest short ones until they fit.
 
 | constant | value |
 |---|---|
-| `BattleScreen.PAYOFF_S`, `RING_S` | 3.2 s, 1.5 s |
+| `BattleScreen.PAYOFF_S`, `RING_S`, `BattleBeats.SKIP_AFTER_S` | 3.2 s, 1.5 s, 0.3 s |
+| `CrowdLayer.MIN_MAN_PX`, `MAX_BOOST`, `DIM_LOSS`, `DIM_WIN` | 18 px, 4x, 0.3, 0.4 |
+| `BattleCamera.AUTO_MIN_ZOOM`, `ANCHOR_SLACK` | 6 px/m, 0.4 |
+| `BattleEffects.VEIL_S`; `FxSwarm.MIN_CLOUD_PX` | 0.6 s; 44 px |
+| `FxHiding.PER_PAIR`, `MAX_PAIRS`, `EYE_PX` | 12 people, 4, 7 px |
+| `FxSignals.CHEVRON_PX`, `CHARGE_CHEVRONS`, `RETREAT_CHEVRONS` | 40 px, 3, 2 |
 | `BattleCamera.MAX_ZOOM`, `MIN_FIT`, `FOLLOW_S`, `WHEEL_STEP` | 22 px/m, 0.85, 0.45 s, 1.15 |
 | `BattleCamera.PAD_M`, `MIN_SPAN_M`, `ENGAGE_M`, `LEAD_M` | 24 m, 150 x 84 m, 70 m, 60 m |
 | `CameraInput.DRAG_PX`, `SnapshotTween.TELEPORT_M` | 10 px, 40 m |
@@ -151,15 +177,17 @@ oldest short ones until they fit.
 | `BattleEffects.MAX_LIVE`, `MIN_LIVE`, `DRAW_BUDGET_MS`, `SHED_BELOW_S` | 72, 12, 1 ms, 2.4 s |
 | `BattleEffects.FLAG_RISE_S`, `DEFAULT_REACH` | 1.4 s, 60 m |
 | `FxRecipes` | per event: life 0.45 to 3 s, reach 0 to 120 m |
-| `FxMarks.RALLY_POLE_M`, `RALLY_POLE_PX`, `WIN_POLE_M`, `CENTRE_RING_M` | 10 m, at least 60 px, 22 m, 18 m |
+| `FxMarks.RALLY_POLE_M`, `RALLY_POLE_PX`, `RALLY_LINE_PX`, `WIN_POLE_M`, `CENTRE_RING_M` | 10 m, at least 120 px, 4 px, 22 m, 18 m |
 | `BattleBeats.FRAMES`, `CHURCH_BOX`, `ARMY_PAD_M` | 172 x 100 m and 124 x 88 m, 150 x 96 m, 30 m |
 | `MapPlan.FIELDS`, `PATH_STEPS`, `PATH_SWAY_M`, tries | 9, 14, 14 m, 60 and 160 |
 | `MapLayer.FURROW_M`, `PATH_M` | 3.2 m, 5.5 m |
 | `HudButton.SIZE`, `BADGE`; `BattleHud.EDGE`, `GAP` | 96 px, 40 px; 28 px, 14 px |
 | `HudMeters.WIDE`, `TALL`, `BAR`, `RING_R`, `LOW_MORALE` | 1440 px, 96 px, 300 x 26 px, 32 px, 0.25 |
 | `PauseMenu.BUTTON_PX`, `BADGE_PX`, `PADDING` | 200 px, 60 px, 44 px |
-| `SiegeActions.STICK_DEADZONE` | 0.5 |
+| `InputDevice.STICK_PUSH` | 0.5 |
 | `FrameStats.WORK_BUDGET_MS` | 4 ms: a quarter of a 60 fps frame |
 | `BattleChecks.PAYOFF_SEEN`, `TRIES`, `ENTER_BUDGET_MS` | 0.6, 3, 1000 ms (lesson L9) |
+| `BattleChecks.FLAG_FLOOR`, `CHEVRON_FLOOR`, `CLOUD_FLOOR`, `HIDING_FLOOR` | pixels (canvas units squared) the bot sees an effect change: 5000, 1500, 4000, 2000 |
+| `BattleChecks.SOFT_EDGES`, `SUBJECT_LOSS`, `SUBJECT_WIN` | 0.5 soft edges (staircase frame: 0.37); payoff brighter than the rest 1.6, 1.4 |
 | `ShowcaseScript.SHOT_S`, `SEEN_AT`; `ShowcaseBot.CROWD_FRAMES` | 1.3 s, 0.4; 150 frames |
 | `ShowcaseCrowd` | 2,000 villagers, 300 men, 100 wasps; an event every tick |

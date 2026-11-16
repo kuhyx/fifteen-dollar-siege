@@ -27,10 +27,10 @@ Each is a `[design guess]` unless a source is named.
   feathered rim built for the size on screen. Vignettes and the result
   scenes are drawn per frame with a `VignettePen` in stage units. No raster,
   no AI, no external asset.
-- **Palette.** The game's own `Palette` plus four hues (`PictoInk`: wood,
-  violet, deep gold, slate). The procedural-art skill's "one 4-colour Lospec
-  palette" was NOT used: `Palette` is shared with the battle screen and
-  twelve colours are what 25 distinct buffs needed.
+- **Palette.** The one `Palette` (design-system tokens and mixes of two; see
+  `DOCS-design-battle.md`); `PictoInk` names its hues. The procedural-art
+  skill's "one 4-colour Lospec palette" was NOT used: twelve colours are
+  what 25 distinct buffs needed.
 - **No brand, no real person.** The pep-talk man is a grey tough guy with a
   red headband, the emperor a small man under a wide two-cornered hat, the
   band four plain figures, the monster a stitched green head without bolts.
@@ -45,7 +45,7 @@ Each is a `[design guess]` unless a source is named.
   look at the clock) instead of calling `Lab.run_one` per frame, so one slow
   siege cannot freeze a frame. `tests/test_menu_screens.gd` holds it equal to
   `Lab.run_batch`.
-- **Keys.** 1 2 3 pick a screen's big controls left to right, Backspace goes
+- **Keys.** One `KeyHint` draws them (`InputDevice` picks the event for the device). 1 2 3 pick a screen's big controls left to right, Backspace goes
   back from the shop: keys whose glyph needs no letter. A pad uses focus and
   its accept button.
 
@@ -58,7 +58,7 @@ Each is a `[design guess]` unless a source is named.
 | `CoinFlight.FLY_S`, `STAGGER_S`, `ARC` | 0.26 s, 0.045 s, 70 units | `[design guess]` |
 | `CoinTray.SHAKE_S`, `BuffCard.SHAKE_S`, `BuffCard.POP_S` | 0.4 s, 0.3 s, 0.2 s | `[design guess]` |
 | `BuffCard.DIM` | 0.66 toward the panel | `[design guess]` |
-| `ResultScreen.PAYOFF_S` | 1.4 s (any press skips it) | `[design guess]`; lesson L13 |
+| `ResultScene.SETTLED_S` | 2.4 s: the result opens on the end state, no second payoff | `[design guess]` |
 | `ResultScene.FLAG_UP_S`, `BURN_S` | 0.7 s, 0.9 s | `[design guess]` |
 | `LabScreen.REVEAL_S` | 0.9 s | `[design guess]` |
 | `LabRunner.TICKS_PER_LOOK` | 8 sim ticks | `[design guess]` |
