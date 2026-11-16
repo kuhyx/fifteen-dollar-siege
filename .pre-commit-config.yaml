@@ -1,0 +1,130 @@
+# Pre-commit hooks for fifteen-dollar-siege.
+#
+# Install with:  ./install.sh        Run manually:  pre-commit run --all-files
+#
+# Only non-mutating checks live here (gdformat --check, never gdformat itself).
+# pre-commit stashes unstaged changes for the duration of the run and restores
+# them with `git apply`; a hook that rewrites a tracked file inside that window
+# makes the restore conflict, which aborts the commit AND drops the uncommitted
+# edit. Run `gdformat <file>` / `ruff format <file>` by hand to fix formatting.
+#
+# The shared gates are `language: system` shims that exec the checker in
+# ~/src/utils, so this repo's idea of a rule cannot drift from every other
+# repo's. fail_fast so a later check cannot run after an earlier one has
+# already rejected the commit.
+fail_fast: true
+
+default_install_hook_types: [pre-commit, post-commit, post-merge, post-rewrite]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      # gdtoolkit is pinned in requirements-dev.txt (install.sh).
+      - id: gdlint
+        name: gdlint
+        entry: gdlint
+        language: system
+        files: \.gd$
+        exclude: ^addons/
+
+      - id: gdformat
+        name: gdformat --check
+        entry: gdformat --check
+        language: system
+        files: \.gd$
+        exclude: ^addons/
+
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck -x
+        language: system
+        types: [shell]
+
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format --check
+        entry: ruff format --check
+        language: system
+        types: [python]
+
+      # Text only in git: art, audio and builds live in
+      # ~/data/fifteen-dollar-siege_binaries (install.sh). An image or an
+      # archive in a commit is a mistake, not an asset.
+      - id: no-binaries
+        name: no binary or image files
+        entry: scripts/check_no_binaries.sh
+        language: system
+        pass_filenames: true
+
+      # The shared 250-line cap. The exemption list lives with the checker.
+      - id: file-length
+        name: file length <= 250 lines
+        entry: scripts/check_file_length.sh
+        language: system
+
+      # README / CLAUDE* / DOCS* only; tasks go to the todo app, never a file.
+      - id: md-naming
+        name: markdown naming convention
+        entry: scripts/check_md_naming.sh
+        language: system
+        files: \.(md|markdown)$
+
+      - id: todo-closer
+        name: close Todo trailer tasks
+        entry: scripts/todo_hooks.sh closer
+        language: system
+        stages: [post-commit]
+        always_run: true
+        pass_filenames: false
+
+      - id: todo-import-pr-merge
+        name: import PR Todo sections (pull)
+        entry: scripts/todo_hooks.sh import-pr post-merge
+        language: system
+        stages: [post-merge]
+        always_run: true
+        pass_filenames: false
+
+      - id: todo-import-pr-rewrite
+        name: import PR Todo sections (pull --rebase)
+        entry: scripts/todo_hooks.sh import-pr post-rewrite
+        language: system
+        stages: [post-rewrite]
+        always_run: true
+        pass_filenames: false
+
+      # Every dependency on its ecosystem's newest STABLE release, exact-pinned.
+      # `files:` keeps this cheap: a commit touching only source makes zero
+      # network requests. Runs WITHOUT --strict on purpose: offline it degrades
+      # to the cached answer; CI, always online, is the strict authority.
+      - id: dependency-freshness
+        name: dependencies on newest stable
+        entry: scripts/check_dependency_freshness.sh
+        language: system
+        pass_filenames: true
+        files: >-
+          (pyproject\.toml|requirements.*\.txt|\.python-version
+          |\.pre-commit-config\.yaml|\.github/workflows/.*\.ya?ml)$
+
+      - id: repo-contract
+        name: repo contract (CLAUDE.md Commands + test_changed)
+        entry: scripts/check_repo_contract.sh
+        language: system
+        pass_filenames: false
+        files: ^(CLAUDE\.md|AGENTS\.md|scripts/test_changed\.sh)$|(^|/)(AndroidManifest\.xml|build\.gradle(\.kts)?|strings\.xml|pubspec\.yaml|repo-contract\.toml|[^/]+\.desktop|assets/icon/[^/]+\.png)$

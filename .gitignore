@@ -1,0 +1,18 @@
+# generated / fetched
+.godot/
+addons/gut/
+__pycache__/
+.ruff_cache/
+.coverage
+coverage.xml
+*.log
+*.tmp
+# binaries live in ~/data/fifteen-dollar-siege_binaries (install.sh); the links are files to git
+/assets
+/builds
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+# agent worktrees
+.claude/
