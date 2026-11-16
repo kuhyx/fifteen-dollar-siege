@@ -6,6 +6,7 @@
 #   scripts/screenshot.sh <out_dir> [mode] [WxH]   (default: watch 1920x1080)
 # Frames land in <out_dir>/NN_<beat>.png. Copy one before Reading it: a hook
 # downscales files in place.
+# godot runs muted (--audio-driver Dummy, scripts/lib/bot.sh).
 # ============================================================================
 
 set -euo pipefail

@@ -21,14 +21,12 @@ func _init(dir: String) -> void:
 ## "" when the beat is fine, else why not. Headless has nothing to read back.
 func take(label: String, viewport: Viewport) -> String:
 	count += 1
-	var headless := DisplayServer.get_name() == "headless"
-	if not headless:
-		rendered += 1
+	if DisplayServer.get_name() == "headless":
+		return ""  # nothing is drawn, so there is no frame to wait for
+	rendered += 1
 	RenderingServer.render_loop_enabled = true
 	await RenderingServer.frame_post_draw
 	RenderingServer.render_loop_enabled = false
-	if headless:
-		return ""
 	var image := viewport.get_texture().get_image()
 	if FrameStats.is_blank(image):
 		return "frame '%s' is blank" % label

@@ -13,7 +13,8 @@
 #   BOT_SIZE=1280x720   window size (default 1920x1080)
 #   BOT_SPEED=16        sim seconds per second
 #   GATE_MAX_S=40       also fail when the whole gate took longer
-# Never touches the live display. Whole script < 60 s; one mode per call if
+# Never touches the live display; godot runs with --audio-driver Dummy (the
+# flags live in scripts/lib/bot.sh). Whole script < 60 s; one mode per call if
 # the machine is very busy.
 # ============================================================================
 
