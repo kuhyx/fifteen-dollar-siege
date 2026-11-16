@@ -2,9 +2,8 @@ class_name BattleScreen
 extends Control
 ## The siege on screen: the map from above (MapLayer), every individual
 ## drawn (CrowdLayer), an effect for every event (BattleEffects), a camera
-## that frames the action, and the HUD (BattleHud). Staged beats play before
-## the first tick; the payoff (a flag on the church, or the army in flames)
-## plays BEFORE `finished` opens the result.
+## that frames the action, the HUD and the delights of BattleFlair. Staged
+## beats play before the first tick; the payoff plays BEFORE `finished`.
 ## Contract kept for Main, the bot and the dev tools: the three signals,
 ## `sim`, `mode`, `speed`, `shot`, `commands_sent`, `payoff_active`,
 ## `payoff_s`, `charge_button`, `retreat_button`, `setup`, `order`,
@@ -18,8 +17,7 @@ signal command_given(kind: int, pos: Vector2)
 const PAYOFF_S := 3.2
 ## Real seconds the HUD bell swings after a ring [design guess].
 const RING_S := 1.5
-## The siege plays on at no more than this speed once decided, so the last
-## blows and the rout are seen as they happen [design guess].
+## Speed cap once decided: the last blows are seen as they happen [design guess].
 const PAYOFF_SPEED := 1.0
 
 var sim: SiegeSim
@@ -47,6 +45,8 @@ var map_layer := MapLayer.new()
 var crowd := CrowdLayer.new()
 var effects := BattleEffects.new()
 var hud := BattleHud.new()
+## The view's own delights: the weight of blows, the fallen's pops and tally.
+var flair := BattleFlair.new()
 ## This screen's own work per frame (the frame gate reads it).
 var meter := FrameMeter.new()
 ## Milliseconds `setup` took: the whole cost of entering the screen.
@@ -90,23 +90,23 @@ func _process(delta: float) -> void:
 	meter.next_frame()
 	if beats.staging():
 		beats.update(delta)
-	elif not held:
+	elif not held and not flair.impact.frozen():
 		_step(delta * (minf(speed, PAYOFF_SPEED) if payoff_active else speed))
 	meter.begin()
 	if not held:
 		_clock += delta
 		effects.advance(delta)
+		flair.update(delta)
 	beats.tick_payoff(delta)
 	BattleAim.aim(self)
 	if payoff_active or beats.staging():
 		camera.resume_auto()
 	camera.update(delta)
-	world.transform = camera.transform()
+	flair.frame(world, camera, _clock)
 	effects.view_zoom = camera.zoom
 	crowd.draw_frame(tween, shot, _clock, delta, camera.zoom * _pixel_scale())
-	var state := {"speed": speed, "held": held, "auto": camera.auto}
+	var state := {"speed": speed, "held": held, "auto": camera.auto, "staged": beats.staging()}
 	state["centre"] = effects.centre_progress
-	state["staged"] = beats.staging()
 	hud.show_state(shot, state, delta)
 	meter.end()
 
@@ -175,11 +175,11 @@ func payoff_progress() -> float:
 
 
 func map_to_canvas(point: Vector2) -> Vector2:
-	return camera.to_canvas(point)
+	return camera.to_canvas(point) + flair.impact.offset(_clock)
 
 
 func canvas_to_map(point: Vector2) -> Vector2:
-	return camera.to_map(point)
+	return camera.to_map(point - flair.impact.offset(_clock))
 
 
 ## The entity nearest a canvas point (dev feedback's select tool), {} for none.
@@ -221,6 +221,7 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 	tween.push(shot, dt_sim)
 	crowd.sync(shot)
 	effects.shot = shot
+	flair.take(shot, _clock, effects)
 	AudioDirector.on_snapshot(shot, Rect2(camera.to_map(Vector2.ZERO), size / camera.zoom))
 	for event in shot.events:
 		if shot.clock_s <= 0.0 and BattleBeats.stages(event):

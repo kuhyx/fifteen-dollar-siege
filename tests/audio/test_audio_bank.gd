@@ -28,7 +28,7 @@ func _mixed(wav: AudioStreamWAV, from_frame: int, count: int) -> PackedVector2Ar
 
 func test_nothing_on_the_cue_sheet_is_missing() -> void:
 	assert_eq(Array(bank.missing), [], "run ./install.sh: it renders the audio")
-	assert_eq(bank.streams.size(), 50)
+	assert_eq(bank.streams.size(), 57)
 
 
 func test_every_siege_event_maps_to_loaded_streams() -> void:

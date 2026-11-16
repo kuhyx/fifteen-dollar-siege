@@ -13,7 +13,18 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from audio import dsp, loudness, music_battle, music_hub, music_rock, music_stingers, sfx_fight, sfx_specials, sfx_ui
+from audio import (
+    dsp,
+    loudness,
+    music_battle,
+    music_hub,
+    music_rock,
+    music_stingers,
+    sfx_fight,
+    sfx_fun,
+    sfx_specials,
+    sfx_ui,
+)
 
 # Highest sample a finished file may hold (dBFS): head-room under the gate's -1.
 CEILING_DB = -1.5
@@ -63,7 +74,12 @@ def _described(build: Callable[[], np.ndarray]) -> str:
 
 def _effects() -> list[Asset]:
     out = []
-    for folder, sounds in (("sfx", sfx_fight.SOUNDS), ("sfx", sfx_specials.SOUNDS), ("ui", sfx_ui.SOUNDS)):
+    for folder, sounds in (
+        ("sfx", sfx_fight.SOUNDS),
+        ("sfx", sfx_specials.SOUNDS),
+        ("sfx", sfx_fun.SOUNDS),
+        ("ui", sfx_ui.SOUNDS),
+    ):
         for name, (build, target) in sounds.items():
             out.append(Asset(name, folder, folder, False, target, build, {"synthesis": _described(build)}))
     return out

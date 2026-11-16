@@ -38,6 +38,18 @@ const UI: Array[StringName] = [
 	&"ui_lab_done",
 ]
 
+## The small rewards and surprises (DOCS-design-fun.md), played by the view
+## through `AudioDirector.play`.
+const FUN: Array[StringName] = [
+	&"fun_toll",
+	&"fun_heartbeat",
+	&"fun_glint",
+	&"fun_dice",
+	&"fun_star",
+	&"fun_firework",
+	&"fun_hic",
+]
+
 const CUES := {
 	&"command_rally": {"files": ["sfx/command_rally"], "gap": 0.15, "voices": 1, "rank": 2},
 	&"command_charge": {"files": ["sfx/command_charge"], "gap": 0.15, "voices": 1, "rank": 2},
@@ -84,6 +96,13 @@ const CUES := {
 	&"centre_held": {"files": ["sfx/centre_tick"], "gap": 0.4, "voices": 2, "rank": 2},
 	&"victory": {"files": ["sfx/cheer"], "gap": 3.0, "voices": 1, "rank": 3},
 	&"combust": {"files": ["sfx/combust"], "gap": 3.0, "voices": 1, "rank": 3},
+	&"fun_toll": {"files": ["sfx/fun_toll"], "gap": 0.3, "voices": 2, "jitter": 0.0},
+	&"fun_heartbeat": {"files": ["sfx/fun_heartbeat"], "gap": 0.5, "voices": 1},
+	&"fun_glint": {"files": ["sfx/fun_glint"], "gap": 0.12, "voices": 3, "jitter": 0.06},
+	&"fun_dice": {"files": ["sfx/fun_dice"], "gap": 0.3, "voices": 1, "jitter": 0.03},
+	&"fun_star": {"files": ["sfx/fun_star"], "gap": 0.1, "voices": 3},
+	&"fun_firework": {"files": ["sfx/fun_firework"], "gap": 0.25, "voices": 3, "jitter": 0.05},
+	&"fun_hic": {"files": ["sfx/fun_hic"], "gap": 0.6, "voices": 1, "jitter": 0.08},
 	&"ui_buy": {"files": ["ui/ui_buy"], "gap": 0.05, "voices": 2},
 	&"ui_unbuy": {"files": ["ui/ui_unbuy"], "gap": 0.05, "voices": 2},
 	&"ui_refuse": {"files": ["ui/ui_refuse"], "gap": 0.15, "voices": 1},

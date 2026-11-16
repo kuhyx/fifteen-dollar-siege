@@ -94,6 +94,27 @@ func spawn(event: Dictionary) -> void:
 	queue_redraw()
 
 
+## One live effect of the view's own (not a sim event): `kind` is `pop` (a
+## squad lost `n` heads here) or `toll` (`total` villagers have fallen).
+func flourish(
+	kind: StringName, painter: Callable, life: float, at: Vector2, data: Dictionary
+) -> void:
+	var fx := BattleFx.new()
+	_spawned += 1
+	seen[kind] = int(seen.get(kind, 0)) + 1
+	fx.kind = kind
+	fx.painter = painter
+	fx.life = life
+	fx.pos = at
+	fx.to = at
+	fx.team = int(data.get("team", SiegeSnapshot.Team.ARMY))
+	fx.seed_value = hash([kind, _spawned])
+	fx.data = data
+	live.append(fx)
+	_shed()
+	queue_redraw()
+
+
 ## Plants the rally flag at once (the screen calls it on the player's click;
 ## the sim's own `command` event confirms it a tick later).
 func plant(at: Vector2) -> void:
@@ -104,14 +125,7 @@ func plant(at: Vector2) -> void:
 
 ## A soft ring at `at`: "click the map" (the rally button's hint).
 func pulse(at: Vector2) -> void:
-	var fx := BattleFx.new()
-	fx.kind = &"hint"
-	fx.painter = FxSignals.order
-	fx.life = 0.9
-	fx.pos = at
-	fx.to = at
-	live.append(fx)
-	queue_redraw()
+	flourish(&"hint", FxSignals.order, 0.9, at, {})
 
 
 ## Takes the effects of `kind` off the stage (a skipped beat).
