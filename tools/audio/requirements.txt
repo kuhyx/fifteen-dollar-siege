@@ -1,0 +1,3 @@
+# The procedural-music toolkit, pinned to its released tag (skill procedural-music).
+# numpy comes with it at the version the tag pins; nothing else is needed.
+music_theory @ git+https://github.com/kuhyx/utils@music-theory-v0.1.0#subdirectory=music_theory
