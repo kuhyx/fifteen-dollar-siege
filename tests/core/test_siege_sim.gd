@@ -2,6 +2,8 @@ extends GutTest
 ## The sim contract (DOCS-design.md "Core API"), tested against the STUB: the
 ## signatures, determinism from the seed, the rule "+50 men before double", and
 ## the stub's own behaviour (walk to the centre; WIN at 8 dollars or more).
+## A test with "stub" in its name pins scaffold behaviour and goes away with
+## the stub; every other test is contract and must stay green.
 
 const WIN_IDS: Array[StringName] = [&"double_men", &"fifty_men"]
 const LOSE_IDS: Array[StringName] = [&"pep_talk", &"stew"]
@@ -88,7 +90,7 @@ func test_the_stub_decides_at_about_twenty_seconds() -> void:
 		assert_ne(sim.outcome(), SiegeSim.Outcome.RUNNING, "seed %d at 22.1 s" % sim_seed)
 
 
-func test_the_army_walks_to_the_village_centre() -> void:
+func test_the_stub_army_walks_to_the_village_centre() -> void:
 	var sim := SiegeSim.create(Loadout.new(), 5)
 	var centre := sim.map().village_center
 	var start := sim.snapshot()
@@ -149,7 +151,7 @@ func test_events_are_drained_once_per_snapshot() -> void:
 	assert_eq(sim.snapshot().events.size(), 0, "handed over once")
 
 
-func test_the_decision_raises_one_event_and_marks_the_losers() -> void:
+func test_the_stub_decision_raises_events_and_marks_the_losers() -> void:
 	var win := _run(WIN_IDS, 8, 30.0).snapshot()
 	var kinds := win.events.map(func(e: Dictionary) -> StringName: return e["kind"])
 	assert_has(kinds, &"alarm")
@@ -163,7 +165,7 @@ func test_the_decision_raises_one_event_and_marks_the_losers() -> void:
 			assert_eq(lose.ent_state[i], SiegeSnapshot.State.DOWN)
 
 
-func test_commands_move_the_target_and_stop_after_the_decision() -> void:
+func test_stub_commands_move_the_target_and_stop_after_the_decision() -> void:
 	var sim := SiegeSim.create(Loadout.of(WIN_IDS), 11)
 	sim.command(SiegeSim.Command.RETREAT, Vector2.ZERO)
 	assert_eq(sim.snapshot().events[0]["pos"], sim.map().army_spawn)

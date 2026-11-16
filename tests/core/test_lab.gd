@@ -1,5 +1,6 @@
 extends GutTest
 ## Lab: N headless sieges of one loadout, reproducible from the base seed.
+## A test with "stub" in its name goes away with the stub sim.
 
 const WIN_IDS: Array[StringName] = [&"double_men", &"fifty_men"]
 const LOSE_IDS: Array[StringName] = [&"stew"]
@@ -9,11 +10,17 @@ func test_a_batch_reports_wins_runs_and_mean_seconds() -> void:
 	var result := Lab.run_batch(Loadout.of(WIN_IDS), 12, 100)
 	assert_eq(result.keys(), ["wins", "runs", "mean_seconds"])
 	assert_eq(result["runs"], 12)
-	assert_eq(result["wins"], 12, "the stub always wins at 9 dollars")
+	assert_between(result["wins"], 0, 12)
+	assert_gt(result["mean_seconds"], 0.0)
+
+
+func test_the_stub_wins_every_run_at_nine_dollars() -> void:
+	var result := Lab.run_batch(Loadout.of(WIN_IDS), 12, 100)
+	assert_eq(result["wins"], 12)
 	assert_between(result["mean_seconds"], 18.0, 22.0)
 
 
-func test_a_losing_loadout_never_wins() -> void:
+func test_the_stub_never_wins_a_one_dollar_loadout() -> void:
 	var result := Lab.run_batch(Loadout.of(LOSE_IDS), 12, 100)
 	assert_eq(result["wins"], 0)
 	assert_eq(result["runs"], 12)
