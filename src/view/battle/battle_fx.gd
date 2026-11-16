@@ -56,9 +56,12 @@ static func lob(a: Vector2, b: Vector2, part: float, lift: float) -> Vector2:
 static func star(
 	canvas: CanvasItem, at: Vector2, outer: float, inner: float, spikes: int, tint_in: Color
 ) -> void:
+	if outer < 0.05:
+		return
+	var waist := minf(inner, outer * 0.6)
 	var outline := PackedVector2Array()
 	for i in spikes * 2:
-		var reach := outer if i % 2 == 0 else inner
+		var reach := outer if i % 2 == 0 else waist
 		outline.append(at + Vector2.from_angle(TAU * i / (spikes * 2.0) - PI / 2.0) * reach)
 	canvas.draw_colored_polygon(outline, tint_in)
 
