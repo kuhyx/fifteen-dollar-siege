@@ -192,6 +192,11 @@ func fallen() -> int:
 	return capacity - alive
 
 
+## The squad's place in the draw order (higher is drawn later, on top).
+func depth() -> int:
+	return _depth
+
+
 func is_down(individual: int) -> bool:
 	return _down[individual] == 1
 

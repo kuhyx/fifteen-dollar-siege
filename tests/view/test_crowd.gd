@@ -97,6 +97,35 @@ func test_a_squad_that_is_down_lies_in_place_and_flight_scatters_it() -> void:
 	assert_eq(squad.fallen(), 0, "the whole squad lies down by its pose, heads unchanged")
 
 
+func test_an_entity_that_grows_or_changes_kind_is_built_anew() -> void:
+	var idle := SiegeSnapshot.State.IDLE
+	_show(_shot([[SiegeSnapshot.Kind.MEN, 4, idle, Vector2(100, 100)]]))
+	var first := crowd.squads[0]
+	_show(_shot([[SiegeSnapshot.Kind.MEN, 9, idle, Vector2(100, 100)]]))
+	assert_ne(crowd.squads[0], first, "more heads than it was built for")
+	assert_eq(crowd.squads[0].capacity, 9)
+	assert_eq(crowd.figures(), 9)
+	_show(_shot([[SiegeSnapshot.Kind.MOOSE, 3, idle, Vector2(100, 100)]]))
+	assert_eq(crowd.squads[0].kind, SiegeSnapshot.Kind.MOOSE, "the index became another kind")
+	_show(_shot([[SiegeSnapshot.Kind.ROCK_BAND, 1, idle, Vector2(100, 100)]]))
+	assert_eq(crowd.squads[0].spec.meshes(false, 1).size(), 1, "one head: the whole band at once")
+	assert_eq(crowd.squads[0].spec.meshes(true, 4).size(), 4, "four heads: four players")
+	_show(_shot([[SiegeSnapshot.Kind.UFO, 0, idle, Vector2(100, 100)]]))
+	assert_eq(crowd.figures(), 0, "an entity without heads draws nothing")
+	_show(_shot([]))
+	assert_eq(crowd.squads.size(), 1, "a shorter snapshot is harmless")
+
+
+func test_squads_are_drawn_back_to_front_and_the_fallen_underneath() -> void:
+	var men := SiegeSnapshot.Kind.MEN
+	var rows := [[men, 5, SiegeSnapshot.State.IDLE, Vector2(100, 300)]]
+	rows.append([men, 5, SiegeSnapshot.State.IDLE, Vector2(100, 100)])
+	rows.append([men, 5, SiegeSnapshot.State.DOWN, Vector2(100, 350)])
+	_show(_shot(rows))
+	assert_gt(crowd.squads[0].depth(), crowd.squads[1].depth(), "lower on the map: drawn later")
+	assert_lt(crowd.squads[2].depth(), crowd.squads[1].depth(), "a fallen squad lies under all")
+
+
 func test_hidden_army_shimmers_and_hidden_villagers_are_gone() -> void:
 	var hidden := SiegeSnapshot.State.HIDDEN
 	var rows := [[SiegeSnapshot.Kind.MEN, 10, hidden, Vector2(100, 100)]]
