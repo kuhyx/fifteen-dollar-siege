@@ -38,7 +38,7 @@ ensure_venv() {
         uv pip install --quiet --python "$VENV/bin/python" -r "$REQUIREMENTS"
     else
         python3 -m venv "$VENV"
-        "$VENV/bin/python" -m pip install --quiet -r "$REQUIREMENTS"
+        "$VENV/bin/python" -m pip install --quiet --disable-pip-version-check -r "$REQUIREMENTS"
     fi
     echo "$want" >"$stamp"
     echo "done audio venv ($VENV)"

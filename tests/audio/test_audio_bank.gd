@@ -66,9 +66,14 @@ func test_every_stream_is_16_bit_pcm_at_44100() -> void:
 func test_loops_loop_forward_over_the_whole_file_and_one_shots_do_not() -> void:
 	var loops := AudioCues.loops()
 	for file in AudioCues.files():
-		var wav := bank.stream(file) as AudioStreamWAV
+		# A fresh copy straight from the import: the bank sets a loop again in
+		# code, which would hide a sidecar that got it wrong.
+		var path := AudioCues.ROOT + file + ".wav"
+		var wav := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as AudioStreamWAV
 		if wav == null:
+			fail_test("%s did not load" % file)
 			continue
+		assert_ne(wav, bank.stream(file), "%s: a copy, not the bank's stream" % file)
 		if file in loops:
 			assert_eq(wav.loop_mode, AudioStreamWAV.LOOP_FORWARD, "%s loops" % file)
 			assert_eq(wav.loop_begin, 0, "%s loop start" % file)

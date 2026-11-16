@@ -16,7 +16,7 @@ set -euo pipefail
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../../scripts/lib/common.sh"
 
-readonly SIZE="320x180"
+readonly SIZE="160x90"
 DEFAULT_OUT="$(dirname "$SCRATCH")/audio/siege_in_20_seconds.wav"
 readonly DEFAULT_OUT
 TMP=""
@@ -37,7 +37,7 @@ main() {
     mkdir -p "$XDG_DATA_HOME"
     cap timeout 55 "$REPO_ROOT/scripts/xvfb_run.sh" "$SIZE" \
         godot --audio-driver Dummy --path "$REPO_ROOT" --resolution "$SIZE" \
-        --write-movie "$TMP/demo.avi" --fixed-fps 30 \
+        --write-movie "$TMP/demo.avi" --fixed-fps 20 \
         -s tools/audio/demo_siege.gd >"$log" 2>&1 || {
         tail -n 20 "$log" >&2
         echo "demo: the scripted siege FAILED" >&2
