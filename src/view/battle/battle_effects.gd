@@ -157,9 +157,9 @@ func _draw() -> void:
 	if _plan != null:
 		FxMarks.centre_ring(self, _plan.map.village_center, centre_progress)
 	if has_rally():
-		var size := maxf(1.0, FxMarks.RALLY_POLE_PX / FxMarks.RALLY_POLE_M / view_zoom)
-		FxMarks.rally_flag(self, rally, _rally_age, size)
+		FxMarks.rally_flag(self, rally, _rally_age, view_zoom)
 	for fx in live:
+		fx.zoom = view_zoom
 		fx.painter.call(self, fx)
 	if flag_up and _plan != null:
 		FxMarks.win_flag(self, _plan.bell, _flag_raised, _clock)

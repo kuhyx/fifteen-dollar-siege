@@ -5,25 +5,56 @@ extends RefCounted
 ## back into sight, the hold on the village centre.
 ## Each painter is func(canvas, fx) and draws one moment of the effect.
 
+## Chevrons the charge sends, and the retreat sends: more and filled with the
+## team's colour against fewer and plain white (shape and colour, not hue).
+const CHARGE_CHEVRONS := 3
+const RETREAT_CHEVRONS := 2
+const CHEVRON_M := 3.4
+## A chevron is never smaller than this on screen (canvas px).
+const CHEVRON_PX := 40.0
+
+
+## Metres one chevron measures at `view_zoom` (canvas pixels per metre).
+static func chevron_m(view_zoom: float) -> float:
+	return maxf(CHEVRON_M, CHEVRON_PX / view_zoom)
+
+
+static func charge_fill() -> Color:
+	return Palette.ARMY
+
+
+static func retreat_fill() -> Color:
+	return WorldPalette.WHITE
+
 
 ## An order lands: rally thumps a ring onto the spot; charge and retreat send
 ## chevrons from the army (fx.to) to where it should go (fx.pos).
 static func order(canvas: CanvasItem, fx: BattleFx) -> void:
+	var px := 1.0 / fx.zoom
 	var tint := Color(WorldPalette.WHITE, fx.fading(0.5))
 	if int(fx.data.get("command", SiegeSim.Command.RALLY)) == SiegeSim.Command.RALLY:
 		var close := 1.0 - ease(fx.progress(), 0.4)
-		canvas.draw_arc(fx.pos, 2.0 + 14.0 * close, 0.0, TAU, 32, tint, 0.7)
-		canvas.draw_arc(fx.pos, 1.0 + 7.0 * close, 0.0, TAU, 24, Color(fx.tint(), fx.fading()), 0.7)
+		var wide := 3.0 * px
+		canvas.draw_arc(fx.pos, 2.0 + 14.0 * close, 0.0, TAU, 32, tint, wide, true)
+		canvas.draw_arc(
+			fx.pos, 1.0 + 7.0 * close, 0.0, TAU, 24, Color(fx.tint(), fx.fading()), wide
+		)
 		return
+	var charge := int(fx.data["command"]) == SiegeSim.Command.CHARGE
 	var along := (fx.pos - fx.to).normalized() if fx.pos != fx.to else Vector2.RIGHT
 	var span := fx.to.distance_to(fx.pos)
-	for i in 4:
-		var part := fmod(fx.progress() * 1.4 + i * 0.22, 1.0)
-		var at := fx.to + along * span * part + Vector2(0, -3.0)
-		var size := 3.4 if int(fx.data["command"]) == SiegeSim.Command.CHARGE else 2.4
-		BattleFx.chevron(canvas, at, along, size, Color(tint, tint.a * (1.0 - absf(part - 0.5))))
+	var size := chevron_m(fx.zoom)
+	var count := CHARGE_CHEVRONS if charge else RETREAT_CHEVRONS
+	for i in count:
+		var part := fmod(fx.progress() * 1.2 + float(i) / count, 1.0)
+		var at := fx.to + along * span * part
+		var seen := fx.fading(0.3) * (0.6 + 0.4 * sin(part * PI))
+		var fill := charge_fill() if charge else retreat_fill()
+		BattleFx.vee(canvas, at, along, size, px, Color(fill, seen))
+		if charge:
+			BattleFx.vee(canvas, at - along * size * 0.9, along, size, px, Color(fill, seen))
 	canvas.draw_arc(
-		fx.pos, 3.0 + 5.0 * fx.progress(), 0.0, TAU, 24, Color(fx.tint(), fx.fading()), 0.6
+		fx.pos, 3.0 + 5.0 * fx.progress(), 0.0, TAU, 24, Color(fx.tint(), fx.fading()), 3.0 * px
 	)
 
 

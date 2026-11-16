@@ -8,6 +8,8 @@ var main: Main
 var shots: BotShots
 ## The first failed assert ("" = none so far). Later steps do not run.
 var failure := ""
+## Measured values for the RESULT line ("name=value").
+var numbers := PackedStringArray()
 
 
 ## Waits `count` process frames (bot time is frames: load only slows the run).

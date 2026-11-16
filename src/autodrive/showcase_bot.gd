@@ -28,7 +28,6 @@ const DRAWN_FRAMES := 12
 ## "kind:state" pairs and event names that were on screen.
 var _pairs: Dictionary = {}
 var _events: Dictionary = {}
-var _numbers: PackedStringArray = []
 
 
 func _ready() -> void:
@@ -51,7 +50,7 @@ func _run() -> void:
 	)
 	if may_run and await _play():
 		_covered()
-	finish("mode=showcase frames=%d %s" % [shots.count, " ".join(_numbers)])
+	finish("mode=showcase frames=%d %s" % [shots.count, " ".join(numbers)])
 
 
 func _play() -> bool:
@@ -125,24 +124,44 @@ func _looks() -> bool:
 	return true
 
 
-## Command mode: a click plants the flag, the buttons charge and retreat.
+## Command mode at whole-map zoom: a click plants the flag, the buttons
+## charge and retreat; each order must change enough pixels to be seen.
 func _orders() -> bool:
 	var battle: BattleScreen = await _open(&"orders", &"command")
-	await click_at(battle.map_to_canvas(Vector2(356, 168)))
+	var flag := Vector2(250, 110)
+	await click_at(battle.map_to_canvas(flag))
 	await _watch(battle, 14)
 	var planted := battle.commands_sent == 1 and battle.effects.has_rally()
-	if not (check(planted, "a click plants the rally flag") and await shot("orders_rally")):
+	var near := battle.map_to_canvas(flag)
+	var spot := Rect2(near + Vector2(-90, -170), Vector2(240, 210))
+	if not (
+		check(planted, "a click plants the rally flag")
+		and await BattleChecks.reads_at_a_glance(
+			self, battle.effects, spot, "rally flag", BattleChecks.FLAG_FLOOR
+		)
+		and await shot("orders_rally")
+	):
 		return false
 	await click(battle.charge_button)
 	await _watch(battle, 20)
+	var way := Rect2(battle.map_to_canvas(Vector2(300, 150)), Vector2(200, 160))
 	if not (
 		check(not battle.effects.has_rally(), "a charge pulls the flag")
+		and await BattleChecks.reads_at_a_glance(
+			self, battle.effects, way, "charge chevrons", BattleChecks.CHEVRON_FLOOR
+		)
 		and await shot("orders_charge")
 	):
 		return false
 	await click(battle.retreat_button)
-	await _watch(battle, 4)
-	return check((battle.sim as ShowcaseSim).show_orders == 3, "three orders reached the sim")
+	await _watch(battle, 8)
+	var back := Rect2(battle.map_to_canvas(Vector2(80, 150)), Vector2(380, 160))
+	return (
+		check((battle.sim as ShowcaseSim).show_orders == 3, "three orders reached the sim")
+		and await BattleChecks.reads_at_a_glance(
+			self, battle.effects, back, "retreat chevrons", BattleChecks.CHEVRON_FLOOR
+		)
+	)
 
 
 ## The staged beats: the clock stands still, Space skips, then the siege runs.
@@ -184,11 +203,11 @@ func _crowd() -> bool:
 	await frames(20)
 	var worst: float = await BattleChecks.smooth(self, battle, CROWD_FRAMES)
 	var whole := battle.crowd.figures() == ShowcaseCrowd.FIGURES
-	_numbers.append("figures=%d enter_ms=%.1f" % [battle.crowd.figures(), battle.setup_ms])
+	numbers.append("figures=%d enter_ms=%.1f" % [battle.crowd.figures(), battle.setup_ms])
 	var meter := battle.meter
-	_numbers.append("work_worst_ms=%.2f work_mean_ms=%.2f" % [worst, meter.mean_ms()])
-	_numbers.append("wall_worst_ms=%.2f" % meter.worst_wall_ms)
-	_numbers.append("live_effects=%d drawn_ms=%.1f" % [battle.effects.live.size(), await _drawn()])
+	numbers.append("work_worst_ms=%.2f work_mean_ms=%.2f" % [worst, meter.mean_ms()])
+	numbers.append("wall_worst_ms=%.2f" % meter.worst_wall_ms)
+	numbers.append("live_effects=%d drawn_ms=%.1f" % [battle.effects.live.size(), await _drawn()])
 	if not (
 		check(worst >= 0.0 and whole, "2,400 figures inside the frame budget")
 		and await shot("crowd_2400")

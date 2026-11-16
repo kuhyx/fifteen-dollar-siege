@@ -13,6 +13,10 @@ const PAYOFF_SEEN := 0.6
 const TRIES := 3
 ## (FrameMeter also times on the thread's CPU clock for the bots, so a stall
 ## is not counted in the first place where that clock exists.)
+## Canvas-unit squares an order must change on the whole-map view to count as
+## seen (FrameDiff): the rally flag, one set of charge or retreat chevrons.
+const FLAG_FLOOR := 5000
+const CHEVRON_FLOOR := 1500
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 
@@ -62,3 +66,31 @@ static func smooth(bot: BotBase, battle: BattleScreen, frames: int) -> float:
 		lazy == 0 or battle.payoff_active, "%d things made on first sight" % lazy
 	)
 	return battle.meter.worst_ms if bot.check(problem == "", problem) and steady else -1.0
+
+
+## Canvas-unit squares of `region` that `layer` adds to the frame: the drawn
+## frame minus the frame drawn with the layer hidden. -1 when nothing is
+## drawn (headless), which a caller treats as "not measurable".
+static func footprint(bot: BotBase, layer: CanvasItem, region: Rect2) -> int:
+	var view := bot.get_viewport()
+	var with: Image = await bot.shots.grab(view)
+	if with == null:
+		return -1
+	layer.hide()
+	var without: Image = await bot.shots.grab(view)
+	layer.show()
+	var to_window := view.get_final_transform()
+	var px := to_window * region
+	var count := FrameDiff.changed(with, without, Rect2i(Vector2i(px.position), Vector2i(px.size)))
+	return roundi(count / to_window.get_scale().x / to_window.get_scale().y)
+
+
+## `footprint` against a floor, with the number in the failure.
+static func reads_at_a_glance(
+	bot: BotBase, layer: CanvasItem, region: Rect2, what: String, floor_px: int
+) -> bool:
+	var seen := await footprint(bot, layer, region)
+	bot.numbers.append("%s=%d" % [what.replace(" ", "_"), seen])
+	return bot.check(
+		seen < 0 or seen >= floor_px, "%s: %d px of %d changed" % [what, seen, floor_px]
+	)

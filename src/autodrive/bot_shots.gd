@@ -34,3 +34,14 @@ func take(label: String, viewport: Viewport) -> String:
 		return ""
 	var path := "%s/%02d_%s.png" % [_dir, count, label]
 	return "" if image.save_png(path) == OK else "cannot save %s" % path
+
+
+## One drawn frame read back and not saved (null headless): the bot compares
+## frames with and without a layer (FrameDiff).
+func grab(viewport: Viewport) -> Image:
+	if DisplayServer.get_name() == "headless":
+		return null
+	RenderingServer.render_loop_enabled = true
+	await RenderingServer.frame_post_draw
+	RenderingServer.render_loop_enabled = false
+	return viewport.get_texture().get_image()

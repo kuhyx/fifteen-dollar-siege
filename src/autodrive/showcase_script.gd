@@ -32,7 +32,7 @@ const BOXES := {
 	&"events_ranged": Rect2(118, 96, 126, 96),
 	&"events_melee": Rect2(96, 104, 200, 84),
 	&"events_calls": Rect2(336, 126, 188, 148),
-	&"orders": Rect2(286, 130, 200, 140),
+	&"orders": Rect2(0, 0, 600, 400),
 	&"crowd": Rect2(0, 0, 600, 400),
 	&"fight": Rect2(214, 180, 72, 40),
 }
@@ -69,7 +69,6 @@ static func build(sim: ShowcaseSim, scene: StringName) -> void:
 			_calls(sim)
 		&"orders":
 			_host(sim, Vector2(330, 200), Vector2(400, 200), 6)
-			sim.fire(0.0, SiegeEvent.CENTRE_HELD, sim.show_map.village_center, {"progress": 0.6})
 		&"beats":
 			_host(sim, sim.show_map.army_spawn, sim.show_map.village_center, 10)
 			sim.fire(0.0, SiegeEvent.UFO_ABDUCT, sim.show_map.village_center)
@@ -180,6 +179,7 @@ static func _calls(sim: ShowcaseSim) -> void:
 	_event(sim, SiegeEvent.REVEAL, c + Vector2(50, 46), {"team": ARMY})
 	_event(sim, SiegeEvent.ALARM, c + Vector2(0, 30))
 	_event(sim, SiegeEvent.BELL_RING, c)
+	_event(sim, SiegeEvent.CENTRE_HELD, c, {"progress": 0.6})
 
 
 ## The last moment of a siege: the decision comes 0.3 s in.

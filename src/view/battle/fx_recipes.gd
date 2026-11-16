@@ -12,7 +12,7 @@ static var _recipes: Dictionary = {}
 static func all() -> Dictionary:
 	if _recipes.is_empty():
 		_recipes = {
-			SiegeEvent.COMMAND: [FxSignals.order, 0.9, 0.0],
+			SiegeEvent.COMMAND: [FxSignals.order, 1.8, 0.0],
 			SiegeEvent.ALARM: [FxSignals.alarm, 1.6, 0.0],
 			SiegeEvent.BELL_RING: [FxSignals.bell, 1.2, 0.0],
 			SiegeEvent.SLING_VOLLEY: [FxShots.sling, 0.7, 70.0],

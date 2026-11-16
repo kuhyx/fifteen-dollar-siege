@@ -5,23 +5,46 @@ extends RefCounted
 ## centre, and the flag that goes up on the church at a win.
 
 const RALLY_POLE_M := 10.0
-## The rally flag's pole is never shorter than this on screen.
-const RALLY_POLE_PX := 60.0
+## The rally flag's pole is never shorter than this on screen (canvas px).
+const RALLY_POLE_PX := 120.0
+## Stroke width of the flag's pole and rings on screen, and its dark halo.
+const RALLY_LINE_PX := 4.0
+const HALO_PX := 3.0
 const WIN_POLE_M := 22.0
 const CENTRE_RING_M := 18.0
 
 
-## The player's rally flag: it drops in with a bounce, then waves. `size`
-## scales it up when the camera is far, so it never shrinks to a speck.
-static func rally_flag(canvas: CanvasItem, at: Vector2, age: float, size := 1.0) -> void:
+## How many times the flag's design size it is drawn at `view_zoom`
+## (canvas pixels per metre): up, when the camera is far, so it never
+## shrinks to a speck.
+static func scale_for(view_zoom: float) -> float:
+	return maxf(1.0, RALLY_POLE_PX / RALLY_POLE_M / view_zoom)
+
+
+## The player's rally flag: it drops in with a bounce, then waves. A dark
+## halo under every stroke keeps it readable on grass, yard and crowd alike.
+static func rally_flag(canvas: CanvasItem, at: Vector2, age: float, view_zoom := 6.0) -> void:
+	var size := scale_for(view_zoom)
+	var px := 1.0 / view_zoom
 	var drop := minf(age * 5.0, 1.0)
 	var bounce := 1.0 + 0.25 * sin(minf(age * 5.0, 2.0) * PI) * exp(-age * 4.0)
 	var top := at + Vector2(0, -RALLY_POLE_M * size * drop * bounce)
-	canvas.draw_arc(at, 2.2 * size, 0.0, TAU, 20, Color(WorldPalette.WHITE, 0.8), 0.5 * size)
-	canvas.draw_line(at, top, WorldPalette.SOOT, 0.9 * size)
-	canvas.draw_line(at, top, WorldPalette.WHITE, 0.5 * size)
-	banner(canvas, top, Vector2(7.0, 4.4) * size, age, Palette.ARMY)
-	canvas.draw_circle(top, 0.6 * size, Palette.COIN)
+	var pulse := 1.0 + 0.12 * sin(age * 4.0)
+	var ring := 2.4 * size * pulse
+	var line := RALLY_LINE_PX * px
+	var halo := (RALLY_LINE_PX + 2.0 * HALO_PX) * px
+	canvas.draw_arc(at, ring, 0.0, TAU, 32, WorldPalette.SOOT, halo, true)
+	canvas.draw_arc(at, ring, 0.0, TAU, 32, Palette.ARMY, line, true)
+	canvas.draw_line(at, top, WorldPalette.SOOT, halo)
+	canvas.draw_line(at, top, WorldPalette.WHITE, line)
+	var cloth := Vector2(7.0, 4.4) * size
+	var rim := HALO_PX * px
+	banner(
+		canvas, top + Vector2(-rim, -rim), cloth + Vector2(rim, rim) * 2.0, age, WorldPalette.SOOT
+	)
+	banner(canvas, top, cloth, age, Palette.ARMY)
+	canvas.draw_circle(top, 0.9 * size + rim, WorldPalette.SOOT)
+	canvas.draw_circle(top, 0.9 * size, Palette.COIN)
 
 
 ## The hold on the centre: a faint full ring and a bright arc for the part

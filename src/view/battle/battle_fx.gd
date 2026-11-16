@@ -20,6 +20,9 @@ var life := 1.0
 var seed_value := 0
 ## Event data the painter may need (`command`, `progress`).
 var data: Dictionary = {}
+## The camera's pixels per metre when it was last drawn: painters keep their
+## marks a legible size on screen with it.
+var zoom := 6.0
 
 
 ## 0 at birth, 1 at the end.
@@ -87,6 +90,21 @@ static func chevron(
 	var outline := PackedVector2Array([at + along * size, at - along * size * 0.4 + side])
 	outline.append_array([at, at - along * size * 0.4 - side])
 	canvas.draw_colored_polygon(outline, tint_in)
+
+
+## A bold arrow head: a V of two strokes `size` metres long pointing along
+## `along`, `px` metres per screen pixel. A halo, a rim and the fill, so it
+## reads on grass and on the crowd alike.
+static func vee(
+	canvas: CanvasItem, at: Vector2, along: Vector2, size: float, px: float, fill: Color
+) -> void:
+	var side := along.orthogonal() * size * 0.9
+	var path := PackedVector2Array([at - along * size * 0.5 + side, at + along * size * 0.5])
+	path.append(at - along * size * 0.5 - side)
+	var width := size * 0.32
+	canvas.draw_polyline(path, Color(WorldPalette.SOOT, fill.a), width + 8.0 * px, true)
+	canvas.draw_polyline(path, Color(WorldPalette.WHITE, fill.a), width + 3.0 * px, true)
+	canvas.draw_polyline(path, fill, width, true)
 
 
 ## A plus sign `size` wide.
