@@ -6,6 +6,9 @@ extends RefCounted
 ## his spot while his squad walks, shrinks or scatters.
 
 const GOLDEN := 2.39996323
+## Metres a figure keeps from a wall, and how many buildings the shader knows.
+const MARGIN_M := 0.8
+const MAX_BLOCKS := 64
 ## How much wider or tighter a squad stands in a state [design guess].
 const FLEE_SPREAD := 1.6
 const FIGHT_SPREAD := 0.9
@@ -63,6 +66,30 @@ static func state_spread(state: int) -> float:
 		SiegeSnapshot.State.MOVE:
 			return MOVE_SPREAD
 	return 1.0
+
+
+## Where a figure that would stand at `point` really stands: off every block
+## (x, y, width, height in metres), by the shortest way out. The crowd shader
+## does the same sums (crowd.gdshader `cleared`); keep the two in step.
+static func clear_of(point: Vector2, blocks: PackedVector4Array) -> Vector2:
+	var spot := point
+	for _round in 3:
+		for block in blocks:
+			var low := Vector2(block.x, block.y) - Vector2.ONE * MARGIN_M
+			var high := Vector2(block.x + block.z, block.y + block.w) + Vector2.ONE * MARGIN_M
+			if spot.x <= low.x or spot.x >= high.x or spot.y <= low.y or spot.y >= high.y:
+				continue
+			var gap := Vector4(spot.x - low.x, high.x - spot.x, spot.y - low.y, high.y - spot.y)
+			var least := minf(minf(gap.x, gap.y), minf(gap.z, gap.w))
+			if least == gap.x:
+				spot.x = low.x
+			elif least == gap.y:
+				spot.x = high.x
+			elif least == gap.z:
+				spot.y = low.y
+			else:
+				spot.y = high.y
+	return spot
 
 
 ## A fixed number in 0..1 for (seed, salt).

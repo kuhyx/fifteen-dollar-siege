@@ -23,6 +23,10 @@ const MIN_MAN_PX := 18.0
 const MAX_BOOST := 4.0
 ## The shader's global for it, set once a frame beside the clock.
 const BOOST := &"figure_boost"
+## The shader's globals for the buildings: a one-row float texture of
+## (x, y, w, h) and how many of its texels are used.
+const BLOCKS := &"blocks"
+const BLOCK_COUNT := &"block_count"
 ## A rout within this many metres throws a squad apart.
 const SCATTER_M := 30.0
 const SCATTER_KICK := 1.2
@@ -38,12 +42,25 @@ var allocations := 0
 
 var _rect := Rect2()
 var _cheer := 0.0
+var _blocks := PackedVector4Array()
 
 
 func setup(map_bounds: Rect2, p_look: FigureLook) -> void:
 	_rect = map_bounds.grow(60.0)
 	look = p_look
 	FigureLibrary.warm(look)
+
+
+## Keeps every figure off these footprints (the crowd shader and `place`).
+func set_blocks(blocks: PackedVector4Array) -> void:
+	_blocks = blocks
+	var image := Image.create_empty(CrowdScatter.MAX_BLOCKS, 1, false, Image.FORMAT_RGBAF)
+	for i in blocks.size():
+		image.set_pixel(i, 0, Color(blocks[i].x, blocks[i].y, blocks[i].z, blocks[i].w))
+	RenderingServer.global_shader_parameter_set(BLOCKS, ImageTexture.create_from_image(image))
+	RenderingServer.global_shader_parameter_set(BLOCK_COUNT, blocks.size())
+	for squad in squads:
+		squad.blocks = blocks
 
 
 ## Makes the squads match the snapshot's entities (new, changed kind, more
@@ -149,6 +166,7 @@ func _make(index: int, kind: int, team: int, heads: int) -> SquadVisual:
 	squad.kind = kind
 	squad.team = team
 	squad.spec = FigureLibrary.spec(kind, look)
+	squad.blocks = _blocks
 	squad.build(get_canvas_item(), SHADER, heads, far, _rect)
 	var sways := look.wobble() if FigurePeople.DRESSED.has(kind) else 0.0
 	squad.material.set_shader_parameter("wobble", sways)

@@ -66,3 +66,11 @@ figure_boost={
 "type": "float",
 "value": 1.0
 }
+blocks={
+"type": "sampler2D",
+"value": ""
+}
+block_count={
+"type": "int",
+"value": 0
+}

@@ -12,6 +12,10 @@ const TREE_TRIES := 160
 const PATH_STEPS := 14
 const PATH_SWAY_M := 14.0
 
+## Where the three tents stand, from the camp.
+const TENTS: Array[Vector2] = [Vector2(-13, -11), Vector2(-15, 9), Vector2(2, 16)]
+const TENT_SIZE := Vector2(10, 8)
+
 var map: SiegeMap
 ## The church: nave (long, east-west), transept, and the bell tower.
 var nave := Rect2()
@@ -46,6 +50,19 @@ static func of(p_map: SiegeMap) -> MapPlan:
 	plan._lay_fields(rng)
 	plan._plant_trees(rng)
 	return plan
+
+
+## Every footprint nobody stands on, as (x, y, width, height): houses, the
+## church and the tents. The crowd keeps its figures off them.
+func blocks() -> PackedVector4Array:
+	var rects: Array[Rect2] = houses.duplicate()
+	rects.append_array([nave, transept, tower])
+	for offset in TENTS:
+		rects.append(Rect2(camp + offset - TENT_SIZE / 2.0, TENT_SIZE))
+	var out := PackedVector4Array()
+	for rect in rects.slice(0, CrowdScatter.MAX_BLOCKS):
+		out.append(Vector4(rect.position.x, rect.position.y, rect.size.x, rect.size.y))
+	return out
 
 
 ## Metres from `point` to the path's centre line.

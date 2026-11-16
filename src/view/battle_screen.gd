@@ -67,6 +67,7 @@ func setup(p_sim: SiegeSim, p_mode: StringName, p_speed: float) -> void:
 		world.add_child(layer)
 	map_layer.setup(plan)
 	crowd.setup(sim.map().bounds, FigureLook.of(loadout))
+	crowd.set_blocks(plan.blocks())
 	effects.setup(plan, crowd, meter)
 	hud.setup(mode == &"command")
 	add_child(hud)

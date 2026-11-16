@@ -99,8 +99,8 @@ func _tree(at: Vector2, crown: float) -> void:
 ## The army's start: three tents around a fire and a pole with its colour.
 func _camp(at: Vector2) -> void:
 	draw_circle(at, 26.0, Color(WorldPalette.PATH, 0.45))
-	for offset: Vector2 in [Vector2(-13, -11), Vector2(-15, 9), Vector2(2, 16)]:
-		var tent := Rect2(at + offset - Vector2(5, 4), Vector2(10, 8))
+	for offset in MapPlan.TENTS:
+		var tent := Rect2(at + offset - MapPlan.TENT_SIZE / 2.0, MapPlan.TENT_SIZE)
 		_roof(tent, WorldPalette.TENT, WorldPalette.TENT.darkened(0.2), WorldPalette.WOOD_DARK)
 	draw_circle(at + Vector2(-2, 0), 2.2, WorldPalette.STONE_SHADE)
 	draw_circle(at + Vector2(-2, 0), 1.4, WorldPalette.FLAME_MID)

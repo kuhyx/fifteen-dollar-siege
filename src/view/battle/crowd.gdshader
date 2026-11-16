@@ -40,6 +40,37 @@ uniform float flame = 0.0;
 // Metres of jumping for joy (the pep talk).
 uniform float cheer = 0.0;
 
+// The buildings (x, y, w, h in metres, one texel each): nobody stands on a roof.
+// The same sums as CrowdScatter.clear_of.
+global uniform sampler2D blocks : filter_nearest;
+global uniform int block_count;
+const float MARGIN = 0.8;
+
+vec2 cleared(vec2 spot) {
+	for (int round_no = 0; round_no < 3; round_no++) {
+		for (int i = 0; i < block_count; i++) {
+			vec4 block = texelFetch(blocks, ivec2(i, 0), 0);
+			vec2 low = block.xy - vec2(MARGIN);
+			vec2 high = block.xy + block.zw + vec2(MARGIN);
+			if (spot.x <= low.x || spot.x >= high.x || spot.y <= low.y || spot.y >= high.y) {
+				continue;
+			}
+			vec4 gap = vec4(spot.x - low.x, high.x - spot.x, spot.y - low.y, high.y - spot.y);
+			float least = min(min(gap.x, gap.y), min(gap.z, gap.w));
+			if (least == gap.x) {
+				spot.x = low.x;
+			} else if (least == gap.y) {
+				spot.x = high.x;
+			} else if (least == gap.z) {
+				spot.y = low.y;
+			} else {
+				spot.y = high.y;
+			}
+		}
+	}
+	return spot;
+}
+
 vec2 turned(vec2 v, float angle) {
 	float c = cos(angle);
 	float s = sin(angle);
@@ -91,5 +122,6 @@ void vertex() {
 	}
 	float glint = 0.3 + 0.18 * sin(t * 3.0);
 	COLOR.a *= fade * mix(1.0, glint, shimmer);
-	VERTEX = v + shift + (1.0 - fallen) * (anchor + home * spread * grow - lag * phase);
+	vec2 spot = anchor + home * spread * grow - lag * phase;
+	VERTEX = v + shift + (1.0 - fallen) * cleared(spot);
 }

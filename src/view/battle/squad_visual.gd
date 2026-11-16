@@ -28,6 +28,8 @@ var burning := false
 var material := ShaderMaterial.new()
 ## Times the spread is stretched (wasps grow with the far-zoom boost).
 var grow := 1.0
+## Footprints nobody stands on (MapPlan.blocks).
+var blocks := PackedVector4Array()
 ## Extra spread from a rout (`kick`), decaying.
 var scatter := 0.0
 
@@ -204,7 +206,8 @@ func is_down(individual: int) -> bool:
 func place(individual: int) -> Vector2:
 	if _down[individual] == 1:
 		return _spots[individual]
-	return anchor + _homes[individual] * spread * grow - _lag * _phases[individual]
+	var spot := anchor + _homes[individual] * spread * grow - _lag * _phases[individual]
+	return CrowdScatter.clear_of(spot, blocks)
 
 
 ## Sets every figure of the squad on fire (flames grow in `pose`).
