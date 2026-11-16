@@ -67,31 +67,27 @@ static func _catapult(b: PictoBrush) -> void:
 	b.bar(101, 32, 109, 44, 4.5)
 
 
-## A four-piece band on its stage: two guitars, a singer, a drummer.
+## An electric guitar that is playing: a red body with pickups, a long neck and
+## head, two gold notes above it and a gold lightning bolt below.
 static func _band(b: PictoBrush) -> void:
-	b.ink(PictoInk.GREY)
-	b.box(4, 114, 120, 7, 3)
-	b.bar(62, 114, 62, 62, 3)
-	b.disc(61, 60, 4.5)
-	b.ink(PictoInk.LIGHT)
-	b.man(20, 72, 0.6)
-	b.man(46, 76, 0.6)
-	b.man(84, 62, 0.6)
-	b.man(110, 72, 0.6)
+	b.ink(PictoInk.WOOD)
+	b.bar(66, 68, 106, 28, 9)
+	b.poly([98, 12, 122, 24, 114, 38, 94, 26])
 	b.ink(PictoInk.RED)
-	b.disc(22, 90, 9)
-	b.bar(22, 88, 36, 70, 4)
-	b.disc(108, 90, 9)
-	b.bar(108, 88, 96, 70, 4)
-	b.ink(PictoInk.GOLD)
-	b.disc(84, 98, 15)
-	b.disc(34, 30, 6.5)
-	b.bar(39, 30, 39, 8, 3.5)
-	b.bar(39, 8, 52, 13, 3.5)
-	b.disc(100, 26, 5.5)
-	b.bar(104.5, 26, 104.5, 8, 3)
+	b.disc(34, 96, 26)
+	b.disc(58, 78, 20)
+	b.disc(30, 70, 11)
 	b.ink(PictoInk.DARK)
-	b.disc(84, 98, 8)
+	b.bar(44, 74, 56, 86, 6)
+	b.bar(32, 86, 44, 98, 6)
+	b.ink(PictoInk.GOLD)
+	b.disc(24, 106, 4.5)
+	b.disc(18, 26, 7)
+	b.bar(24, 26, 24, 8, 3.5)
+	b.bar(24, 9, 38, 14, 3.5)
+	b.disc(56, 20, 6)
+	b.bar(61, 20, 61, 5, 3)
+	b.poly([104, 74, 90, 100, 100, 100, 94, 124, 122, 90, 110, 90, 120, 74])
 
 
 ## A football helmet from the side: shell, stripe, ear hole, face mask.

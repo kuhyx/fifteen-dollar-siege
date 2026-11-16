@@ -76,23 +76,30 @@ static func _trumpet(b: PictoBrush) -> void:
 	b.arc(96, 54, 29, -38.0, 38.0, 5)
 
 
-## A leather canteen on its strap, fizzing.
+## Booze: a green bottle with a cork behind a mug of amber beer, foam spilling
+## over the rim and bubbles rising in it.
 static func _canteen(b: PictoBrush) -> void:
-	b.ink(PictoInk.LIGHT)
-	b.arc(60, 54, 42, 180.0, 360.0, 5)
+	b.ink(PictoInk.GREEN)
+	b.box(8, 56, 38, 64, 10)
+	b.box(18, 24, 18, 40, 5)
 	b.ink(PictoInk.WOOD)
-	b.disc(60, 82, 38)
-	b.ring(60, 82, 28, 3, true)
-	b.ink(PictoInk.GREY)
-	b.box(50, 30, 20, 18, 3)
+	b.box(19, 10, 16, 16, 4)
 	b.ink(PictoInk.LIGHT)
-	b.box(47, 22, 26, 11, 4)
+	b.box(12, 80, 30, 22, 3)
+	b.box(54, 44, 50, 76, 11)
+	b.ring(108, 82, 15, 8)
+	b.disc(64, 40, 13)
+	b.disc(80, 32, 15)
+	b.disc(96, 40, 13)
 	b.ink(PictoInk.GOLD)
-	b.disc(60, 88, 11)
-	b.poly([50, 84, 60, 62, 70, 84])
-	b.disc(106, 40, 6.5)
-	b.disc(116, 22, 4.5)
-	b.disc(100, 16, 3.5)
+	b.box(60, 62, 38, 52, 7)
+	b.disc(27, 91, 6)
+	b.ink(PictoInk.DEEP_GOLD)
+	b.box(60, 62, 10, 52, 5)
+	b.ink(PictoInk.LIGHT)
+	b.disc(82, 100, 3.5)
+	b.disc(90, 84, 3)
+	b.disc(78, 74, 2.5)
 
 
 ## A raised fist in a speech bubble, said by a tough guy in a headband.

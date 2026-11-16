@@ -35,44 +35,68 @@ static func _ear(b: PictoBrush) -> void:
 	b.bar(14, 114, 110, 12, 11)
 
 
-## A sawn-off double barrel going off, and two shells.
+## A sawn-off double barrel seen from the side, going off: a wooden stock, a
+## grey receiver and two long barrels over a wooden fore-end, a flash and
+## pellets at the muzzle, a shell below.
 static func _shotgun(b: PictoBrush) -> void:
 	b.ink(PictoInk.WOOD)
-	b.poly([40, 40, 14, 66, 6, 98, 24, 104, 34, 80, 54, 66])
+	b.poly([46, 40, 4, 52, 8, 92, 26, 90, 34, 66, 48, 64])
+	b.box(62, 62, 42, 12, 5)
 	b.ink(PictoInk.GREY)
-	b.bar(46, 44, 90, 44, 11)
-	b.bar(46, 57, 90, 57, 11)
+	b.box(42, 34, 24, 34, 6)
+	b.bar(52, 42, 104, 42, 12)
+	b.bar(52, 56, 104, 56, 12)
 	b.ink(PictoInk.LIGHT)
-	b.box(34, 36, 24, 30, 5)
-	b.arc(52, 70, 9, 0.0, 180.0, 3.5)
+	b.arc(54, 72, 11, 10.0, 170.0, 4)
+	b.bar(70, 38, 98, 38, 3)
 	b.ink(PictoInk.GOLD)
-	b.star(107, 50, 19, 8, 8)
+	b.star(113, 49, 13, 5, 8)
+	b.disc(122, 28, 3.2)
+	b.disc(120, 70, 3.2)
 	b.ink(PictoInk.RED)
-	b.box(68, 86, 14, 28, 4)
-	b.box(90, 86, 14, 28, 4)
+	b.box(60, 86, 16, 30, 4)
+	b.box(84, 86, 16, 30, 4)
 	b.ink(PictoInk.GOLD)
-	b.box(68, 105, 14, 9, 2)
-	b.box(90, 105, 14, 9, 2)
+	b.box(60, 106, 16, 10, 2)
+	b.box(84, 106, 16, 10, 2)
 
 
-## A small man under a very wide two-cornered hat, one hand in his coat.
+## Napoleon from the front: a bicorne worn sideways (a gold-trimmed crescent
+## with a cockade), a face with a lock of hair, the blue coat with white
+## lapels, gold epaulettes and one hand tucked into the coat.
 static func _emperor(b: PictoBrush) -> void:
 	b.ink(PictoInk.BLUE)
-	b.box(42, 78, 44, 46, 12)
+	b.box(30, 84, 68, 42, 14)
 	b.ink(PictoInk.LIGHT)
-	b.disc(64, 62, 15)
-	b.oval(67, 102, 8, 5)
+	b.poly([44, 84, 64, 114, 84, 84, 74, 82, 64, 98, 54, 82])
+	b.ink(PictoInk.ORANGE)
+	b.box(56, 72, 16, 14, 3)
+	b.oval(64, 100, 10, 7)
+	b.disc(64, 60, 18)
+	b.disc(46, 62, 4.5)
+	b.disc(82, 62, 4.5)
 	b.ink(PictoInk.GOLD)
-	b.box(32, 78, 20, 9, 4)
-	b.box(76, 78, 20, 9, 4)
+	b.box(20, 84, 24, 10, 4)
+	b.box(84, 84, 24, 10, 4)
+	b.disc(54, 118, 2.5)
+	b.disc(74, 118, 2.5)
+	b.ink(PictoInk.DARK)
+	b.disc(57, 62, 2.4)
+	b.disc(71, 62, 2.4)
+	b.bar(64, 64, 62, 70, 2.2)
+	b.bar(57, 74, 71, 74, 2.2)
+	b.ink(PictoInk.GOLD)
+	b.oval(64, 38, 62, 28)
+	b.oval(64, 52, 46, 22, 0.0, true)
 	b.ink(PictoInk.SLATE)
-	b.poly([4, 54, 22, 30, 64, 10, 106, 30, 124, 54, 96, 48, 64, 46, 32, 48])
-	b.ink(PictoInk.GOLD)
-	b.path([8, 52, 32, 46, 64, 44, 96, 46, 120, 52], 3.5)
+	b.oval(64, 40, 56, 23)
+	b.oval(64, 52, 46, 22, 0.0, true)
 	b.ink(PictoInk.RED)
-	b.disc(64, 28, 7)
+	b.disc(64, 20, 9)
 	b.ink(PictoInk.LIGHT)
-	b.disc(64, 28, 3)
+	b.disc(64, 20, 5)
+	b.ink(PictoInk.BLUE)
+	b.disc(64, 20, 2.2)
 
 
 ## A plus and a knot of men: more join the army.
