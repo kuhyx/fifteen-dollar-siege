@@ -151,7 +151,7 @@ oldest short ones until they fit.
 | `BattleEffects.FLAG_RISE_S`, `DEFAULT_REACH` | 1.4 s, 60 m |
 | `FxRecipes` | per event: life 0.45 to 3 s, reach 0 to 120 m |
 | `FxMarks.RALLY_POLE_M`, `WIN_POLE_M`, `CENTRE_RING_M` | 10 m, 22 m, 18 m |
-| `BattleBeats.FRAMES`, `CHURCH_BOX`, `ARMY_PAD_M` | 172 x 100 m and 168 x 124 m, 150 x 96 m, 30 m |
+| `BattleBeats.FRAMES`, `CHURCH_BOX`, `ARMY_PAD_M` | 172 x 100 m and 124 x 88 m, 150 x 96 m, 30 m |
 | `MapPlan.FIELDS`, `PATH_STEPS`, `PATH_SWAY_M`, tries | 9, 14, 14 m, 60 and 160 |
 | `MapLayer.FURROW_M`, `PATH_M` | 3.2 m, 5.5 m |
 | `HudButton.SIZE`, `BADGE`; `BattleHud.EDGE`, `GAP` | 96 px, 40 px; 28 px, 14 px |

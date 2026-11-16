@@ -8,6 +8,21 @@ extends RefCounted
 const FLOATS := 16
 
 
+## The instance data of one variant: every `variants`-th individual from
+## `variant` on, each at the origin (the shader places it), a shade of its
+## own, and its home and phase as the custom value.
+static func buffer(
+	homes: PackedVector2Array, phases: PackedFloat32Array, variant: int, variants: int
+) -> PackedFloat32Array:
+	var data := PackedFloat32Array()
+	for individual in range(variant, homes.size(), variants):
+		var shade := 0.86 + 0.14 * phases[individual]
+		var home := homes[individual]
+		data.append_array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, shade, shade, shade, 1.0])
+		data.append_array([home.x, home.y, phases[individual], 0.0])
+	return data
+
+
 ## A MultiMesh of `shape`, one instance per FLOATS of `data`.
 static func multimesh(shape: Mesh, data: PackedFloat32Array) -> RID:
 	var rid := RenderingServer.multimesh_create()

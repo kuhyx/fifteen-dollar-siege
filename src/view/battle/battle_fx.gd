@@ -4,6 +4,10 @@ extends RefCounted
 ## how old it is. The drawing itself is a static function of an Fx* file; this
 ## also holds the few shapes they all share. Everything is in map metres.
 
+## A star smaller than this is not drawn: nobody could see it, and the
+## engine cannot triangulate a polygon that small.
+const MIN_STAR_M := 0.3
+
 var kind: StringName = &""
 ## The function that draws it: func(canvas: CanvasItem, fx: BattleFx).
 var painter: Callable
@@ -56,14 +60,23 @@ static func lob(a: Vector2, b: Vector2, part: float, lift: float) -> Vector2:
 static func star(
 	canvas: CanvasItem, at: Vector2, outer: float, inner: float, spikes: int, tint_in: Color
 ) -> void:
-	if outer < 0.05:
-		return
-	var waist := minf(inner, outer * 0.6)
+	var outline := star_outline(at, outer, inner, spikes)
+	if not outline.is_empty():
+		canvas.draw_colored_polygon(outline, tint_in)
+
+
+## The star's outline; empty when it is too small to draw.
+static func star_outline(
+	at: Vector2, outer: float, inner: float, spikes: int
+) -> PackedVector2Array:
 	var outline := PackedVector2Array()
+	if outer < MIN_STAR_M:
+		return outline
+	var waist := minf(inner, outer * 0.6)
 	for i in spikes * 2:
 		var reach := outer if i % 2 == 0 else waist
 		outline.append(at + Vector2.from_angle(TAU * i / (spikes * 2.0) - PI / 2.0) * reach)
-	canvas.draw_colored_polygon(outline, tint_in)
+	return outline
 
 
 ## An arrow head pointing along `along`.

@@ -13,6 +13,9 @@ const SETTLE_S := 0.35
 const FLEE_SPREAD := 1.6
 const FIGHT_SPREAD := 0.9
 const MOVE_SPREAD := 1.1
+## Draw-order steps per metre of depth, and how far under a fallen squad goes.
+const DEPTH_PER_M := 2.0
+const UNDER := 100000
 
 var index := 0
 var kind := -1
@@ -44,6 +47,7 @@ var _trail := Vector2.ZERO
 var _flip := 1.0
 var _posed := false
 var _settled := false
+var _depth := 0
 var _parent: RID
 var _rect := Rect2()
 
@@ -67,7 +71,7 @@ func build(parent: RID, shader: Shader, heads: int, far: bool, rect: Rect2) -> v
 	material.set_shader_parameter("down_turn", spec.down_turn)
 	var shapes := spec.meshes(far, heads)
 	for variant in shapes.size():
-		_buffers.append(_buffer(variant, shapes.size()))
+		_buffers.append(CrowdMesh.buffer(_homes, _phases, variant, shapes.size()))
 		_meshes.append(CrowdMesh.multimesh(shapes[variant], _buffers[variant]))
 		_items.append(CrowdMesh.item(_parent, _meshes[variant], material, _rect))
 
@@ -107,6 +111,7 @@ func pose(at: Vector2, velocity: Vector2, p_state: int, facing: float, delta: fl
 	if at != anchor:
 		anchor = at
 		_both("anchor", anchor)
+	_layer()
 	var side := signf(cos(facing))
 	if side != _flip and absf(cos(facing)) > 0.2:
 		_flip = side
@@ -116,6 +121,19 @@ func pose(at: Vector2, velocity: Vector2, p_state: int, facing: float, delta: fl
 		return
 	_trail = trail
 	_settle(delta)
+
+
+## Draw order among the squads: further up the map first, a squad that is
+## down under everyone; a burning squad goes on top of the whole crowd.
+func _layer() -> void:
+	var depth := int(anchor.y * DEPTH_PER_M)
+	if state == SiegeSnapshot.State.DOWN:
+		depth -= UNDER
+	if depth == _depth:
+		return
+	_depth = depth
+	for item in _items:
+		RenderingServer.canvas_item_set_draw_index(item, depth)
 
 
 ## A rout throws the squad apart; it closes up again by itself.
@@ -200,6 +218,8 @@ func ignite(flame: FigureSpec) -> void:
 	_both("anchor", anchor)
 	_both("spread", spread)
 	_both("lag", _lag)
+	for item in _items:
+		RenderingServer.canvas_item_set_z_index(item, 1)
 
 
 func free_rids() -> void:
@@ -221,13 +241,3 @@ func _pin(individual: int, down: bool) -> void:
 	data[slot * FLOATS + 15] = 1.0 if down else 0.0
 	for mesh in range(individual % variants, _meshes.size(), variants):
 		RenderingServer.multimesh_set_buffer(_meshes[mesh], data)
-
-
-func _buffer(variant: int, variants: int) -> PackedFloat32Array:
-	var data := PackedFloat32Array()
-	for individual in range(variant, capacity, variants):
-		var shade := 0.86 + 0.14 * _phases[individual]
-		var home := _homes[individual]
-		data.append_array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, shade, shade, shade, 1.0])
-		data.append_array([home.x, home.y, _phases[individual], 0.0])
-	return data

@@ -58,6 +58,22 @@ func test_every_effect_draws_through_its_whole_life_without_an_error() -> void:
 	assert_gt(effects.draws, 0, "and was drawn on the way")
 
 
+func test_a_star_too_small_to_triangulate_is_not_drawn() -> void:
+	# A wasp sting once shrank to a star the engine rejected ("Invalid polygon
+	# data"): anywhere on the map, every star that IS drawn must triangulate.
+	var rejected := 0
+	for spot in 400:
+		var at := Vector2(100.0 + spot * 1.37, 160.0 + spot * 0.61)
+		for size: float in [BattleFx.MIN_STAR_M, 0.5, 1.6, 9.0]:
+			var outline := BattleFx.star_outline(at, size, size * 0.4, 5)
+			assert_eq(outline.size(), 10)
+			if Geometry2D.triangulate_polygon(outline).is_empty():
+				rejected += 1
+	assert_eq(rejected, 0, "a drawn star the engine cannot fill")
+	assert_true(BattleFx.star_outline(Vector2(100, 160), 0.06, 0.02, 5).is_empty(), "too small")
+	assert_true(BattleFx.star_outline(Vector2.ZERO, 0.0, 0.0, 5).is_empty())
+
+
 func test_an_unknown_event_is_ignored() -> void:
 	effects.spawn({"kind": &"not_an_event", "pos": Vector2.ZERO})
 	effects.spawn({"pos": Vector2.ZERO})

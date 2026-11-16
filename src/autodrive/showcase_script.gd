@@ -8,6 +8,8 @@ extends RefCounted
 ## Sim second (= real second: the showcase runs at speed 1) of an event shot.
 const SHOT_S := 1.3
 const SEEN_AT := 0.4
+## The shotgun is shot earlier in its life: its flash is short.
+const FLASH_AT := 0.14
 const ARMY := SiegeSnapshot.Team.ARMY
 const VILLAGE := SiegeSnapshot.Team.VILLAGE
 const VILLAGE_KINDS: Array[int] = [
@@ -85,9 +87,11 @@ static func stir(sim: ShowcaseSim, tick: int) -> void:
 	ShowcaseCrowd.stir(sim, tick)
 
 
-## Fires `kind` so that it is SEEN_AT of the way through its life at SHOT_S.
-static func _event(sim: ShowcaseSim, kind: StringName, pos: Vector2, data: Dictionary = {}) -> void:
-	sim.fire(SHOT_S - BattleEffects.life_of(kind) * SEEN_AT, kind, pos, data)
+## Fires `kind` so that it is `seen` of the way through its life at SHOT_S.
+static func _event(
+	sim: ShowcaseSim, kind: StringName, pos: Vector2, data: Dictionary = {}, seen := SEEN_AT
+) -> void:
+	sim.fire(SHOT_S - BattleEffects.life_of(kind) * seen, kind, pos, data)
 
 
 static func _grid(sim: ShowcaseSim, grid: Array, columns: int) -> void:
@@ -122,7 +126,7 @@ static func _ranged(sim: ShowcaseSim) -> void:
 	sim.add(
 		SiegeSnapshot.Kind.MILITIA, VILLAGE, 8, SiegeSnapshot.State.FLEE, Vector2(184, lanes[2])
 	)
-	_event(sim, SiegeEvent.SHOTGUN_BLAST, Vector2(160, lanes[2]), {"team": ARMY})
+	_event(sim, SiegeEvent.SHOTGUN_BLAST, Vector2(160, lanes[2]), {"team": ARMY}, FLASH_AT)
 	sim.add(SiegeSnapshot.Kind.CATAPULT, ARMY, 1, fight, Vector2(146, lanes[3]))
 	sim.add(
 		SiegeSnapshot.Kind.VILLAGERS, VILLAGE, 12, SiegeSnapshot.State.FLEE, Vector2(214, lanes[3])

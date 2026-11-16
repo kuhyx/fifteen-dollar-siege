@@ -16,7 +16,7 @@ const STAGED: Array[StringName] = [SiegeEvent.UFO_ABDUCT, SiegeEvent.PEP_TALK]
 ## The map box the camera shows for a beat, around the event [design guess].
 const FRAMES := {
 	SiegeEvent.UFO_ABDUCT: Rect2(-86.0, -66.0, 172.0, 100.0),
-	SiegeEvent.PEP_TALK: Rect2(-84.0, -64.0, 168.0, 124.0),
+	SiegeEvent.PEP_TALK: Rect2(-60.0, -48.0, 124.0, 88.0),
 }
 ## Metres around the army the lose payoff shows.
 const ARMY_PAD_M := 30.0
