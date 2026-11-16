@@ -99,7 +99,7 @@ func test_launch_options_defaults_and_problems() -> void:
 	assert_false(plain.dev)
 	assert_eq(plain.mode, &"")
 	assert_eq(plain.sim_seed, -1, "a random seed per siege")
-	assert_eq(plain.speed, 1.0)
+	assert_eq(plain.speed, LaunchOptions.DEFAULT_SPEED)
 	assert_eq(plain.lab_runs, LaunchOptions.DEFAULT_LAB_RUNS)
 	assert_eq(LaunchOptions.parse(["--autodrive=lab"]).autodrive, &"lab")
 	assert_string_contains(LaunchOptions.parse(["--mode=party"]).problem, "unknown mode")

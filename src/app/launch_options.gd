@@ -5,7 +5,7 @@ extends RefCounted
 ##   --mode=watch|command|lab open straight into that mode's siege
 ##   --loadout=id,id          the loadout for --mode (default: nothing bought)
 ##   --seed=N                 every siege uses this seed (default: random)
-##   --speed=N                sim seconds per real second (default 1)
+##   --speed=N                sim seconds per real second (default 2)
 ##   --lab-runs=N             sieges per Lab batch (default 200)
 ##   --save-dir=DIR           save root (bots and tests never use the real one)
 ##   --autodrive=MODE         the bot plays MODE (or `showcase`) and exits 0 / 1
@@ -21,6 +21,9 @@ const BOT_MODES: Array[StringName] = [
 	&"watch", &"command", &"lab", &"showcase", &"touch", &"reel", &"buffs"
 ]
 const DEFAULT_LAB_RUNS := 200
+## A siege lasts about 100 sim seconds and the first 30 are a march: x2 is
+## about a minute of watching [design guess]. x1 to x8 are on the HUD.
+const DEFAULT_SPEED := 2.0
 const MAX_SPEED := 64.0
 const VALUES: Array[String] = [
 	"--mode=",
@@ -46,7 +49,7 @@ var mode: StringName = &""
 var loadout := Loadout.new()
 ## -1 = a fresh random seed per siege.
 var sim_seed := -1
-var speed := 1.0
+var speed := DEFAULT_SPEED
 var lab_runs := DEFAULT_LAB_RUNS
 var save_dir := ""
 var autodrive: StringName = &""

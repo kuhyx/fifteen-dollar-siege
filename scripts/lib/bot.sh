@@ -15,7 +15,7 @@ readonly BOT_ENGINE_FLAGS=(--audio-driver Dummy --fixed-fps 60 --disable-vsync)
 bot_frames() {
     case "$1" in
         watch) echo 19 ;;
-        command) echo 21 ;;
+        command) echo 22 ;;
         lab) echo 13 ;;
         showcase) echo 24 ;;
         touch) echo 4 ;;

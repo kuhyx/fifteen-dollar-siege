@@ -10,6 +10,8 @@ const DECIDE_LIMIT_FRAMES := 6000
 const SMOOTH_FRAMES := 40
 ## Frames a staged beat plays before the bot takes its frame.
 const BEAT_LOOK_FRAMES := 20
+## Frames the camera takes to turn to what an order changed.
+const CAMERA_SETTLE_FRAMES := 30
 
 
 ## One siege of this mode to its result screen. `bot.hashes` gets the state hash.
@@ -23,17 +25,25 @@ static func play(bot: Autodrive, wins: bool, mode: StringName) -> bool:
 		if battle.shot.ent_team[i] == SiegeSnapshot.Team.ARMY:
 			men += battle.shot.ent_count[i]
 	var ok := await staged_beats(bot, battle, tag)
+	var commander := BotCommander.new() if wins and mode == &"command" else null
 	await bot.frames(20)
 	ok = (
 		ok
 		and bot.check(men == SiegeSim.army_size(bot.main.loadout), "the army has %d men" % men)
 		and await bot.shot("battle_" + tag)
 		and BattleChecks.hud_ok(bot, battle)
-		and (mode != &"command" or await give_orders(bot, battle))
+		and (mode != &"command" or await give_orders(bot, battle, commander))
 		and (not wins or await pause_freezes(bot, battle))
-		and await BattleChecks.smooth(bot, battle, SMOOTH_FRAMES) >= 0.0
+		and await _smooth(bot, battle)
 	)
-	return ok and await to_result(bot, battle, wins)
+	return ok and await to_result(bot, battle, wins, commander)
+
+
+## The frame gate at the bot's speed; the worst frame goes on the RESULT line.
+static func _smooth(bot: BotBase, battle: BattleScreen) -> bool:
+	var worst := await BattleChecks.smooth(bot, battle, SMOOTH_FRAMES)
+	bot.numbers.append("work_worst_ms_x%d=%.2f" % [int(battle.speed), worst])
+	return worst >= 0.0
 
 
 ## The beats before the first tick: each is on stage while the clock stands
@@ -57,13 +67,21 @@ static func staged_beats(bot: BotBase, battle: BattleScreen, tag: String) -> boo
 	return true
 
 
-## Waits for the decision, takes the payoff frame BEFORE any result UI opens
-## (lesson L13), then plays the result screen's own payoff and controls.
-static func to_result(bot: Autodrive, battle: BattleScreen, wins: bool) -> bool:
+## Waits for the decision (giving the commander's orders as they fall due),
+## takes the payoff frame BEFORE any result UI opens (lesson L13), then plays
+## the result screen's own payoff and controls.
+static func to_result(
+	bot: Autodrive, battle: BattleScreen, wins: bool, commander: BotCommander
+) -> bool:
 	var tag := "win" if wins else "lose"
 	var want := SiegeSim.Outcome.WIN if wins else SiegeSim.Outcome.LOSE
-	var decided := func() -> bool: return battle.sim.outcome() != SiegeSim.Outcome.RUNNING
-	if not await bot.wait_for(decided, DECIDE_LIMIT_FRAMES, "the siege to be decided"):
+	for frame in DECIDE_LIMIT_FRAMES:
+		if battle.sim.outcome() != SiegeSim.Outcome.RUNNING:
+			break
+		if commander != null and not await _advise(bot, battle, commander):
+			return false
+		await bot.frames(1)
+	if not bot.check(battle.sim.outcome() != SiegeSim.Outcome.RUNNING, "the siege was decided"):
 		return false
 	bot.hashes.append(str(battle.sim.state_hash()))
 	var showing: bool = await BattleChecks.payoff_seen(bot, battle)
@@ -76,17 +94,68 @@ static func to_result(bot: Autodrive, battle: BattleScreen, wins: bool) -> bool:
 	return ok and await MenuBeats.result(bot, wins, want, bot.main.loadout.ids)
 
 
-## Command mode: a rally click on the map, then retreat and charge buttons.
-static func give_orders(bot: BotBase, battle: BattleScreen) -> bool:
-	await bot.click_at(battle.camera.view.get_center() + Vector2(0.0, -120.0))
-	if not bot.check(battle.commands_sent == 1, "a map click places the rally flag"):
+## Command mode. A won siege is played by the commander (rally, charge, and a
+## retreat when the men are worn down), every order through the real controls;
+## the first one is given now. A lost one gets the three controls in a burst.
+static func give_orders(bot: BotBase, battle: BattleScreen, commander: BotCommander) -> bool:
+	if commander != null:
+		return await _advise(bot, battle, commander)
+	var flag := BotCommander.flag_for(battle.sim.map())
+	return (
+		await _perform(bot, battle, {"kind": SiegeSim.Command.RALLY, "pos": flag})
+		and await bot.shot("rally")
+		and await _perform(bot, battle, {"kind": SiegeSim.Command.RETREAT, "pos": Vector2.ZERO})
+		and await _perform(bot, battle, {"kind": SiegeSim.Command.CHARGE, "pos": Vector2.ZERO})
+	)
+
+
+## Asks the commander; gives the order it names through the controls.
+static func _advise(bot: BotBase, battle: BattleScreen, commander: BotCommander) -> bool:
+	var order := commander.advise(battle.shot, battle.sim.map())
+	if order.is_empty():
+		return true
+	var first := battle.commands_sent == 0
+	if not await _perform(bot, battle, order):
 		return false
-	await bot.frames(20)
-	if not await bot.shot("rally"):
-		return false
-	await bot.click(battle.retreat_button)
-	await bot.click(battle.charge_button)
-	return bot.check(battle.commands_sent == 3, "retreat and charge reach the sim")
+	if not (first or order["kind"] == SiegeSim.Command.CHARGE):
+		return true
+	await bot.frames(CAMERA_SETTLE_FRAMES)  # the camera turns to what changed
+	return await bot.shot("rally" if first else "charge")
+
+
+## One order by its control: a click on the map for the rally flag, the
+## button for charge and retreat. The flag is planted and the order's own
+## effect appears on screen.
+static func _perform(bot: BotBase, battle: BattleScreen, order: Dictionary) -> bool:
+	var sent := battle.commands_sent
+	var kind: int = order["kind"]
+	if kind == SiegeSim.Command.RALLY:
+		var at := battle.map_to_canvas(order["pos"])
+		var clear := Rect2(Vector2.ZERO, battle.size).grow(-BattleHud.BOTTOM_CLEAR)
+		if clear.has_point(at):
+			await bot.click_at(at)
+		else:
+			battle.order(kind, order["pos"])
+	else:
+		await bot.click(
+			battle.charge_button if kind == SiegeSim.Command.CHARGE else battle.retreat_button
+		)
+	await bot.frames(6)
+	var seen := int(battle.effects.seen.get(SiegeEvent.COMMAND, 0))
+	return (
+		bot.check(battle.commands_sent == sent + 1, "order %d reaches the sim" % kind)
+		and bot.check(seen >= battle.commands_sent, "the order shows as an effect")
+		and (
+			bot
+			. check(
+				(
+					kind != SiegeSim.Command.RALLY
+					or battle.effects.rally.distance_to(order["pos"]) < 1.0
+				),
+				"the rally flag stands where it was sent",
+			)
+		)
+	)
 
 
 ## Esc mid-battle: the menu is up and the sim clock stands still.
