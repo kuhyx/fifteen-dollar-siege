@@ -34,6 +34,12 @@ static func default_root() -> String:
 	return home.path_join("data/claude-scratch/fifteen-dollar-siege/balance")
 
 
+## The sweep kept in git, one folder per sim hash (DOCS-design-sim.md section 9):
+## what the report and tests/test_balance_committed.gd read.
+static func committed_root() -> String:
+	return ProjectSettings.globalize_path("res://tools/sim/data")
+
+
 ## 12 hex digits over the code of every core script, in name order. Comments
 ## and blank lines do not count (a reworded comment keeps the cache), and
 ## neither does NOT_SIM (the pinned fixtures are not part of the model).

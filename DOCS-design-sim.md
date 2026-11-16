@@ -171,6 +171,25 @@ sharded, resumable), `scripts/balance_report.sh` (the tables below),
 `scripts/balance_quick.sh` (a rough look after a tuning change),
 `scripts/balance_gate.sh` (the pinned gate, in `scripts/check.sh`).
 
+**The claim from the repo alone.** The sweep behind the result below is
+committed in `tools/sim/data/<sim hash>/` (two JSON shards, 183 KB, the
+store's own format: `tools/sim/balance_store.gd`). `scripts/balance_report.sh
+--strict` reads it by default and exits 0 only when the four targets hold;
+`tests/test_balance_committed.gd` (in `scripts/check.sh --group play`) fails
+when the folder is not the current sim hash, or a target is missed. After any
+change to `src/core`, regenerate it:
+
+1. `scripts/balance_search.sh` until every shard prints `left=0` (several
+   calls, each under 60 s; add `--carry=<old hash>` to start from the best
+   loadouts of the old sweep), then `scripts/balance_report.sh --scratch
+   --strict` (reads the working folder, not the commit).
+2. Replace the folder: `git rm -r tools/sim/data`, then `mkdir -p
+   tools/sim/data/<hash>` and copy the non-empty `shard-*.json` from
+   `~/data/claude-scratch/fifteen-dollar-siege/balance/<hash>/` into it
+   (under 300 KB; larger means commit only the loadouts the four targets need).
+3. `scripts/balance_report.sh --strict` and `scripts/check.sh --group play`
+   green, then `find_pins.gd --write` for the quick gate (see "The gate").
+
 **Result**, 2026-11-16, sim hash `07d46f192f9a`: 1,485 loadouts, 38,189
 sieges, run r of a loadout on seed 1000 + r. Ranked loadouts have 48 sieges or
 more, the top 25 and each buff's best three have 96. The search was stopped

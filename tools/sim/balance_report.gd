@@ -2,7 +2,10 @@ extends SceneTree
 ## Reads what the balance search measured for the current sim and prints the
 ## four numbers kuhy's bar is about, the top loadouts and each buff's best rank.
 ##   godot --headless -s tools/sim/balance_report.gd -- [--top=50] [--rows=10]
-##       [--min-runs=48] [--strict] [--store=DIR]
+##       [--min-runs=48] [--strict] [--scratch | --store=DIR]
+## It reads the sweep committed in tools/sim/data/<sim hash>/ by default;
+## --scratch reads the search's working folder instead (a sweep not committed
+## yet), --store=DIR any folder of per-hash folders.
 ## Targets: no buffs under 5 %, a random loadout 25-45 %, the best 85 % or
 ## more, every buff in at least one of the top 50. --strict exits 1 when one
 ## is missed (or not measured yet). The output is Markdown: the table in
@@ -12,6 +15,7 @@ const Args = preload("res://tools/sim/sim_args.gd")
 const Space = preload("res://tools/sim/loadout_space.gd")
 const Store = preload("res://tools/sim/balance_store.gd")
 const Plan = preload("res://tools/sim/balance_plan.gd")
+const Targets = preload("res://tools/sim/balance_targets.gd")
 
 var _store: RefCounted
 
@@ -19,17 +23,24 @@ var _store: RefCounted
 func _init() -> void:
 	var args := Args.parse()
 	Plan.configure(args)
-	_store = Store.open(args.get("store", Store.default_root()))
+	var root: String = Store.default_root() if args.has("scratch") else Store.committed_root()
+	root = args.get("store", root)
+	if not DirAccess.dir_exists_absolute(root.path_join(Store.hash_of_sim())):
+		printerr("balance_report: no sweep for sim hash %s in %s" % [Store.hash_of_sim(), root])
+		quit(1)
+		return
+	_store = Store.open(root)
 	var top_n := int(args.get("top", "50"))
-	var ranked: Array[String] = Plan.ranking(_store, int(args.get("min-runs", "48")))
-	var top := ranked.slice(0, top_n)
+	var found := Targets.evaluate(_store, top_n, int(args.get("min-runs", "48")))
+	var ranked: Array[String] = found["ranked"]
+	var top: Array[String] = found["top"]
 	var sieges := 0
 	for key: String in _store.results:
 		sieges += _store.runs(key)
-	var sample := _sample_rate()
-	var empty: float = _store.rate("none")
-	var best: float = _store.rate(top[0]) if not top.is_empty() else 0.0
-	var missing := _missing(top)
+	var sample: Array = found["sample"]
+	var empty: float = found["empty"]
+	var best: float = found["best"]
+	var missing: Array[String] = found["missing"]
 	var stamp := Time.get_date_string_from_system()
 	var counts := [_store.results.size(), sieges, ranked.size()]
 	var head := "sim hash `%s`, %s: " % [_store.sim_hash, stamp]
@@ -44,46 +55,12 @@ func _init() -> void:
 	print("")
 	_print_top(top.slice(0, int(args.get("rows", "10"))))
 	_print_buffs(ranked, top_n)
-	var random_rate: float = sample[0]
-	var measured: bool = _store.runs("none") >= 100
-	var ok := (
-		measured
-		and empty < 0.05
-		and random_rate >= 25.0
-		and random_rate <= 45.0
-		and best >= 0.85
-		and missing.is_empty()
-	)
-	print("RESULT report sim=%s targets=%s" % [_store.sim_hash, "met" if ok else "MISSED"])
-	quit(1 if args.has("strict") and not ok else 0)
-
-
-## [mean win rate in percent, loadouts measured, runs each] of the random sample.
-func _sample_rate() -> Array:
-	var total := 0.0
-	var measured := 0
-	for index in Plan.sample_size:
-		var key: String = Space.key(Space.sample(index))
-		if _store.runs(key) >= Plan.sample_runs:
-			total += _store.wins(key) / float(_store.runs(key))
-			measured += 1
-	return [total / maxi(measured, 1) * 100.0, measured, Plan.sample_runs]
+	print("RESULT report sim=%s targets=%s" % [_store.sim_hash, "met" if found["ok"] else "MISSED"])
+	quit(1 if args.has("strict") and not found["ok"] else 0)
 
 
 func _runs_of(top: Array[String]) -> int:
 	return _store.runs(top[0]) if not top.is_empty() else 0
-
-
-## Buff ids in none of the `top` loadouts.
-func _missing(top: Array[String]) -> Array[String]:
-	var out: Array[String] = []
-	for def in BuffCatalog.all():
-		var found := false
-		for key in top:
-			found = found or key.split("+").has(String(def.id))
-		if not found:
-			out.append(String(def.id))
-	return out
 
 
 func _print_top(rows: Array[String]) -> void:
