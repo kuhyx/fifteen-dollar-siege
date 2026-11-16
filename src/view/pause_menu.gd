@@ -23,10 +23,9 @@ var row: HBoxContainer
 ## The panel the buttons sit on.
 var card: PanelContainer
 ## The key picture in the corner of the resume button.
-var close_badge: TextureRect
+var close_hint: KeyHint
 
 var _shade: ColorRect
-var _device := SiegeActions.Device.KEYS
 
 
 func _init() -> void:
@@ -52,16 +51,7 @@ func _init() -> void:
 	var resume := add_entry("resume", &"resume", "Resume", close)
 	add_entry("hub", &"home", "Back to the hub", _on_hub)
 	add_entry("quit", &"quit", "Quit the game", func() -> void: quit_pressed.emit())
-	close_badge = TextureRect.new()
-	close_badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	close_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	close_badge.modulate = Palette.DIM
-	close_badge.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	close_badge.offset_left = -BADGE_PX - 8.0
-	close_badge.offset_top = -BADGE_PX - 8.0
-	close_badge.offset_right = -8.0
-	close_badge.offset_bottom = -8.0
-	resume.add_child(close_badge)
+	close_hint = KeyHint.attach(resume, CLOSE_ACTION, BADGE_PX, false)
 	_shade.hide()
 
 
@@ -89,7 +79,6 @@ func is_open() -> bool:
 func open() -> void:
 	if is_open():
 		return
-	_show_close_key()
 	_shade.show()
 	get_tree().paused = true
 	(buttons["resume"] as Button).grab_focus()
@@ -114,20 +103,6 @@ func toggle() -> void:
 func _on_hub() -> void:
 	close()
 	hub_pressed.emit()
-
-
-## The picture of what closes the menu, for the device in use (none on touch).
-func _show_close_key() -> void:
-	var event := SiegeActions.event_for(CLOSE_ACTION)
-	_device = SiegeActions.device
-	close_badge.visible = event != null
-	close_badge.texture = KeyGlyphs.texture(event) if event != null else null
-
-
-func _input(event: InputEvent) -> void:
-	SiegeActions.note(event)
-	if _device != SiegeActions.device:
-		_show_close_key()
 
 
 func _unhandled_input(event: InputEvent) -> void:

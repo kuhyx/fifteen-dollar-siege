@@ -8,7 +8,7 @@ var main: Main
 
 func before_each() -> void:
 	SaveStore.clear()
-	MenuKeys.device = MenuKeys.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
 	main.options.speed = 32.0

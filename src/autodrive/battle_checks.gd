@@ -48,7 +48,7 @@ static func hud_ok(bot: BotBase, battle: BattleScreen) -> bool:
 		var plain := button.text == "" and button.accessibility_name != "" and button.icon != null
 		if not (whole and bot.check(plain, "%s must be a labelled pictogram" % action)):
 			return false
-		if not bot.check(not button.badge_unknown, "%s shows the placeholder key" % action):
+		if not bot.check(not button.badge_unknown(), "%s shows the placeholder key" % action):
 			return false
 	return bot.check(battle.setup_ms < ENTER_BUDGET_MS, "entering took %.0f ms" % battle.setup_ms)
 

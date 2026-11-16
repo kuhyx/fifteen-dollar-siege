@@ -37,7 +37,7 @@ class BeatSim:
 
 
 func before_each() -> void:
-	SiegeActions.device = SiegeActions.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func _battle(mode: StringName, ids: Array, sim: SiegeSim = null) -> BattleScreen:

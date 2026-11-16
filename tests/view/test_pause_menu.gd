@@ -6,14 +6,14 @@ var menu: PauseMenu
 
 
 func before_each() -> void:
-	SiegeActions.device = SiegeActions.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 	menu = PauseMenu.new()
 	add_child_autofree(menu)
 
 
 func after_each() -> void:
 	get_tree().paused = false
-	SiegeActions.device = SiegeActions.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func test_escape_opens_it_pauses_the_game_and_closes_it_again() -> void:
@@ -61,18 +61,16 @@ func test_resume_and_hub_close_the_menu() -> void:
 
 func test_the_resume_button_shows_the_key_that_closes_the_menu() -> void:
 	menu.open()
-	var on_keys := menu.close_badge.texture
-	assert_not_null(on_keys)
-	assert_eq(on_keys, KeyGlyphs.texture(SiegeActions.event_for(&"ui_cancel")))
-	assert_true(KeyGlyphs.known(SiegeActions.event_for(&"ui_cancel")), "Esc has a picture")
+	var on_keys := menu.close_hint.glyph_event()
+	assert_true(on_keys is InputEventKey, "Esc on a keyboard")
+	assert_false(menu.close_hint.unknown(), "Esc has a picture")
 	var pad := InputEventJoypadButton.new()
 	pad.button_index = JOY_BUTTON_Y
 	pad.pressed = true
 	Input.parse_input_event(pad)
 	Input.flush_buffered_events()
-	assert_ne(menu.close_badge.texture, on_keys, "on a pad it is the pad's button")
-	assert_true(KeyGlyphs.known(SiegeActions.event_for(&"ui_cancel")), "pad B has a picture")
-	assert_true(menu.close_badge.visible)
+	assert_true(menu.close_hint.glyph_event() is InputEventJoypadButton, "on a pad: its button")
+	assert_false(menu.close_hint.unknown(), "pad B has a picture")
 
 
 func test_dev_tools_can_add_an_entry() -> void:

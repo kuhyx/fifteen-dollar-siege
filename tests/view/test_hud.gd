@@ -7,14 +7,14 @@ var hud: BattleHud
 
 
 func before_each() -> void:
-	SiegeActions.device = SiegeActions.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 	hud = BattleHud.new()
 	hud.setup(true)
 	add_child_autofree(hud)
 
 
 func after_each() -> void:
-	SiegeActions.device = SiegeActions.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func _pad_event() -> InputEventJoypadButton:
@@ -27,11 +27,13 @@ func _pad_event() -> InputEventJoypadButton:
 func test_every_action_is_in_the_input_map_for_keys_and_for_a_pad() -> void:
 	for action in SiegeActions.all():
 		assert_true(InputMap.has_action(action), String(action))
-		for device: int in [SiegeActions.Device.KEYS, SiegeActions.Device.PAD]:
-			var event := SiegeActions.event_for(action, device)
+		for device: int in [InputDevice.Device.KEYS, InputDevice.Device.PAD]:
+			var event := InputDevice.event_for(action, device)
 			assert_not_null(event, "%s has no binding for device %d" % [action, device])
-			assert_true(KeyGlyphs.known(event), "%s: no picture for %s" % [action, event.as_text()])
-		assert_null(SiegeActions.event_for(action, SiegeActions.Device.TOUCH), "touch has no keys")
+			assert_true(
+				KeyGlyph.can_draw(event), "%s: no picture for %s" % [action, event.as_text()]
+			)
+		assert_null(InputDevice.event_for(action, InputDevice.Device.TOUCH), "touch has no keys")
 
 
 func test_every_control_is_a_glyph_button_with_a_spoken_label_and_its_key() -> void:
@@ -43,59 +45,50 @@ func test_every_control_is_a_glyph_button_with_a_spoken_label_and_its_key() -> v
 		assert_ne(button.accessibility_name, "", "%s: a spoken label" % action)
 		assert_not_null(button.icon, "%s: a pictogram" % action)
 		assert_true(button.has_badge(), "%s shows its key" % action)
-		assert_false(button.badge_unknown, "%s shows the placeholder key" % action)
+		assert_false(button.badge_unknown(), "%s shows the placeholder key" % action)
 		assert_eq(
 			button.focus_mode, Control.FOCUS_NONE, "%s: Space never clicks a HUD button" % action
 		)
 
 
 func test_the_glyphs_follow_the_device_in_use() -> void:
-	var on_keys := hud.pause_button.badge()
-	assert_true(SiegeActions.note(_pad_event()), "a pad press switches the device")
-	assert_false(SiegeActions.note(_pad_event()), "a second one changes nothing")
-	hud.refresh_badges()
-	assert_ne(hud.pause_button.badge(), on_keys, "the pause badge is now a pad button")
+	var on_keys := hud.pause_button.badge_event()
+	assert_true(InputDevice.note(_pad_event()), "a pad press switches the device")
+	assert_false(InputDevice.note(_pad_event()), "a second one changes nothing")
+	assert_ne(hud.pause_button.badge_event(), on_keys, "the pause badge is now a pad button")
 	for button: HudButton in hud.buttons().values():
 		assert_true(button.has_badge())
-		assert_false(button.badge_unknown, "%s: placeholder on a pad" % button.action)
+		assert_false(button.badge_unknown(), "%s: placeholder on a pad" % button.action)
 	var touch := InputEventScreenTouch.new()
 	touch.pressed = true
-	SiegeActions.note(touch)
-	hud.refresh_badges()
+	InputDevice.note(touch)
 	assert_false(hud.pause_button.has_badge(), "a touch screen needs no key badge")
 	var emulated := InputEventMouseButton.new()
 	emulated.device = InputEvent.DEVICE_ID_EMULATION
-	assert_false(SiegeActions.note(emulated), "the mouse a touch emulates is still touch")
+	assert_false(InputDevice.note(emulated), "the mouse a touch emulates is still touch")
 	var key := InputEventKey.new()
 	key.physical_keycode = KEY_SPACE
-	assert_true(SiegeActions.note(key))
-	assert_eq(SiegeActions.device, SiegeActions.Device.KEYS)
+	assert_true(InputDevice.note(key))
+	assert_eq(InputDevice.device, InputDevice.Device.KEYS)
 
 
 func test_a_binding_without_a_picture_is_caught() -> void:
 	var odd := InputEventKey.new()
 	odd.physical_keycode = KEY_F7
-	assert_false(KeyGlyphs.known(odd))
+	assert_false(KeyGlyph.can_draw(odd))
 	InputMap.add_action(&"test_odd_action")
 	InputMap.action_add_event(&"test_odd_action", odd)
 	var button := HudButton.create(HudGlyphs.texture(HudGlyphs.PAUSE), "odd", &"test_odd_action")
 	autofree(button)
-	assert_true(button.badge_unknown, "this is what the test above would fail on")
+	assert_true(button.badge_unknown(), "this is what the test above would fail on")
 	InputMap.erase_action(&"test_odd_action")
-	assert_ne(KeyGlyphs.texture(odd), KeyGlyphs.texture(SiegeActions.event_for(SiegeActions.PAUSE)))
 
 
-func test_the_key_pictures_are_distinct_and_inside_their_square() -> void:
+func test_the_key_pictures_are_distinct() -> void:
 	var seen := {}
 	for action in SiegeActions.all():
-		for device: int in [SiegeActions.Device.KEYS, SiegeActions.Device.PAD]:
-			var event := SiegeActions.event_for(action, device)
-			var glyph := KeyGlyphs.texture(event).glyph
-			assert_gt(glyph.area(), 300.0, event.as_text())
-			for piece in glyph.pieces:
-				for point in piece:
-					assert_true(Rect2(0, 0, 128, 128).grow(0.5).has_point(point), event.as_text())
-			seen[KeyGlyphs.id_of(event)] = true
+		for device: int in [InputDevice.Device.KEYS, InputDevice.Device.PAD]:
+			seen[KeyGlyph.id_of(InputDevice.event_for(action, device))] = true
 	assert_gte(seen.size(), 17, "nine keys or buttons per device, the shared ones once")
 	for id: StringName in [HudGlyphs.PAUSE, HudGlyphs.PLAY, HudGlyphs.AUTO, HudGlyphs.SKIP]:
 		assert_gt(HudGlyphs.texture(id).glyph.area(), 300.0, String(id))

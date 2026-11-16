@@ -6,11 +6,11 @@ extends GutTest
 
 func before_each() -> void:
 	MenuKeys.ensure()
-	MenuKeys.device = MenuKeys.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func after_each() -> void:
-	MenuKeys.device = MenuKeys.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func _key(code: Key) -> InputEventKey:
@@ -34,7 +34,7 @@ func test_every_menu_action_has_a_key_that_can_be_drawn() -> void:
 	assert_eq(MenuKeys.actions().size(), 4)
 	for action in MenuKeys.actions():
 		assert_true(InputMap.has_action(action), String(action))
-		var event := MenuKeys.event_for(action, false)
+		var event := InputDevice.event_for(action)
 		assert_not_null(event, "%s has a key" % action)
 		assert_true(KeyGlyph.can_draw(event), "%s shows a real key, not a blank cap" % action)
 
@@ -53,7 +53,7 @@ func test_a_key_with_only_a_letter_cannot_be_drawn() -> void:
 func test_a_rebind_to_a_letter_fails_the_gate() -> void:
 	InputMap.add_action(&"test_letter_action")
 	InputMap.action_add_event(&"test_letter_action", _key(KEY_Q))
-	var event := MenuKeys.event_for(&"test_letter_action", false)
+	var event := InputDevice.event_for(&"test_letter_action")
 	assert_not_null(event)
 	assert_false(KeyGlyph.can_draw(event), "the gate above would be red for this action")
 	InputMap.erase_action(&"test_letter_action")
@@ -79,7 +79,7 @@ func test_the_hint_follows_the_device() -> void:
 	var pad := InputEventJoypadButton.new()
 	pad.button_index = JOY_BUTTON_X
 	pad.pressed = true
-	assert_true(MenuKeys.note(pad), "a pad button switches the device")
+	assert_true(InputDevice.note(pad), "a pad button switches the device")
 	assert_null(hint.glyph_event(), "pad: no hint on a control without the focus")
 	button.grab_focus()
 	var shown := hint.glyph_event() as InputEventJoypadButton
@@ -88,9 +88,9 @@ func test_the_hint_follows_the_device() -> void:
 	assert_true(KeyGlyph.can_draw(shown))
 	var touch := InputEventScreenTouch.new()
 	touch.pressed = true
-	assert_true(MenuKeys.note(touch))
+	assert_true(InputDevice.note(touch))
 	assert_null(hint.glyph_event(), "touch: the control itself is the target")
 	var finger := InputEventMouseButton.new()
 	finger.device = InputEvent.DEVICE_ID_EMULATION
-	assert_false(MenuKeys.note(finger), "a mouse event made from a touch is still touch")
-	assert_true(MenuKeys.note(InputEventMouseMotion.new()), "a real mouse: back to keys")
+	assert_false(InputDevice.note(finger), "a mouse event made from a touch is still touch")
+	assert_true(InputDevice.note(InputEventMouseMotion.new()), "a real mouse: back to keys")

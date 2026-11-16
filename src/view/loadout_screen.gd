@@ -123,7 +123,7 @@ func pick_at(point: Vector2) -> Dictionary:
 
 
 func _input(event: InputEvent) -> void:
-	MenuKeys.note(event)
+	InputDevice.note(event)
 
 
 func _on_card_pressed(card: BuffCard) -> void:
@@ -138,7 +138,7 @@ func _on_card_hovered(id: StringName) -> void:
 
 
 func _show_if_mouse(id: StringName) -> void:
-	if MenuKeys.device != MenuKeys.Device.TOUCH:
+	if InputDevice.device != InputDevice.Device.TOUCH:
 		focus_card(id)
 
 

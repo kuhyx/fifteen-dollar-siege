@@ -15,8 +15,10 @@ var _button: Button
 var _shown := -1
 
 
-## Binds `action` to `button` (a shortcut) and draws its glyph on the corner.
-static func attach(button: Button, p_action: StringName, px := PX) -> KeyHint:
+## Draws `action`'s glyph on the corner of `button`, and (with `shortcut`)
+## binds the action to the button too. The battle HUD passes false: the
+## screen already handles those actions itself.
+static func attach(button: Button, p_action: StringName, px := PX, shortcut := true) -> KeyHint:
 	MenuKeys.ensure()
 	var hint := KeyHint.new()
 	hint.action = p_action
@@ -28,12 +30,13 @@ static func attach(button: Button, p_action: StringName, px := PX) -> KeyHint:
 	hint.offset_top = -px * (1.0 - OVERHANG)
 	hint.offset_right = px * OVERHANG
 	hint.offset_bottom = px * OVERHANG
-	var press := InputEventAction.new()
-	press.action = p_action
-	press.pressed = true
-	button.shortcut = Shortcut.new()
-	button.shortcut.events = [press]
-	button.shortcut_in_tooltip = false
+	if shortcut:
+		var press := InputEventAction.new()
+		press.action = p_action
+		press.pressed = true
+		button.shortcut = Shortcut.new()
+		button.shortcut.events = [press]
+		button.shortcut_in_tooltip = false
 	button.add_child(hint)
 	button.focus_entered.connect(hint.queue_redraw)
 	button.focus_exited.connect(hint.queue_redraw)
@@ -42,16 +45,23 @@ static func attach(button: Button, p_action: StringName, px := PX) -> KeyHint:
 
 ## The event this hint draws now (null: nothing, e.g. on touch).
 func glyph_event() -> InputEvent:
-	return MenuKeys.event_for(action, _button != null and _button.has_focus())
+	return InputDevice.event_for(action, -1, _button != null and _button.has_focus())
+
+
+## True when the control's binding has no picture: the placeholder a test
+## must never find on a screen (lesson L6).
+func unknown() -> bool:
+	var event := glyph_event()
+	return event != null and not KeyGlyph.can_draw(event)
 
 
 func _input(event: InputEvent) -> void:
-	if MenuKeys.note(event) or _shown != MenuKeys.device:
+	if InputDevice.note(event) or _shown != InputDevice.device:
 		queue_redraw()
 
 
 func _draw() -> void:
-	_shown = MenuKeys.device
+	_shown = InputDevice.device
 	var event := glyph_event()
 	if event != null:
 		KeyGlyph.draw(self, event, Rect2(Vector2.ZERO, size))

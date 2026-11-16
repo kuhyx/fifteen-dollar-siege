@@ -77,7 +77,7 @@ func _process(delta: float) -> void:
 ## Any press during the payoff brings the controls up at once. A pointer
 ## press is used up by that: it must not land on a button it could not see.
 func _input(event: InputEvent) -> void:
-	MenuKeys.note(event)
+	InputDevice.note(event)
 	if controls_shown or not event.is_pressed() or event.is_echo():
 		return
 	var pointer := event is InputEventMouseButton or event is InputEventScreenTouch

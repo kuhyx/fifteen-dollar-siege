@@ -10,7 +10,7 @@ var shop: LoadoutScreen
 
 func before_each() -> void:
 	SaveStore.clear()
-	MenuKeys.device = MenuKeys.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
 	main.open_loadout(&"watch")
@@ -20,7 +20,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	MenuKeys.device = MenuKeys.Device.KEYS
+	InputDevice.device = InputDevice.Device.KEYS
 
 
 func _card(id: StringName) -> BuffCard:
@@ -134,7 +134,7 @@ func test_a_real_touch_goes_the_same_way() -> void:
 	var at := _card(&"moose").get_global_rect().get_center()
 	InputSynth.touch_tap(at)
 	await wait_process_frames(3)
-	assert_eq(MenuKeys.device, MenuKeys.Device.TOUCH)
+	assert_eq(InputDevice.device, InputDevice.Device.TOUCH)
 	assert_eq(shop.focused_id, &"moose")
 	assert_false(shop.loadout.has(&"moose"), "one finger tap only looks")
 	InputSynth.touch_tap(at)

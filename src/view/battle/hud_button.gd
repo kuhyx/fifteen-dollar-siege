@@ -1,9 +1,10 @@
 class_name HudButton
 extends GlyphButton
 ## One HUD control: a pictogram, and in its corner the key or pad button that
-## does the same, read from the InputMap for the device in use (no badge on a
-## touch screen: the button is the control). `lit` marks the active choice
-## with a frame as well as a colour. No words; `accessibility_name` speaks.
+## does the same: the game's one `KeyHint`, read from the InputMap for the
+## device in use (nothing on a touch screen: the button is the control).
+## `lit` marks the active choice with a frame as well as a colour. No words;
+## `accessibility_name` speaks.
 
 const SIZE := 96.0
 const BADGE := 40.0
@@ -15,10 +16,8 @@ var lit := false:
 	set(value):
 		lit = value
 		_restyle()
-## True when the badge is the UNKNOWN cap: a binding without a picture.
-var badge_unknown := false
-
-var _badge: GlyphTexture
+## The key picture in the corner.
+var hint: KeyHint
 
 
 static func create(
@@ -38,37 +37,26 @@ static func create(
 	button.add_theme_stylebox_override("hover", GlyphButton.box(Palette.PANEL_HOVER))
 	button.add_theme_stylebox_override("pressed", GlyphButton.box(Palette.PANEL_PRESSED))
 	button._restyle()
-	button.refresh_badge()
+	button.hint = KeyHint.attach(button, p_action, BADGE, false)
 	return button
 
 
-## Reads the action's binding for the device in use and shows its picture.
-func refresh_badge() -> void:
-	var event := SiegeActions.event_for(action)
-	_badge = KeyGlyphs.texture(event) if event != null else null
-	badge_unknown = event != null and not KeyGlyphs.known(event)
-	queue_redraw()
-
-
+## True while the control shows a key or pad button.
 func has_badge() -> bool:
-	return _badge != null
+	return hint.glyph_event() != null
 
 
-## The picture in the corner (null on a touch screen).
-func badge() -> GlyphTexture:
-	return _badge
+## True when its binding has no picture (a placeholder: tests fail on it).
+func badge_unknown() -> bool:
+	return hint.unknown()
+
+
+## The event whose picture is in the corner (null on a touch screen).
+func badge_event() -> InputEvent:
+	return hint.glyph_event()
 
 
 func _restyle() -> void:
 	var frame := Palette.COIN if lit else Color.TRANSPARENT
 	add_theme_stylebox_override("normal", GlyphButton.box(Palette.PANEL, frame))
 	add_theme_color_override("icon_normal_color", Palette.COIN if lit else Palette.INK)
-
-
-func _draw() -> void:
-	if _badge == null:
-		return
-	var corner := size - Vector2.ONE * (BADGE - 6.0)
-	var chip := Rect2(corner, Vector2.ONE * BADGE)
-	draw_style_box(GlyphButton.box(Palette.PANEL.darkened(0.4)), chip)
-	draw_texture_rect(_badge, chip.grow(-8.0), false, Palette.INK)

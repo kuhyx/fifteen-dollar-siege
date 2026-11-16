@@ -109,7 +109,7 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	SiegeActions.note(event)
+	InputDevice.note(event)
 
 
 func _gui_input(event: InputEvent) -> void:
