@@ -95,6 +95,9 @@ func test_the_buses_exist_once_and_carry_the_settings() -> void:
 	assert_gt(music, 0)
 	assert_gt(sfx, 0)
 	assert_eq(AudioServer.bus_count, 3, "Master, Music, Sfx: asking twice adds nothing")
+	assert_eq(AudioServer.get_bus_effect_count(0), 1, "one limiter on Master")
+	var limiter := AudioServer.get_bus_effect(0, 0) as AudioEffectHardLimiter
+	assert_almost_eq(limiter.ceiling_db, AudioBuses.CEILING_DB, 0.001)
 	var settings := AudioSettings.new()
 	settings.music = 0.5
 	AudioBuses.apply(settings, false)
