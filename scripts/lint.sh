@@ -21,6 +21,11 @@ lint_gd() {
     need gdlint gdformat
     local files=()
     mapfile -t files < <(find "${GD_DIRS[@]}" -name '*.gd' -type f | sort)
+    # gdtoolkit builds its parser cache (~/.cache/gdtoolkit) on first use with a
+    # check-then-create that races when several processes start cold (a fresh CI
+    # runner): one serial run of each tool warms it before the parallel batches.
+    gdlint "${files[0]}" >/dev/null
+    gdformat --check "${files[0]}" >/dev/null 2>&1 || true # the batches below judge the format
     # One process per batch of files, a few batches at once: gdlint parses slowly.
     printf '%s\0' "${files[@]}" | xargs -0 -n 12 -P 4 gdlint >/dev/null
     printf '%s\0' "${files[@]}" | xargs -0 -n 12 -P 4 gdformat --check >/dev/null 2>&1 || {
