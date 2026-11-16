@@ -224,6 +224,7 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 	tween.push(shot, dt_sim)
 	crowd.sync(shot)
 	effects.shot = shot
+	AudioDirector.on_snapshot(shot, Rect2(camera.to_map(Vector2.ZERO), size / camera.zoom))
 	for event in shot.events:
 		if shot.clock_s <= 0.0 and BattleBeats.stages(event):
 			beats.add(event)

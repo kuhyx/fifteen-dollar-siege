@@ -54,6 +54,7 @@ func _ready() -> void:
 	_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_holder)
 	_build_overlay()
+	add_child(AudioDirector.new())
 	if options.problem != "":
 		printerr("fifteen-dollar-siege: %s" % options.problem)
 		get_tree().quit(2)
