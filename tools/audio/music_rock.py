@@ -121,4 +121,4 @@ def render() -> np.ndarray:
     # A little shared grit glues the band together; the high-pass comes last
     # because clipping an uneven wave leaves a DC offset behind.
     glued = dsp.drive(dsp.room(mix.total, 0.6, 0.08, SEED, wrap=True) * 0.55, 1.3)
-    return dsp.highpass(glued, 32.0, wrap=True)
+    return dsp.highpass(glued, 42.0, poles=2, wrap=True)

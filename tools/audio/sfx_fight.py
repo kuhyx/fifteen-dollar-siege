@@ -140,7 +140,7 @@ def combust() -> np.ndarray:
     out = kit.Take(seconds)
     flame = dsp.lowpass(kit.sweep((260.0, 1500.0, 900.0), 1.5, "flame", 0.7), 2800.0, poles=2)
     out.add(0.0, kit.swell(flame, 0.14, 1.1), 1.0)
-    out.add(0.05, kit.thump(75.0, 38.0, 0.22), 0.9)
+    out.add(0.05, kit.thump(88.0, 48.0, 0.22), 0.9)
     crackle = dsp.lowpass(kit.band(1.6, "crackle", 1700.0, 0.8), 3600.0, poles=2) * kit.grains(
         1.6, "cracklegate", 26.0, 0.003
     )

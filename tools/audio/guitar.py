@@ -54,8 +54,8 @@ def chord(midis: tuple[int, ...], seconds: float, mute: bool = False, take: int 
         raw = dsp.lowpass(raw, _at(900.0))
     tight = dsp.highpass(raw, _at(110.0))  # a loose low end turns to mud in the fuzz
     fuzz = np.tanh(tight * (5.0 if mute else 9.0) / max(dsp.peak(tight), 1e-9))
-    cabinet = dsp.highpass(dsp.lowpass(fuzz, _at(4200.0), poles=2), _at(85.0))
-    cabinet = cabinet + 0.4 * dsp.bandpass(fuzz, _at(1300.0), 0.9)
+    cabinet = dsp.highpass(dsp.lowpass(fuzz, _at(5200.0), poles=2), _at(85.0))
+    cabinet = cabinet + 0.7 * dsp.bandpass(fuzz, _at(1700.0), 0.9)
     clock = np.arange(count) / _RATE
     stop = np.exp(-np.clip(clock - seconds, 0.0, None) / 0.02)  # the hand damps the strings
     voiced = (cabinet * stop * np.clip(clock / 0.002, 0.0, 1.0))[::OVER]

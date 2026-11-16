@@ -44,8 +44,9 @@ def frame_drum(low: bool = True) -> np.ndarray:
 def taiko() -> np.ndarray:
     """A big war drum."""
     count = dsp.frames(0.9)
-    body = _skin((115.0, 52.0), 0.07, count) * dsp.decay(count, 0.26)
-    thump = dsp.lowpass(dsp.noise(count, _rng("taiko")), 480.0) * dsp.decay(count, 0.03)
+    # The note ends at 68 Hz, not lower: a laptop speaker has to carry it.
+    body = _skin((135.0, 68.0), 0.07, count) * dsp.decay(count, 0.22)
+    thump = dsp.lowpass(dsp.noise(count, _rng("taiko")), 650.0) * dsp.decay(count, 0.03)
     return _hit(dsp.drive(body + 0.6 * thump, 1.5))
 
 
@@ -90,7 +91,7 @@ def woodblock(hz: float = 820.0) -> np.ndarray:
 
 def kick() -> np.ndarray:
     count = dsp.frames(0.5)
-    body = _skin((165.0, 46.0), 0.045, count) * dsp.decay(count, 0.16)
+    body = _skin((160.0, 56.0), 0.045, count) * dsp.decay(count, 0.13)
     click = dsp.highpass(dsp.noise(count, _rng("kick")), 2000.0) * dsp.decay(count, 0.003)
     return _hit(dsp.drive(body, 1.8) + 0.25 * click)
 

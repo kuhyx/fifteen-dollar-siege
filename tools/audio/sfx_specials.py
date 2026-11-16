@@ -99,8 +99,8 @@ def cart_crash() -> np.ndarray:
 def smash() -> np.ndarray:
     """The monster's fist: the ground gives, and it growls."""
     out = kit.Take(1.1)
-    out.add(0.0, kit.thump(72.0, 28.0, 0.26, 0.08), 1.0)
-    out.add(0.0, kit.struck(dsp.lowpass(kit.hiss(0.6, "smash"), 320.0), 0.16, 0.002), 0.9)
+    out.add(0.0, kit.thump(98.0, 44.0, 0.22, 0.08), 1.0)
+    out.add(0.0, kit.struck(dsp.lowpass(kit.hiss(0.6, "smash"), 520.0), 0.16, 0.002), 0.9)
     growl = kit.tone((58.0, 50.0), 0.6, 12, 1.0, 900.0) * (
         0.55 + 0.45 * np.sin(2.0 * math.pi * 27.0 * dsp.times(dsp.frames(0.6)))
     )

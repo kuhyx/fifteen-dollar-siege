@@ -52,7 +52,7 @@ def _notes(pairs: list[tuple[int, float, float, float]]) -> list[sequencer.NoteE
 
 
 def _finish(mix: grid.Mix, wet: float) -> np.ndarray:
-    mix.total[:] = dsp.highpass(mix.total, 30.0, wrap=True)
+    mix.total[:] = dsp.highpass(mix.total, 42.0, poles=2, wrap=True)
     return dsp.room(mix.total, 1.8, wet, SEED, wrap=True)
 
 
