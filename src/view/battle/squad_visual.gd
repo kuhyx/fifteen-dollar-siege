@@ -96,8 +96,11 @@ func set_far(far: bool) -> void:
 func pose(at: Vector2, velocity: Vector2, p_state: int, facing: float, delta: float) -> void:
 	if p_state != state or not _posed:
 		state = p_state
-		_posed = true
 		_settled = false
+		if not _posed:  # born in this state: no glide from a default
+			spread = spread_goal()
+			fade = fade_goal()
+		_posed = true
 		var unseen := state == SiegeSnapshot.State.HIDDEN and team == SiegeSnapshot.Team.ARMY
 		material.set_shader_parameter("pose", float(state))
 		material.set_shader_parameter("shimmer", 1.0 if unseen else 0.0)

@@ -3,7 +3,9 @@ extends GutTest
 ## every event on the battlefield, and its crowd is the 2,400 figures the
 ## frame gate is measured on.
 
-const GRIDS: Array[StringName] = [&"kinds_army", &"kinds_village", &"specials_a", &"specials_b"]
+const GRIDS: Array[StringName] = [
+	&"kinds_army", &"kinds_leaders", &"kinds_village", &"specials_a", &"specials_b"
+]
 const SCENES: Array[StringName] = [
 	&"events_ranged", &"events_melee", &"events_calls", &"orders", &"beats", &"payoff_win"
 ]

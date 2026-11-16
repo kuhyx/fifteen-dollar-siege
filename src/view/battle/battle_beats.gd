@@ -13,11 +13,13 @@ signal payoff_done
 
 ## The events that are staged when they come before the first tick.
 const STAGED: Array[StringName] = [SiegeEvent.UFO_ABDUCT, SiegeEvent.PEP_TALK]
-## Half the map box the camera shows for a beat, by event [design guess].
+## The map box the camera shows for a beat, around the event [design guess].
 const FRAMES := {
-	SiegeEvent.UFO_ABDUCT: Vector2(150.0, 100.0),
-	SiegeEvent.PEP_TALK: Vector2(120.0, 135.0),
+	SiegeEvent.UFO_ABDUCT: Rect2(-86.0, -66.0, 172.0, 100.0),
+	SiegeEvent.PEP_TALK: Rect2(-84.0, -64.0, 168.0, 124.0),
 }
+## Metres around the army the lose payoff shows.
+const ARMY_PAD_M := 30.0
 ## Metres around the church the win payoff shows [design guess].
 const CHURCH_BOX := Rect2(-70.0, -62.0, 150.0, 96.0)
 
@@ -71,9 +73,9 @@ func beat_box() -> Rect2:
 	var beat := current
 	if beat.is_empty() and not queue.is_empty():
 		beat = queue[0]
-	var half: Vector2 = FRAMES.get(beat.get("kind", &""), Vector2(150.0, 100.0))
+	var around: Rect2 = FRAMES.get(beat.get("kind", &""), Rect2(-150.0, -100.0, 300.0, 200.0))
 	var at: Vector2 = beat.get("pos", Vector2.ZERO)
-	return Rect2(at - half, half * 2.0)
+	return Rect2(at + around.position, around.size)
 
 
 ## Starts the payoff: `seconds` of show before `payoff_done`.
@@ -104,7 +106,13 @@ func payoff_progress() -> float:
 static func payoff_box(won: bool, plan: MapPlan, shot: SiegeSnapshot) -> Rect2:
 	if won:
 		return Rect2(plan.bell + CHURCH_BOX.position, CHURCH_BOX.size)
-	return BattleCamera.action_box(shot, plan.map)
+	var box := Rect2()
+	var found := false
+	for i in shot.entity_count():
+		if shot.ent_team[i] == SiegeSnapshot.Team.ARMY:
+			box = box.expand(shot.ent_pos[i]) if found else Rect2(shot.ent_pos[i], Vector2.ZERO)
+			found = true
+	return box.grow(ARMY_PAD_M) if found else plan.map.bounds
 
 
 func _end(skipped: bool) -> void:

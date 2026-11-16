@@ -7,7 +7,9 @@ extends BotBase
 ## 2,400-figure crowd the frame gate is measured on. Exit 0 only when every
 ## assert held. scripts/lib/bot.sh `bot_frames` holds its number of beats.
 
-const GRIDS: Array[StringName] = [&"kinds_army", &"kinds_village", &"specials_a", &"specials_b"]
+const GRIDS: Array[StringName] = [
+	&"kinds_army", &"kinds_leaders", &"kinds_village", &"specials_a", &"specials_b"
+]
 const EVENT_SCENES: Array[StringName] = [&"events_ranged", &"events_melee", &"events_calls"]
 ## Name -> the buffs whose look it shows.
 const LOOKS := {

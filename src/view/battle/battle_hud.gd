@@ -31,6 +31,7 @@ var charge_button: HudButton
 var retreat_button: HudButton
 
 var _left := HBoxContainer.new()
+var _device := SiegeActions.Device.KEYS
 var _right := HBoxContainer.new()
 
 
@@ -86,6 +87,8 @@ func buttons() -> Dictionary:
 ## Shows the state of the screen on the controls and the meters.
 func show_state(shot: SiegeSnapshot, state: Dictionary, delta: float) -> void:
 	meters.show_levels(shot, state.get("centre", 0.0), delta)
+	if _device != SiegeActions.device:
+		refresh_badges()
 	var staged: bool = state.get("staged", false)
 	_left.visible = not staged
 	_right.visible = not staged
@@ -104,6 +107,7 @@ func show_state(shot: SiegeSnapshot, state: Dictionary, delta: float) -> void:
 
 ## Shows the glyphs of the device in use (call when it changes).
 func refresh_badges() -> void:
+	_device = SiegeActions.device
 	for button: HudButton in buttons().values():
 		button.refresh_badge()
 

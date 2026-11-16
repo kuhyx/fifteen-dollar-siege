@@ -1,22 +1,32 @@
 class_name PauseMenu
 extends CanvasLayer
-## Esc / pad B / the menu button: the tree pauses and three pictogram buttons
-## appear: resume, back to the hub, quit. Dev mode adds its own entries with
-## `add_entry` (the camera). No words.
-## SCAFFOLD view: the view agent restyles it and keeps the API.
+## Esc / pad B / the menu button: the tree pauses, the screen dims and one
+## card of pictogram buttons appears: resume, back to the hub, quit. Resume
+## has the focus and shows the key or pad button that closes the menu, read
+## from the InputMap for the device in use. Dev mode adds its own entries
+## with `add_entry` (the camera). No words.
 
 signal toggled(open: bool)
 signal hub_pressed
 signal quit_pressed
 
 const LAYER := 50
-const SHADE := Color(0, 0, 0, 0.6)
+const SHADE := Color(0.03, 0.03, 0.05, 0.7)
+const BUTTON_PX := 200.0
+const BADGE_PX := 60.0
+const PADDING := 44
+const CLOSE_ACTION := &"ui_cancel"
 
 ## Button name -> button: "resume", "hub", "quit", plus dev entries.
 var buttons: Dictionary = {}
 var row: HBoxContainer
+## The panel the buttons sit on.
+var card: PanelContainer
+## The key picture in the corner of the resume button.
+var close_badge: TextureRect
 
 var _shade: ColorRect
+var _device := SiegeActions.Device.KEYS
 
 
 func _init() -> void:
@@ -26,20 +36,38 @@ func _init() -> void:
 	_shade.color = SHADE
 	_shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_shade)
+	var middle := CenterContainer.new()
+	middle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_shade.add_child(middle)
+	card = PanelContainer.new()
+	var panel := GlyphButton.box(Palette.PANEL_HOVER.darkened(0.25), Palette.DIM.darkened(0.35))
+	panel.set_content_margin_all(PADDING)
+	panel.set_corner_radius_all(GlyphButton.RADIUS + PADDING / 2)
+	card.add_theme_stylebox_override("panel", panel)
+	middle.add_child(card)
 	row = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 60)
+	row.add_theme_constant_override("separation", PADDING)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_shade.add_child(row)
-	add_entry("resume", &"resume", "Resume", close)
+	card.add_child(row)
+	var resume := add_entry("resume", &"resume", "Resume", close)
 	add_entry("hub", &"home", "Back to the hub", _on_hub)
 	add_entry("quit", &"quit", "Quit the game", func() -> void: quit_pressed.emit())
+	close_badge = TextureRect.new()
+	close_badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	close_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	close_badge.modulate = Palette.DIM
+	close_badge.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	close_badge.offset_left = -BADGE_PX - 8.0
+	close_badge.offset_top = -BADGE_PX - 8.0
+	close_badge.offset_right = -8.0
+	close_badge.offset_bottom = -8.0
+	resume.add_child(close_badge)
 	_shade.hide()
 
 
 ## Adds one pictogram button to the menu (dev mode's camera uses this).
 func add_entry(id: String, glyph: StringName, spoken: String, on_press: Callable) -> Button:
-	var button := GlyphButton.make(glyph, spoken, 220.0)
+	var button := GlyphButton.make(glyph, spoken, BUTTON_PX)
 	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	button.pressed.connect(on_press)
 	row.add_child(button)
@@ -61,6 +89,7 @@ func is_open() -> bool:
 func open() -> void:
 	if is_open():
 		return
+	_show_close_key()
 	_shade.show()
 	get_tree().paused = true
 	(buttons["resume"] as Button).grab_focus()
@@ -85,6 +114,20 @@ func toggle() -> void:
 func _on_hub() -> void:
 	close()
 	hub_pressed.emit()
+
+
+## The picture of what closes the menu, for the device in use (none on touch).
+func _show_close_key() -> void:
+	var event := SiegeActions.event_for(CLOSE_ACTION)
+	_device = SiegeActions.device
+	close_badge.visible = event != null
+	close_badge.texture = KeyGlyphs.texture(event) if event != null else null
+
+
+func _input(event: InputEvent) -> void:
+	SiegeActions.note(event)
+	if _device != SiegeActions.device:
+		_show_close_key()
 
 
 func _unhandled_input(event: InputEvent) -> void:

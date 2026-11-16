@@ -54,7 +54,7 @@ void vertex() {
 	float tilt = 0.0;
 	if (flame > 0.0) {
 		v.x += sin(t * 9.0 + v.y * 2.0) * 0.14 * -v.y;
-		v *= flame * (0.8 + 0.3 * sin(t * 13.0 + phase * 40.0));
+		v *= flame * (1.25 + 0.4 * sin(t * 13.0 + phase * 40.0));
 		shift.y -= 0.4 * (1.0 - fallen);
 	} else {
 		v.x *= flip;
@@ -82,7 +82,7 @@ void vertex() {
 			home += vec2(sin(t * 0.9 + phase * 20.0), cos(t * 0.7)) * 0.12 * wobble;
 		}
 		v = turned(v, tilt);
-		COLOR.rgb = mix(COLOR.rgb, COLOR.rgb * vec3(0.28, 0.22, 0.22), burn);
+		COLOR.rgb = mix(COLOR.rgb, COLOR.rgb * vec3(0.3, 0.24, 0.24), burn * 0.8);
 		COLOR.rgb = mix(COLOR.rgb, vec3(0.8, 0.95, 1.0), shimmer * 0.45);
 	}
 	float glint = 0.3 + 0.18 * sin(t * 3.0);

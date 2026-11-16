@@ -15,7 +15,7 @@ static func abduct(canvas: CanvasItem, fx: BattleFx) -> void:
 	var part := fx.progress()
 	var dusk := clampf(minf(part * 6.0, (1.0 - part) * 5.0), 0.0, 1.0)
 	var around: Rect2 = fx.data.get("bounds", Rect2(fx.pos - Vector2(300, 200), Vector2(600, 400)))
-	canvas.draw_rect(around.grow(200.0), Color(WorldPalette.NIGHT, WorldPalette.NIGHT.a * dusk))
+	canvas.draw_rect(around.grow(3000.0), Color(WorldPalette.NIGHT, WorldPalette.NIGHT.a * dusk))
 	var ship := fx.pos + HOVER
 	if part < 0.22:
 		ship += Vector2(-120.0, -90.0) * (1.0 - ease(part / 0.22, 0.4))

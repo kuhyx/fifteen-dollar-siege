@@ -18,10 +18,11 @@ const VILLAGE_KINDS: Array[int] = [
 ]
 ## Scene -> [kinds], [heads per entity], cell size, top-left cell.
 const GRIDS := {
-	&"kinds_army": [[0, 5, 6, 7, 8, 9], [6, 4, 1, 1, 1, 4], Vector2(20, 12), Vector2(110, 96)],
-	&"kinds_village": [[1, 2, 3, 4], [12, 8, 6, 6], Vector2(22, 15), Vector2(105, 100)],
-	&"specials_a": [[10, 11, 12, 13], [1, 3, 40, 3], Vector2(30, 21), Vector2(90, 90)],
-	&"specials_b": [[14, 15, 15, 16], [1, 4, 1, 1], Vector2(30, 21), Vector2(90, 90)],
+	&"kinds_army": [[0, 5, 6], [6, 4, 1], Vector2(15, 11), Vector2(116, 112)],
+	&"kinds_leaders": [[7, 8, 9], [1, 1, 3], Vector2(15, 11), Vector2(116, 112)],
+	&"kinds_village": [[1, 2, 3, 4], [8, 6, 5, 5], Vector2(18, 13), Vector2(108, 104)],
+	&"specials_a": [[10, 11, 12, 13], [1, 2, 30, 2], Vector2(24, 17), Vector2(96, 98)],
+	&"specials_b": [[14, 15, 15, 16], [1, 4, 1, 1], Vector2(24, 17), Vector2(96, 98)],
 	&"looks": [[0, 5, 6], [8, 4, 1], Vector2(20, 13), Vector2(120, 110)],
 }
 ## Scene -> the map box the camera holds.

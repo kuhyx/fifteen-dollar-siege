@@ -106,8 +106,7 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if SiegeActions.note(event):
-		hud.refresh_badges()
+	SiegeActions.note(event)
 
 
 func _gui_input(event: InputEvent) -> void:
