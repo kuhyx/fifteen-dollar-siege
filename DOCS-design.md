@@ -183,5 +183,5 @@ combust cues are the art and audio agents' work).
 | `STUB_WIN_COST`, `STUB_DECIDE_S` | 8, 20 s (+- 2 s) | the scaffold brief; deleted with the stub |
 | `STUB_SPEED_MPS`, `STUB_FLEE_MPS` | 18, 6 | stub only: the walk ends near the decision |
 | `LaunchOptions.DEFAULT_LAB_RUNS` | 200 | `[design guess]` |
-| `BattleScreen.PAYOFF_S` | 1.2 s | `[design guess]` |
+| `BattleScreen.PAYOFF_S` | 3.2 s | `[design guess]`; the battle view's other constants: `DOCS-design-battle.md` |
 | `LabScreen.FRAME_BUDGET_MS` | 6 ms | `[design guess]`: under half a 60 fps frame |

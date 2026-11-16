@@ -6,8 +6,9 @@ a 1100 AD village of 2,000, and you get 15 dollars to buy buffs from a list of
 25. Three modes run on ONE sim core: **Watch** (buy, then the siege plays
 itself), **Command** (the same plus a rally flag and charge / retreat), **Lab**
 (one loadout, N headless sieges, the win rate as a number and a ring).
-Design, rules and the Core API: `DOCS-design.md`. Feature map and core flows:
-`DOCS-features.md`.
+Design, rules and the Core API: `DOCS-design.md`. The battle screen (layers,
+controls, showcase, frame gate): `DOCS-design-battle.md`. Feature map and core
+flows: `DOCS-features.md`.
 
 **Scaffold state (2026-11-16):** the sim in `src/core/siege_sim.gd` and the
 screens in `src/view/` are STUBS behind a fixed contract. Three agents build
@@ -115,9 +116,10 @@ is recorded beside the game with moments as chapters
 
 `--dev` | `--mode=watch|command|lab` with `--loadout=id,id` opens straight
 into a siege | `--seed=N` | `--speed=N` (0.1 to 64) | `--lab-runs=N` |
-`--save-dir=DIR` | `--autodrive=MODE` with `--result-file=`,
-`--screenshot-dir=`, `--expect-window=WxH` | `--feedback-dir=DIR`,
-`--session-id=ID`, `--dev-tag=T`, `--dev-shot=/abs/out.png` (dev tools).
+`--save-dir=DIR` | `--autodrive=MODE` (a mode, or `showcase`) with
+`--result-file=`, `--screenshot-dir=`, `--expect-window=WxH` |
+`--feedback-dir=DIR`, `--session-id=ID`, `--dev-tag=T`,
+`--dev-shot=/abs/out.png` (dev tools).
 
 ## Commands
 
@@ -131,7 +133,9 @@ into a siege | `--seed=N` | `--speed=N` (0.1 to 64) | `--lab-runs=N` |
 Other gates, each one call under 60 s:
 
 - `./install.sh` tools, GUT, export templates, binaries links, git hooks
-- `scripts/autodrive_all.sh [mode ...]` the done gate; frames land in
+- `scripts/autodrive_all.sh [mode ...]` the done gate (watch, command, lab,
+  and `showcase`: every kind, state, look and event on the battle screen plus
+  the 2,400-figure frame gate); frames land in
   `~/data/claude-scratch/fifteen-dollar-siege/<checkout>/shots/<mode>/`
 - `scripts/screenshot.sh <out_dir> [mode] [WxH]` one mode's frames
 - `scripts/test_save_guard.sh` the save guard with the hook's redirect off
