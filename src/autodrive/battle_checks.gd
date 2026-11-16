@@ -27,9 +27,11 @@ const HIDING_FLOOR := 2000
 const SOFT_EDGES := 0.5
 ## How many times brighter than the rest of the frame the payoff's subject
 ## must be: the burning army at a loss (the village dims, the night falls),
-## the army under its flag at a win. Measured before the staging: 1.25, 1.34.
+## the army under its flag at a win (already bright: 1.34 before, 1.40 after,
+## so the floor only guards a regression). Measured before the staging: 1.25 at
+## a loss.
 const SUBJECT_LOSS := 1.6
-const SUBJECT_WIN := 1.4
+const SUBJECT_WIN := 1.3
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 

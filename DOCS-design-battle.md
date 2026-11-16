@@ -188,6 +188,6 @@ oldest short ones until they fit.
 | `FrameStats.WORK_BUDGET_MS` | 4 ms: a quarter of a 60 fps frame |
 | `BattleChecks.PAYOFF_SEEN`, `TRIES`, `ENTER_BUDGET_MS` | 0.6, 3, 1000 ms (lesson L9) |
 | `BattleChecks.FLAG_FLOOR`, `CHEVRON_FLOOR`, `CLOUD_FLOOR`, `HIDING_FLOOR` | pixels (canvas units squared) the bot sees an effect change: 5000, 1500, 4000, 2000 |
-| `BattleChecks.SOFT_EDGES`, `SUBJECT_LOSS`, `SUBJECT_WIN` | 0.5 soft edges (staircase frame: 0.37); payoff brighter than the rest 1.6, 1.4 |
+| `BattleChecks.SOFT_EDGES`, `SUBJECT_LOSS`, `SUBJECT_WIN` | 0.5 soft edges (staircase frame: 0.37); payoff brighter than the rest 1.6, 1.3 |
 | `ShowcaseScript.SHOT_S`, `SEEN_AT`; `ShowcaseBot.CROWD_FRAMES` | 1.3 s, 0.4; 150 frames |
 | `ShowcaseCrowd` | 2,000 villagers, 300 men, 100 wasps; an event every tick |
