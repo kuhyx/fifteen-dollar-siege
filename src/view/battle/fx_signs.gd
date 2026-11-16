@@ -19,7 +19,8 @@ static func badge(canvas: CanvasItem, fx: BattleFx) -> void:
 	var pop := minf(fx.progress() * 7.0, 1.0)
 	var grow := 0.5 + 0.5 * ease(pop, 0.35) + 0.12 * sin(pop * PI)
 	var side := BADGE_PX * px * grow
-	var centre := fx.pos + Vector2(0.0, -50.0 * px - 12.0 * px * fx.progress())
+	var across := float(fx.data.get("slot", 0)) * 120.0 * px
+	var centre := fx.pos + Vector2(across, -50.0 * px - 12.0 * px * fx.progress())
 	var plate := Color(Palette.PANEL, 0.9 * fx.fading(0.3))
 	canvas.draw_circle(centre, side * 0.66, Color(WorldPalette.SOOT, 0.5 * fx.fading(0.3)))
 	canvas.draw_circle(centre, side * 0.6, plate)

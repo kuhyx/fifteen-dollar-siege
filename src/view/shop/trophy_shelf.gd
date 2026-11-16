@@ -48,6 +48,11 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## Real seconds the shelf has been alive (the wave's clock).
+func age() -> float:
+	return _age
+
+
 ## How much of the passing wave slot `index` carries at `age` (0..1).
 static func glow(index: int, age: float) -> float:
 	var front := fmod(age, PERIOD_S) / SWEEP_S * (wide() + 2.0 * WAVE_PX) - WAVE_PX

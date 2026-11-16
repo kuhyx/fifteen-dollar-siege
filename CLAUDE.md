@@ -64,7 +64,7 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 | `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
 | `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera, and `BattleFlair`: the delights of the fun pass) | view agent |
 | `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
-| `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf; the Lab's runner, ranking, book | menu-screen agent |
+| `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf, dice (`ShopDice`, `LoadoutDice`); `src/view/lab/` also holds `StarRating` and `ResultStars`; the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`), `fun` (one siege per fun-pass delight); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
 | `tools/recording/` | the session recorder (Python) | shared |

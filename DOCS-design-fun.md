@@ -48,12 +48,12 @@ fails when it stops firing.
 | Fireworks and a jump | the siege is won: 8 rockets over the church, the men jump | `test_finale.gd`; the watch bot asserts rockets in a win | `watch_win_fireworks` |
 | Unmasking | a win with invisible squads: each appears in a flash, one by one | `test_finale.gd`; `--autodrive=fun` scene `reveal` | `invisible_unmasked` |
 | Monster ring | the monster's hero ring is 1.9 times, the emperor's 1.3 times | `test_finale.gd` | `monster_shake_ring` |
-| Buff badges | stew (a bowl and steam), sleepless (at the alarm), deaf (at the bell): the buff's pictogram pops over the field | `tests/view/test_buff_moments.gd`, the buffs gate (`BuffSigns.MOMENTS`) | `buff_stew_badge`, `buff_sleepless_badge`, `buff_deaf_badge` |
-| Clocks | each prep time: a clock face sweeps (3 turns, half a turn) with ticks | same | `buff_prep_hour_clock` |
-| Army roll-up | double or fifty men: the army number rolls from 100 up to what the buff made it | same | `buff_double_men_count` |
-| Looks alive | knight and helmets glint, cardboard flakes, booze hiccups (bubbles), bats ping, every 0.5 to 1.2 s on a squad in view | same; `fun` scene `looks` | `looks_glints`, `buff_*` |
+| Buff badges | stew (a bowl and steam), sleepless and deaf (at the alarm, a beat apart): the buff's pictogram pops over the field | `tests/view/test_buff_moments.gd`, the buffs gate (`BuffSigns.MOMENTS`) | `buff_stew`, `buff_sleepless_village`, `buff_deaf_villagers` |
+| Clocks | each prep time: a clock face sweeps (3 turns, half a turn) with ticks | same | `buff_prep_hour`, `buff_prep_ten_minutes` |
+| Army roll-up | double or fifty men: the army number rolls from 100 up to what the buff made it | same | `buff_double_men`, `buff_fifty_men` |
+| Looks alive | knight and helmets glint, cardboard flakes, booze hiccups (bubbles), bats ping, every 0.5 to 1.2 s on a squad in view | same; `fun` scene `looks` | `looks_glints`, `buff_knight_armor`, `buff_football_helmets`, `buff_cardboard_armor`, `buff_booze`, `buff_metal_bats` |
 | Shop dice | a press sells back and buys a random legal loadout card by card, coins flying, dice rattling | `tests/test_fun_menus.gd`; the shop tour (`shop_dice` frame) | `shop_dice_roll` |
-| Stars | a win: 1 star, 2 when bought for at most 10 dollars, 3 for at most 5; they pop in with rising chimes; the empty ones show the coins they ask for | `test_fun_menus.gd`; the result beat asserts them | `result_win_stars` |
+| Stars | a win: 1 star, 2 when bought for at most 10 dollars, 3 for at most 6; they pop in with rising chimes; the empty ones show the coins they ask for | `test_fun_menus.gd`; the result beat asserts them | `result_win_stars` |
 | Try again with new dice | the result's fourth control starts a siege with a random new loadout; the dice breathe after a second | `test_fun_menus.gd` | `result_loss_dice` |
 | Hub life | a mode button swells under the pointer; a wave of light crosses the shelf, brightening waiting slots and hopping won ones | `tests/test_hub_life.gd` | `hub_wave` |
 
@@ -87,7 +87,7 @@ for the looks and moments of each buff alone.
 | `BuffLooks.LOOKS` | glint 0.5 and 0.65 s, flake 0.55 s, hiccup 1.2 s, ping 0.8 s |
 | `FxSigns.BADGE_PX`, `CLOCK_PX`, `NUMBER_PX`; `FxGlints.STAR_PX` | 112, 44, 56, 34 canvas px |
 | `FxHeroes.RING_SCALE` | monster 1.9, emperor 1.3 |
-| `StarRating.TWO_AT`, `THREE_AT` | 10 dollars, 5 dollars |
+| `StarRating.TWO_AT`, `THREE_AT` | 10 dollars, 6 dollars: measured over 30 random loadouts per cap, 8 seeds each (seeds 500 to 507): at most 10 wins 15 % on average, 75 % at best; 8: 11 %, 50 %; 7: 8 %, 50 %; 6: 3.8 %, 37.5 %; 5: 0.8 %, 12.5 % (so 5 was dropped as near-impossible) |
 | `ResultStars.FIRST_S`, `STEP_S` | 0.45 s, 0.5 s |
 | `ShopDice.STEP_S`; `ResultScreen.BECKON_S` | 0.11 s; 1 s |
 | `TrophyShelf.PERIOD_S`, `SWEEP_S`; `HubScreen.HOVER_SCALE` | 4.5 s, 1.8 s; 1.07 |

@@ -65,6 +65,28 @@ func test_stars_follow_the_dollars_of_a_win() -> void:
 	assert_eq(StarRating.of(win, Loadout.of([&"stew", &"prep_ten_minutes"])), 3)
 
 
+func test_the_star_thresholds_sit_on_their_dollar() -> void:
+	var win := SiegeSim.Outcome.WIN
+	var by_cost := {
+		2: 3,
+		StarRating.THREE_AT: 3,
+		StarRating.THREE_AT + 1: 2,
+		StarRating.TWO_AT: 2,
+		StarRating.TWO_AT + 1: 1,
+		Loadout.BUDGET: 1,
+	}
+	for dollars: int in by_cost:
+		var ids: Array[StringName] = []
+		var rest := dollars
+		for def in BuffCatalog.all():
+			if def.price <= rest:
+				ids.append(def.id)
+				rest -= def.price
+		var loadout := Loadout.of(ids)
+		assert_eq(loadout.cost(), dollars, "built a %d-dollar loadout" % dollars)
+		assert_eq(StarRating.of(win, loadout), by_cost[dollars], "%d dollars" % dollars)
+
+
 func test_a_win_pops_its_stars_in_one_after_another() -> void:
 	var result := ResultScreen.new()
 	result.setup(SiegeSim.Outcome.WIN, Loadout.of([&"stew", &"prep_ten_minutes"]))

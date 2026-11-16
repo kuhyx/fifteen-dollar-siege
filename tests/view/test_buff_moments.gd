@@ -64,16 +64,21 @@ func _with_event(ids: Array, kind: StringName) -> BattleScreen:
 	return battle
 
 
-func test_a_sleepless_village_opens_its_eyes_at_the_alarm() -> void:
-	var woke := _with_event([&"sleepless_village"], SiegeEvent.ALARM)
-	assert_eq(_seen(woke, &"badge"), 1)
-	assert_eq(_seen(_with_event([], SiegeEvent.ALARM), &"badge"), 0)
-
-
-func test_a_deaf_village_shows_its_crossed_ear_at_the_bell() -> void:
-	var rung := _with_event([&"deaf_villagers"], SiegeEvent.BELL_RING)
-	assert_eq(_seen(rung, &"badge"), 1)
-	assert_eq(_seen(_with_event([&"stew"], SiegeEvent.BELL_RING), &"badge"), 0)
+func test_the_village_buffs_show_at_the_alarm_one_after_another() -> void:
+	var both := _with_event([&"sleepless_village", &"deaf_villagers"], SiegeEvent.ALARM)
+	await _play(both, 0.5)
+	assert_eq(_seen(both, &"badge"), 1, "sleepless first")
+	await _play(both, 1.5)
+	assert_eq(_seen(both, &"badge"), 2, "deaf a beat later")
+	var deaf := _with_event([&"deaf_villagers"], SiegeEvent.ALARM)
+	await _play(deaf, 0.5)
+	assert_eq(_seen(deaf, &"badge"), 1, "alone it is at once")
+	var none := _with_event([], SiegeEvent.ALARM)
+	await _play(none, 2.5)
+	assert_eq(_seen(none, &"badge"), 0, "no buff, no badge")
+	var bell := _with_event([&"deaf_villagers"], SiegeEvent.BELL_RING)
+	await _play(bell, 0.5)
+	assert_eq(_seen(bell, &"badge"), 0, "the bell is usually off screen: the alarm is the cue")
 
 
 func test_looks_glint_flake_hiccup_and_ping() -> void:

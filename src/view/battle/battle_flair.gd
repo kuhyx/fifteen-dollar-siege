@@ -34,7 +34,7 @@ func take(shot: SiegeSnapshot, now: float, screen: BattleScreen) -> void:
 	var effects := screen.effects
 	for event in shot.events:
 		impact.on_event(event)
-		moments.on_event(event, effects)
+		moments.on_event(event)
 		if event.get("kind") == SiegeEvent.VICTORY:
 			celebrate(screen)
 	var fallen := toll.feed(shot, now)

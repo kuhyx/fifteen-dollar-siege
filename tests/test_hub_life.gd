@@ -7,7 +7,7 @@ extends GutTest
 func test_a_mode_button_swells_under_the_pointer_and_settles_back() -> void:
 	var hub := HubScreen.new()
 	add_child_autofree(hub)
-	var button := hub.buttons[&"watch"] as Control
+	var button := hub.buttons[&"lab"] as Control
 	assert_eq(button.scale, Vector2.ONE)
 	button.mouse_entered.emit()
 	await wait_until(func() -> bool: return button.scale.x > 1.05, 2.0)

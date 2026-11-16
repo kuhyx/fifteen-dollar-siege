@@ -2,14 +2,17 @@ class_name BuffMoments
 extends RefCounted
 ## The signature moments of the buffs that used to show only a chip: stew
 ## (a bowl and steam), the two prep times (a sweeping clock), the men buffs
-## (the army number rolls up) and the village buffs (eyes open at the alarm,
-## a crossed ear at the bell). Real seconds, view only: the sim never knows.
+## (the army number rolls up) and the village buffs (their badges at the alarm,
+## sleepless first, deaf a beat later). Real seconds, view only.
 
 ## Real seconds after the start: the chips have settled by then.
 const START_AT_S := 1.5
 ## Per prep buff: turns of the clock's long hand, and the clock's size.
 const CLOCKS := {&"prep_hour": [3.0, 1.0], &"prep_ten_minutes": [0.5, 0.7]}
 const BASE_MEN := 100
+## The village buffs that show at the alarm, and the real seconds between two badges.
+const VILLAGE_BUFFS: Array[StringName] = [&"sleepless_village", &"deaf_villagers"]
+const BADGE_GAP_S := 0.9
 
 var _loadout := Loadout.new()
 var _age := 0.0
@@ -17,6 +20,8 @@ var _started := false
 var _rung := {}
 ## [real second, cue, pitch] still to sound.
 var _later: Array[Array] = []
+## [real second, buff id, where, slot] of the village badges still to pop.
+var _badges: Array[Array] = []
 
 
 func setup(loadout: Loadout) -> void:
@@ -25,6 +30,7 @@ func setup(loadout: Loadout) -> void:
 	_started = false
 	_rung.clear()
 	_later.clear()
+	_badges.clear()
 
 
 func advance(delta: float, shot: SiegeSnapshot, effects: BattleEffects) -> void:
@@ -32,21 +38,25 @@ func advance(delta: float, shot: SiegeSnapshot, effects: BattleEffects) -> void:
 	if not _started and _age >= START_AT_S and shot.entity_count() > 0:
 		_started = true
 		_start(shot, effects)
+	for item in _badges.filter(func(it: Array) -> bool: return it[0] <= _age):
+		_badge(item[1], item[2], effects, item[3])
+	_badges = _badges.filter(func(it: Array) -> bool: return it[0] > _age)
 	for item in _later.filter(func(it: Array) -> bool: return it[0] <= _age):
 		FunCue.play(item[1], item[2])
 	_later = _later.filter(func(it: Array) -> bool: return it[0] > _age)
 
 
-## A village buff answers its own event, once.
-func on_event(event: Dictionary, effects: BattleEffects) -> void:
-	var kind: StringName = event.get("kind", &"")
-	var id := &"sleepless_village" if kind == SiegeEvent.ALARM else &"deaf_villagers"
-	if kind not in [SiegeEvent.ALARM, SiegeEvent.BELL_RING] or not _loadout.has(id):
+## A village buff answers the alarm, once, where the alarm rose (the church
+## bell itself is usually off screen): sleepless first, deaf a beat later.
+func on_event(event: Dictionary) -> void:
+	if event.get("kind") != SiegeEvent.ALARM:
 		return
-	if _rung.has(id):
-		return
-	_rung[id] = true
-	_badge(id, event.get("pos", Vector2.ZERO), effects)
+	var slot := 0
+	for id: StringName in VILLAGE_BUFFS:
+		if _loadout.has(id) and not _rung.has(id):
+			_rung[id] = true
+			_badges.append([_age + slot * BADGE_GAP_S, id, event.get("pos", Vector2.ZERO), slot])
+			slot += 1
 
 
 func _start(shot: SiegeSnapshot, effects: BattleEffects) -> void:
@@ -68,8 +78,8 @@ func _start(shot: SiegeSnapshot, effects: BattleEffects) -> void:
 		_later.append([_age + 0.1, &"fun_toll", 0.8])
 
 
-func _badge(id: StringName, at: Vector2, effects: BattleEffects) -> void:
-	effects.flourish(&"badge", FxSigns.badge, BattleFlair.KEEP_S, at, {"id": id})
+func _badge(id: StringName, at: Vector2, effects: BattleEffects, slot := 0) -> void:
+	effects.flourish(&"badge", FxSigns.badge, BattleFlair.KEEP_S, at, {"id": id, "slot": slot})
 	FunCue.play(&"fun_star", 1.0)
 
 

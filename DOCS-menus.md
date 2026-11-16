@@ -48,7 +48,7 @@ Each is a `[design guess]` unless a source is named.
 - **The fun pass's menu delights** (`DOCS-design-fun.md`): the shop's dice
   (`ShopDice`, key 2, top right) sell back and buy a random legal loadout
   (`LoadoutDice`) card by card; a win's result shows 1 to 3 stars
-  (`StarRating`, `ResultStars`: a win, at most 10 dollars, at most 5 dollars)
+  (`StarRating`, `ResultStars`: a win, at most 10 dollars, at most 6 dollars)
   and a fourth control, the dice (key 4), starts a siege with a random new
   loadout; the hub's mode buttons swell under the pointer and a wave of light
   crosses the shelf (`TrophyShelf.glow`). `UiFunMarks` holds the dice and the

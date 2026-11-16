@@ -6,7 +6,11 @@ extends RefCounted
 ## "a different fifteen dollars". [design guess]
 
 const TWO_AT := 10
-const THREE_AT := 5
+## Measured (30 random loadouts under each cap, 8 seeds each): at most 10
+## dollars wins 15 % on average and 75 % at best; at most 6 dollars 3.8 % and
+## 37.5 %; at most 5 dollars 0.8 % and 12.5 %: a third star at 5 would ask the
+## near-impossible, at 6 it is hard but findable (golf carts and booze).
+const THREE_AT := 6
 
 
 ## 0 for a loss, else 1 to 3.

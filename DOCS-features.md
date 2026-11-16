@@ -37,10 +37,10 @@
 | Pops and tally | battle: heads fall | a pop where each squad loses heads; every 10th villager down, a gold number over the fight, a rising bell, the men hop |
 | Heartbeat edge | battle: army morale under 0.3 | a red frame at the screen's edge pulses lub-dub with a heartbeat; back above 0.45 it flashes gold once |
 | Finale | the siege is won | 8 rockets burst over the church, the men jump, invisible squads appear one by one |
-| Buff moments | battle, 1.5 s in (or at the alarm or the bell) | stew: a bowl badge and steam; prep times: a sweeping clock with ticks; double or fifty men: the army number rolls up; sleepless village: its badge at the alarm; deaf village: its badge at the bell |
+| Buff moments | battle, 1.5 s in (or at the alarm) | stew: a bowl badge and steam; prep times: a sweeping clock with ticks; double or fifty men: the army number rolls up; sleepless village: its badge at the alarm; deaf village: its crossed ear a beat later |
 | Live looks | battle, a squad in view | knight armour and helmets glint, cardboard flakes, booze hiccups bubbles, metal bats ping, each every 0.5 to 1.2 s |
 | Shop dice | shop: the dice at the top right (key 2) | sells back, then buys a random legal loadout card by card, coins flying and dice rattling; the go button then starts it |
-| Stars | result of a win | 1 star for the win, 2 for at most 10 dollars spent, 3 for at most 5; they pop in with rising chimes; the empty ones show their coins as a number |
+| Stars | result of a win | 1 star for the win, 2 for at most 10 dollars spent, 3 for at most 6; they pop in with rising chimes; the empty ones show their coins as a number |
 | Try again | result: the dice (key 4) | a siege starts with a random new legal loadout; the dice breathe after a second |
 | Hub life | hub | a mode button swells under the pointer or focus; a wave of light crosses the shelf every 4.5 s |
 | Hero marks | battle | a gold ring and a pointer on the army's single figures (the great captain, the trumpet boy, the gunman, the monster) at any zoom |

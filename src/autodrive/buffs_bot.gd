@@ -11,6 +11,8 @@ const SPEED := 16.0
 const LIMIT_FRAMES := 6000
 ## Frames a staged beat plays before the bot looks at it.
 const BEAT_LOOK_FRAMES := 20
+## Frames a buff's field moment (badge, clock, number, glint) grows before its frame.
+const MOMENT_FRAMES := 14
 
 
 func _ready() -> void:
@@ -71,6 +73,8 @@ func _one(id: StringName) -> bool:
 		why = BuffSigns.missing(battle, id)
 		if why == "":
 			print("BUFF %s at %.1f s" % [id, battle.shot.clock_s])
+			if BuffSigns.MOMENTS.has(id):
+				await frames(MOMENT_FRAMES)  # the moment has grown by the time of the frame
 			return await shot("buff_%s" % id)
 		if battle.beats.staging():
 			battle.beats.skip_all()

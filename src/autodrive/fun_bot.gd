@@ -12,6 +12,9 @@ const LIMIT_FRAMES := 9000
 const LOOK_FRAMES := 12
 ## Different look signs that must be on screen together for the `looks` frame.
 const LOOKS_AT_ONCE := 2
+## Frames the hub gets to show its wave (a wave every 4.5 s), and how bright.
+const HUB_WAVE_FRAMES := 600
+const HUB_GLOW := 0.85
 const SCENES := [
 	[&"shake_monster", [&"stitched_monster"], 1000],
 	[&"reveal", [&"invisibility_potions"], 1000],
@@ -44,6 +47,7 @@ func _run() -> void:
 		if not ok:
 			break
 		ok = await _scene(scene[0], Loadout.of(scene[1]), scene[2])
+	ok = ok and await _hub()
 	finish("mode=fun frames=%d" % shots.count)
 
 
@@ -112,3 +116,20 @@ func _scene(tag: StringName, loadout: Loadout, seed_value: int) -> bool:
 			return await shot("fun_%s" % tag)
 		await frames(1)
 	return check(false, "%s never showed on screen" % tag)
+
+
+## The hub: the pointer rests on Watch (its button swells) and a wave of
+## light crosses the middle of the shelf; one frame with both.
+func _hub() -> bool:
+	main.open_hub()
+	if not await on_screen(&"hub"):
+		return false
+	var hub := main.screen as HubScreen
+	var watch := hub.buttons[&"watch"] as Control
+	InputSynth.canvas_motion(Vector2(4, 4), watch.get_global_rect().get_center())
+	for frame in HUB_WAVE_FRAMES:
+		var swollen := watch.scale.x > HubScreen.HOVER_SCALE - 0.02
+		if swollen and TrophyShelf.glow(TrophyShelf.PER_ROW / 2, hub.shelf.age()) > HUB_GLOW:
+			return await shot("fun_hub")
+		await frames(1)
+	return check(false, "the hub's swell and shelf wave never showed together")
