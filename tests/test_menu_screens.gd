@@ -11,7 +11,7 @@ func before_each() -> void:
 	InputDevice.device = InputDevice.Device.KEYS
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
-	main.options.speed = 32.0
+	main.options.speed = 400.0
 	main.options.sim_seed = 5
 	main.options.lab_runs = 6
 	# One frame old before any synthesized input (see tests/test_menu_keys.gd).
@@ -34,6 +34,7 @@ func _to_result(ids: Array) -> ResultScreen:
 	main.mode = &"watch"
 	main.start_siege(Loadout.of(ids))
 	(main.screen as BattleScreen).payoff_s = 0.05
+	(main.screen as BattleScreen).beats.skip_all()
 	await wait_until(func() -> bool: return main.screen_name == &"result", 20.0)
 	return main.screen as ResultScreen
 
@@ -71,7 +72,11 @@ func test_the_lab_runs_in_slices_and_agrees_with_the_core() -> void:
 		slices += 1
 	assert_gt(slices, 5, "a zero budget still moves, a few ticks at a time")
 	assert_eq(runner.result, Lab.run_batch(loadout, 5, 11), "the same numbers as the core")
-	assert_eq(runner.outcomes, PackedByteArray([1, 1, 1, 1, 1]))
+	var outcomes := PackedByteArray()
+	for i in 5:
+		var won: bool = Lab.run_one(loadout, 11 + i)["outcome"] == SiegeSim.Outcome.WIN
+		outcomes.append(1 if won else 0)
+	assert_eq(runner.outcomes, outcomes, "each run won or lost as the core's run of its seed")
 	var none := LabRunner.new(loadout, 0, 1)
 	assert_true(none.is_done(), "an empty batch is done at once")
 

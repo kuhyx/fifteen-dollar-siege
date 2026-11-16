@@ -8,13 +8,14 @@
 # ============================================================================
 
 readonly FIRST=(smoke)
-readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio coverage)
+readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio coverage balance)
 readonly LAST=(export round web)
 # group name -> its gates. Every gate is in exactly one group.
-readonly GROUP_NAMES=(fast play tools build web)
+readonly GROUP_NAMES=(fast play tools balance build web)
 readonly GROUP_FAST=(smoke lint static shared save_guard recording)
 readonly GROUP_PLAY=(test autodrive launcher)
 readonly GROUP_TOOLS=(audio coverage)
+readonly GROUP_BALANCE=(balance)
 readonly GROUP_BUILD=(export round)
 readonly GROUP_WEB=(web)
 
@@ -24,6 +25,7 @@ group_gates() {
         fast) printf '%s\n' "${GROUP_FAST[@]}" ;;
         play) printf '%s\n' "${GROUP_PLAY[@]}" ;;
         tools) printf '%s\n' "${GROUP_TOOLS[@]}" ;;
+        balance) printf '%s\n' "${GROUP_BALANCE[@]}" ;;
         build) printf '%s\n' "${GROUP_BUILD[@]}" ;;
         web) printf '%s\n' "${GROUP_WEB[@]}" ;;
         *)
@@ -77,7 +79,7 @@ parse_args() {
         esac
     done
     if [[ ${#WANTED[@]} -eq 0 ]]; then
-        echo "name a group or a gate: scripts/check.sh --group fast|play|tools|build|web (--list shows them)" >&2
+        echo "name a group or a gate: scripts/check.sh --group fast|play|tools|balance|build|web (--list shows them)" >&2
         exit 2
     fi
     for arg in "${WANTED[@]}"; do

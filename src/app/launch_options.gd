@@ -10,13 +10,16 @@ extends RefCounted
 ##   --save-dir=DIR           save root (bots and tests never use the real one)
 ##   --autodrive=MODE         the bot plays MODE (or `showcase`) and exits 0 / 1
 ##   --result-file=PATH --screenshot-dir=DIR --expect-window=WxH   bot outputs
+##   --every=S (reel bot) --shard=I/N (buffs bot)
 ##   --feedback-dir=DIR --session-id=ID --dev-shot=PNG --dev-tag=T dev tools
 ## Unknown arguments are kept in `unknown` (the bot fails on them).
 
 const MODES: Array[StringName] = [&"watch", &"command", &"lab"]
 ## What --autodrive= takes: every mode, the battle screen's showcase and the
 ## touch-only pass (R17).
-const BOT_MODES: Array[StringName] = [&"watch", &"command", &"lab", &"showcase", &"touch"]
+const BOT_MODES: Array[StringName] = [
+	&"watch", &"command", &"lab", &"showcase", &"touch", &"reel", &"buffs"
+]
 const DEFAULT_LAB_RUNS := 200
 const MAX_SPEED := 64.0
 const VALUES: Array[String] = [
@@ -34,6 +37,8 @@ const VALUES: Array[String] = [
 	"--session-id=",
 	"--dev-shot=",
 	"--dev-tag=",
+	"--every=",
+	"--shard=",
 ]
 
 var dev := false
@@ -48,6 +53,9 @@ var autodrive: StringName = &""
 var result_file := ""
 var screenshot_dir := ""
 var expect_window := ""
+## Reel bot: sim seconds between two frames. Buffs bot: "I/N", the I-th of N shards.
+var every_s := 0.0
+var shard := ""
 var unknown: Array[String] = []
 ## What is wrong with the arguments, "" when nothing.
 var problem := ""
@@ -103,6 +111,10 @@ func _apply(prefix: String, value: String) -> void:
 			screenshot_dir = value
 		"--expect-window=":
 			expect_window = value
+		"--every=":
+			every_s = _float(prefix, value, 0.1, 600.0)
+		"--shard=":
+			shard = value
 
 
 func _mode(value: String, known: Array[StringName] = MODES) -> StringName:

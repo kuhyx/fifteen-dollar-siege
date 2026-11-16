@@ -4,16 +4,17 @@ extends RefCounted
 ## base_seed + i, so a batch is reproducible and two batches with different
 ## base seeds are independent samples.
 
-## A siege still undecided after this much sim time counts as not won.
+## Kept from the scaffold's API: every siege is decided long before this (the
+## sim's own cap is SiegeTuning.TIME_CAP_S).
 const MAX_SIM_S := 3600.0
 
 
 ## One whole siege with no player orders: {outcome: SiegeSim.Outcome,
-## seconds: sim time when it was decided}.
+## seconds: sim time when it was decided}. Every siege is decided by
+## SiegeTuning.TIME_CAP_S at the latest.
 static func run_one(loadout: Loadout, sim_seed: int) -> Dictionary:
 	var sim := SiegeSim.create(loadout, sim_seed)
-	while sim.outcome() == SiegeSim.Outcome.RUNNING and sim.clock_s() < MAX_SIM_S:
-		sim.step(SiegeSim.STEP_S)
+	sim.run_to_end()
 	return {"outcome": sim.outcome(), "seconds": sim.clock_s()}
 
 

@@ -15,7 +15,7 @@ func before_each() -> void:
 	SaveStore.clear()
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
-	main.options.speed = 32.0
+	main.options.speed = 400.0
 	main.options.sim_seed = 5
 	main.options.lab_runs = 6
 	director = AudioDirector.live()
@@ -64,6 +64,7 @@ func test_a_siege_plays_the_bed_then_the_stinger_then_the_hub_again() -> void:
 	assert_true(director.music.battle.playing, "the bed starts with the siege")
 	assert_eq(director.ui_log.back(), &"ui_go")
 	(main.screen as BattleScreen).payoff_s = 0.05
+	(main.screen as BattleScreen).beats.skip_all()
 	await wait_until(func() -> bool: return main.screen_name == &"result", 20.0)
 	assert_eq(director.music.scene, &"ending")
 	assert_true(director.music.stinger.playing)

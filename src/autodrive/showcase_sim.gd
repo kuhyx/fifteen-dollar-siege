@@ -14,6 +14,7 @@ var show_outcome := SiegeSim.Outcome.RUNNING
 var show_army_morale := 0.8
 var show_village_morale := 0.6
 var show_alarm := 0.4
+var show_centre := 0.0
 ## Parallel arrays, as in SiegeSnapshot.
 var show_pos := PackedVector2Array()
 var show_kind := PackedInt32Array()
@@ -112,6 +113,10 @@ func snapshot() -> SiegeSnapshot:
 	shot.army_morale = show_army_morale
 	shot.village_morale = show_village_morale
 	shot.alarm = show_alarm
+	for event in _due:
+		if event["kind"] == SiegeEvent.CENTRE_HELD:
+			show_centre = event["progress"]
+	shot.centre_hold = show_centre
 	shot.ent_pos = show_pos.duplicate()
 	shot.ent_kind = show_kind.duplicate()
 	shot.ent_team = show_team.duplicate()

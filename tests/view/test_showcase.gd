@@ -54,7 +54,7 @@ func test_the_crowd_is_2400_figures_that_move_and_fall() -> void:
 	assert_ne(after.ent_pos, before.ent_pos, "everybody moves")
 	assert_ne(after.ent_state, before.ent_state, "states change")
 	assert_lt(sim.heads(), 2400, "heads fall")
-	assert_gt(after.events.size(), 20, "a storm of events")
+	assert_gt(after.events.size(), 15, "a storm of events: one every 0.1 s tick")
 	assert_almost_eq(after.clock_s, 2.0, SiegeSim.STEP_S + 0.001, "whole ticks only")
 	var twin := ShowcaseSim.make(&"crowd")
 	twin.step(2.0)

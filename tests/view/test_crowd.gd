@@ -176,16 +176,18 @@ func test_the_army_can_burn_and_a_rout_scatters_the_nearest_squad() -> void:
 func test_the_map_plan_has_a_church_fields_a_path_and_a_camp() -> void:
 	var map := SiegeSim.create(Loadout.new(), 7).map()
 	var plan := MapPlan.of(map)
-	assert_true(plan.nave.has_point(map.village_center), "the church stands at the centre")
-	assert_true(plan.tower.has_point(plan.bell), "with a bell in its tower")
+	assert_true(map.church.encloses(plan.nave), "the church stands where the map says")
+	assert_true(map.church.encloses(plan.transept), "its transept too")
+	assert_eq(plan.bell, map.bell, "the bell rings where the map says")
+	assert_true(plan.tower.has_point(plan.bell), "in its tower")
 	assert_gt(plan.fields.size(), 3)
 	for field in plan.fields:
 		assert_true(map.bounds.encloses(field), "fields lie on the map")
 		assert_false(map.in_village(field.get_center()), "and outside the village")
 	assert_eq(plan.path[0], map.army_spawn, "the path leaves the camp")
-	assert_lt(plan.path[plan.path.size() - 1].distance_to(map.village_center), 25.0)
+	assert_lte(plan.path[plan.path.size() - 1].distance_to(map.village_center), map.centre_radius)
 	assert_eq(plan.camp, map.army_spawn)
 	assert_lte(plan.houses.size(), map.buildings.size())
 	for house in plan.houses:
-		assert_false(house.intersects(plan.nave), "no house under the church")
+		assert_false(house.intersects(map.church), "no house under the church")
 	assert_eq(MapPlan.of(map).fields, plan.fields, "the same map plans the same way")

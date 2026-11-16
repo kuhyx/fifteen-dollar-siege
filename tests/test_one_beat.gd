@@ -14,7 +14,7 @@ func before_each() -> void:
 	SaveStore.clear()
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
-	main.options.speed = 32.0
+	main.options.speed = 400.0
 	main.options.sim_seed = 5
 	main.mode = &"watch"
 	main.start_siege(Loadout.of([&"double_men", &"fifty_men"]))

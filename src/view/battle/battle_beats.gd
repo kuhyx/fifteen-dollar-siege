@@ -69,6 +69,12 @@ func skip() -> void:
 		_end(true)
 
 
+## Drops every beat still to come and cuts the one on stage short.
+func skip_all() -> void:
+	queue.clear()
+	skip()
+
+
 ## The map box the camera should hold for the beat on stage (or, before the
 ## first one starts, for the beat that is next).
 func beat_box() -> Rect2:

@@ -41,8 +41,18 @@ func _squads_at(points: Array, state: int) -> Array[SquadVisual]:
 
 func test_the_plan_lists_every_house_the_church_and_the_tents() -> void:
 	var blocks := plan.blocks()
-	assert_eq(blocks.size(), plan.houses.size() + 3 + MapPlan.TENTS.size())
+	assert_lte(blocks.size(), plan.houses.size() + 3 + MapPlan.TENTS.size())
 	assert_lte(blocks.size(), CrowdScatter.MAX_BLOCKS)
+	for footprint: Rect2 in plan.houses + [plan.nave, plan.transept, plan.tower]:
+		var held := false
+		for block in blocks:
+			held = held or _inside(footprint.get_center(), block)
+		assert_true(held, "%s is inside a block" % footprint)
+	for i in blocks.size():
+		for j in range(i + 1, blocks.size()):
+			var one := Rect2(blocks[i].x, blocks[i].y, blocks[i].z, blocks[i].w)
+			var other := Rect2(blocks[j].x, blocks[j].y, blocks[j].z, blocks[j].w)
+			assert_false(one.intersects(other), "blocks %d and %d overlap" % [i, j])
 
 
 func test_a_point_on_a_roof_is_moved_to_its_edge_and_others_stay() -> void:

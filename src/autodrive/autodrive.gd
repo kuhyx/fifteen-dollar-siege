@@ -1,3 +1,4 @@
+class_name Autodrive
 extends BotBase
 ## The --autodrive=<watch|command|lab> bot: plays one mode through the real
 ## main scene with synthesized clicks and keys, and exits 0 only when every
@@ -10,30 +11,43 @@ extends BotBase
 ## Lives outside src/dev so an exported build can run it too.
 ## scripts/lib/bot.sh `bot_frames` holds the number of beats per mode.
 
-## 15 dollars, 300 men: the stub sim wins at 8 dollars or more.
-const WIN_IDS: Array[StringName] = [&"double_men", &"fifty_men", &"knight_armor", &"pep_talk"]
-## 2 dollars: the stub sim loses.
-const LOSE_IDS: Array[StringName] = [&"pep_talk", &"stew"]
+## The pinned sieges of the real sim (src/core/siege_fixtures.gd): a loadout
+## and seed that win, a loadout and seed that lose.
+const WIN_IDS := SiegeFixtures.WIN_IDS
+const LOSE_IDS := SiegeFixtures.LOSE_IDS
 ## One buy too many for WIN_IDS (16 dollars): must be refused.
 const ONE_TOO_MANY := &"stew"
+## The bots with a script of their own.
+const OTHER_BOTS: Array[StringName] = [&"showcase", &"touch", &"reel", &"buffs"]
 const DECIDE_LIMIT_FRAMES := 6000
-## Frames of a siege the frame gate judges (BattleChecks.smooth).
-const SMOOTH_FRAMES := 40
+
+## State hashes of the sieges played (the RESULT line).
+var hashes: PackedStringArray = []
 
 var _mode: StringName
-var _hashes: PackedStringArray = []
 
 
 func _ready() -> void:
 	main = get_parent() as Main
 	_mode = main.options.autodrive
-	if _mode in [&"showcase", &"touch"]:  # the battle's tour, a finger's loop: other bots
-		var other: BotBase = ShowcaseBot.new() if _mode == &"showcase" else TouchBot.new()
+	if _mode in OTHER_BOTS:  # the battle's tour, a finger's loop, a reel, the buffs
+		var other: BotBase = _other_bot()
 		other.main = main
 		add_child(other)
 		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_run.call_deferred()
+
+
+func _other_bot() -> BotBase:
+	match _mode:
+		&"showcase":
+			return ShowcaseBot.new()
+		&"touch":
+			return TouchBot.new()
+		&"reel":
+			return ReelBot.new()
+	return BuffsBot.new()
 
 
 func _run() -> void:
@@ -44,10 +58,7 @@ func _run() -> void:
 	if _may_run():
 		await _play()
 	finish(
-		(
-			"mode=%s frames=%d hashes=%s %s"
-			% [_mode, shots.count, ",".join(_hashes), " ".join(numbers)]
-		)
+		"mode=%s frames=%d hashes=%s %s" % [_mode, shots.count, ",".join(hashes), " ".join(numbers)]
 	)
 
 
@@ -66,13 +77,14 @@ func _play() -> void:
 		return
 	for wins: bool in [true, false]:
 		var ids := WIN_IDS if wins else LOSE_IDS
+		main.options.sim_seed = SiegeFixtures.WIN_SEED if wins else SiegeFixtures.LOSE_SEED
 		if not await _buy(ids, "win" if wins else "lose"):
 			return
 		var played: bool
 		if _mode == &"lab":
 			played = await _lab_round(wins)
 		else:
-			played = await _siege_round(wins)
+			played = await SiegeRound.play(self, wins, _mode)
 		if not played:
 			return
 	await _pause_to_hub()
@@ -136,75 +148,8 @@ func _buy(ids: Array[StringName], tag: String) -> bool:
 	return true
 
 
-## Battle to the payoff and the result screen, then home.
-func _siege_round(wins: bool) -> bool:
-	var tag := "win" if wins else "lose"
-	if not await on_screen(&"battle"):
-		return false
-	var battle := main.screen as BattleScreen
-	var men := 0
-	for i in battle.shot.entity_count():
-		if battle.shot.ent_team[i] == SiegeSnapshot.Team.ARMY:
-			men += battle.shot.ent_count[i]
-	await frames(20)
-	var ok := (
-		check(men == SiegeSim.army_size(main.loadout), "the army has %d men" % men)
-		and await shot("battle_" + tag)
-		and BattleChecks.hud_ok(self, battle)
-		and (_mode != &"command" or await _give_orders(battle))
-		and (not wins or await _pause_freezes(battle))
-		and await BattleChecks.smooth(self, battle, SMOOTH_FRAMES) >= 0.0
-	)
-	return ok and await _to_result(battle, wins)
-
-
-## Waits for the decision, takes the payoff frame BEFORE any result UI opens
-## (lesson L13), then plays the result screen's own payoff and controls.
-func _to_result(battle: BattleScreen, wins: bool) -> bool:
-	var tag := "win" if wins else "lose"
-	var want := SiegeSim.Outcome.WIN if wins else SiegeSim.Outcome.LOSE
-	var decided := func() -> bool: return battle.sim.outcome() != SiegeSim.Outcome.RUNNING
-	if not await wait_for(decided, DECIDE_LIMIT_FRAMES, "the siege to be decided"):
-		return false
-	_hashes.append(str(battle.sim.state_hash()))
-	var showing: bool = await BattleChecks.payoff_seen(self, battle)
-	var ok := (
-		check(battle.sim.outcome() == want, "the siege ends in %s" % tag)
-		and check(showing, "the payoff shows before the result")
-		and await shot("payoff_" + tag)
-		and await on_screen(&"result")
-	)
-	return ok and await MenuBeats.result(self, wins, want, main.loadout.ids)
-
-
-## Command mode: a rally click on the map, then retreat and charge buttons.
-func _give_orders(battle: BattleScreen) -> bool:
-	await click_at(battle.camera.view.get_center() + Vector2(0.0, -120.0))
-	if not check(battle.commands_sent == 1, "a map click places the rally flag"):
-		return false
-	await frames(20)
-	if not await shot("rally"):
-		return false
-	await click(battle.retreat_button)
-	await click(battle.charge_button)
-	return check(battle.commands_sent == 3, "retreat and charge reach the sim")
-
-
-## Esc mid-battle: the menu is up and the sim clock stands still.
-func _pause_freezes(battle: BattleScreen) -> bool:
-	await press_escape()
-	var before := battle.sim.clock_s()
-	await frames(10)
-	var frozen := main.pause_menu.is_open() and is_equal_approx(battle.sim.clock_s(), before)
-	if not check(frozen, "the pause menu freezes the siege") or not await shot("pause_battle"):
-		return false
-	await press_escape()
-	await frames(5)
-	return check(battle.sim.clock_s() > before, "the siege runs again after the menu closes")
-
-
-## Lab: the batch arrives tick by tick, finishes, every run agrees with the
-## stub rule, the loadout is ranked, and the Lab's own controls lead on.
+## Lab: the batch arrives tick by tick, finishes, sides with the pinned
+## fixture, the loadout is ranked, and the Lab's own controls lead on.
 func _lab_round(wins: bool) -> bool:
 	if not await on_screen(&"lab"):
 		return false
@@ -215,14 +160,14 @@ func _lab_round(wins: bool) -> bool:
 	if not await wait_for(done, DECIDE_LIMIT_FRAMES, "the lab batch"):
 		return false
 	var runs: int = lab.result["runs"]
-	var expected := runs if wins else 0
+	var mostly_won: bool = lab.result["wins"] * 2 > runs
 	var seconds: float = lab.result["mean_seconds"]
-	_hashes.append("%d/%d" % [lab.result["wins"], runs])
+	hashes.append("%d/%d" % [lab.result["wins"], runs])
 	await frames(3)
 	var ok := (
 		check(runs == main.options.lab_runs, "the lab ran %d sieges" % runs)
-		and check(lab.result["wins"] == expected, "the lab counts %d wins" % expected)
-		and check(seconds > 15.0 and seconds < 25.0, "mean seconds near 20: %s" % seconds)
+		and check(mostly_won == wins, "the lab sides with the fixture: %s" % hashes[-1])
+		and check(seconds > 30.0 and seconds < 300.0, "mean seconds of a siege: %s" % seconds)
 		and await MenuBeats.lab_ranked(self, lab, wins)
 		and await shot("lab_win" if wins else "lab_lose")
 	)

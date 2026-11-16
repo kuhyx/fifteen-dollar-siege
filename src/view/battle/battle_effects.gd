@@ -170,7 +170,9 @@ func _draw() -> void:
 	if _meter != null:
 		_meter.begin()
 	if _plan != null:
-		FxMarks.centre_ring(self, _plan.map.village_center, centre_progress)
+		FxMarks.centre_ring(
+			self, _plan.map.village_center, centre_progress, _plan.map.centre_radius
+		)
 	if has_rally():
 		FxMarks.rally_flag(self, rally, _rally_age, view_zoom)
 	for fx in live:

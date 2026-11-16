@@ -89,8 +89,9 @@ func test_a_whole_siege_is_logged_moment_by_moment() -> void:
 	battle.order(SiegeSim.Command.RALLY, Vector2(120, 80))
 	main.pause_menu.open()
 	main.pause_menu.close()
-	battle.speed = 64.0
+	battle.speed = 400.0
 	battle.payoff_s = 0.05
+	battle.beats.skip_all()
 	await wait_until(func() -> bool: return main.screen_name == &"result", 20.0)
 	telemetry.shutdown("test")
 	telemetry.shutdown("again")
@@ -106,7 +107,8 @@ func test_a_whole_siege_is_logged_moment_by_moment() -> void:
 	assert_eq(start["men"], 200.0)
 	assert_eq(start["seed"], 5.0)
 	assert_eq(rows[events.find("command")]["order"], "rally")
-	assert_eq(rows[events.find("game_end")]["outcome"], "win")
+	# The rally flag stands far from the village until the time cap: a loss.
+	assert_eq(rows[events.find("game_end")]["outcome"], "lose")
 	assert_eq(rows[events.find("buy")]["buff"], "double_men")
 
 

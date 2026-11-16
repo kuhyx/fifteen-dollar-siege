@@ -35,7 +35,8 @@ The premise, verbatim:
 - 15 dollar cap. Each buff at most once. Unspent dollars are lost.
 - "+50 men" applies before "double": 100, 150, 200 or 300 men.
 - **Win:** village morale breaks OR the army holds the village centre 30 s.
-- **Lose:** the army is dead or routed. It then combusts.
+- **Lose:** the army is dead or routed (or nothing is decided after 300 s). It
+  then combusts.
 - The village does not know at first; it notices as the men draw near
   (`alarm` 0..1).
 
@@ -53,9 +54,7 @@ label of a card and are never drawn.
 | 2 | `metal_bats` `sleepless_village` `trumpet_boy` `booze` |
 | 1 | `pep_talk` `cardboard_armor` `stew` `prep_ten_minutes` |
 
-Only `fifty_men` and `double_men` have an effect in the scaffold (army size).
-What each other buff does is the sim agent's design work (R6: research first,
-one sourced row per constant in section 8).
+What each buff does, and its catch: `DOCS-design-sim.md` section 6.
 
 ## 5. Core API (`src/core`, additions only)
 
@@ -83,28 +82,35 @@ class_name SiegeMap
     var village_radius: float
     var buildings: Array[Rect2]
     var army_spawn: Vector2
+    var church: Rect2                            # = buildings[0]
+    var bell: Vector2
+    var centre_radius: float                     # the plaza to hold
     func in_village(point: Vector2) -> bool
 class_name SiegeSnapshot
     enum Team { ARMY, VILLAGE }
-    enum Kind { MEN, VILLAGERS }                 # add new kinds at the END
+    enum Kind { MEN, VILLAGERS, MILITIA, RETINUE, ARCHERS, BAT_MEN, SHOTGUNNER,
+        EMPEROR, TRUMPET_BOY, MEDICS, MONSTER, MOOSE, WASPS, GOLF_CARTS,
+        CATAPULT, ROCK_BAND, UFO }               # add new kinds at the END
     enum State { IDLE, MOVE, FIGHT, FLEE, DOWN, HIDDEN }
     var clock_s: float
     var outcome: int                             # SiegeSim.Outcome
     var army_morale: float                       # 0..1
     var village_morale: float                    # 0..1
     var alarm: float                             # 0..1
+    var centre_hold: float                       # 0..1 of the 30 s in the plaza
     var ent_pos: PackedVector2Array
     var ent_kind: PackedInt32Array
     var ent_team: PackedByteArray
     var ent_count: PackedInt32Array              # heads alive in the entity
     var ent_state: PackedByteArray
     var ent_facing: PackedFloat32Array           # radians, 0 = +x
+    var ent_morale: PackedFloat32Array           # 0..1, the squad's own
     var events: Array[Dictionary]                # {kind, pos, ...}
     func entity_count() -> int
 class_name SiegeSim
     enum Outcome { RUNNING, WIN, LOSE }
     enum Command { RALLY, CHARGE, RETREAT }
-    const STEP_S := 1.0 / 30.0                   # fixed internal timestep
+    const STEP_S := 0.1                          # fixed internal timestep
     static func army_size(loadout: Loadout) -> int
     static func create(loadout: Loadout, sim_seed: int) -> SiegeSim
     func map() -> SiegeMap
@@ -114,11 +120,15 @@ class_name SiegeSim
     func outcome() -> int
     func clock_s() -> float
     func state_hash() -> int
+    func run_to_end() -> int                     # no view: plays to the decision
+    func village_low() -> float                  # lowest village morale so far
 class_name Lab
     static func run_one(loadout: Loadout, sim_seed: int) -> Dictionary
         # {outcome, seconds}
     static func run_batch(loadout: Loadout, runs: int, base_seed: int) -> Dictionary
         # {wins, runs, mean_seconds}; run i uses seed base_seed + i
+class_name SiegeEvent         # the event names (`kind`), e.g. SiegeEvent.ALARM
+class_name SiegeFixtures      # WIN_IDS + WIN_SEED, LOSE_IDS + LOSE_SEED (pinned)
 ```
 
 Contract notes:
@@ -127,8 +137,11 @@ Contract notes:
   squad level; the view scatters `ent_count` figures around `ent_pos`. Arrays
   are parallel; the index is the entity for the whole siege.
 - **Events** are handed over once: a second `snapshot()` of the same tick has
-  none. Scaffold kinds: `command` (`command`: the Command), `alarm`,
-  `victory`, `combust`. New kinds are free; the view ignores unknown ones.
+  none. Names: `SiegeEvent`; their data: `DOCS-design-sim.md` section 7.
+- **States.** `HIDDEN` is an army squad nobody sees (potion; `REVEAL` ends
+  it), a crowd that hid indoors, or the UFO once it has left.
+- **Head counts** of the army equal `army_size()` unless a buff adds people or
+  beasts (emperor, trumpet boy, band, medics, monster, moose, wasps, UFO).
 - **Determinism.** The same loadout, seed and `command()` sequence (same
   ticks) give the same `state_hash()` after every tick. `tests/core/`
   enforces it; the exported build prints the same hashes as the source run.
@@ -139,11 +152,8 @@ Contract notes:
 
 ## 6. What is a stub today
 
-`SiegeSim` walks army entities (10 heads each) to their target and decides at
-about 20 s: WIN when the loadout cost 8 dollars or more, else LOSE. Morale
-drains linearly toward the loser. The win conditions of section 3 are not
-simulated yet. `tests/core/test_siege_sim.gd` marks which assertions are
-stub-only (their names say "stub").
+The sim is real: `DOCS-design-sim.md`. The bot and the flow tests play the
+pinned sieges of `SiegeFixtures`.
 
 The screens are real: the hub, the shop, the Lab and the result screen
 (`DOCS-menus.md`) and the battle screen (`DOCS-design-battle.md`; it draws the
@@ -168,10 +178,11 @@ and combust stingers, a volume control on the pause menu.
   drawn fails `tests/test_menu_keys.gd` (lesson L6).
 - Touch needs no hover: a tap puts a card on show, a second tap buys it.
 
-## 8. Sources (the sim agent fills this: one row per tuning constant)
+## 8. Sources
 
-| constant | value | source |
-|---|---|---|
+One row per tuning constant (`constant | value | source`):
+`DOCS-design-sources.md` (the base model) and `DOCS-design-buff-sources.md`
+(the buffs). `tests/core/test_sources.gd` keeps them in step with the code.
 
 ## 9. Scaffold constants
 
@@ -180,13 +191,10 @@ and combust stingers, a volume control on the pause menu.
 | `Loadout.BUDGET` | 15 | premise: "$15" |
 | `SiegeSim.BASE_MEN` | 100 | premise: "100 random men" |
 | `SiegeSim.EXTRA_MEN` | 50 | buff text: "+50 men" |
-| villagers | 2000 (20 groups of 100) | premise: "population of 2,000"; the grouping is a `[design guess]` |
-| hold the centre | 30 s | kuhy's rule (section 3); not simulated yet |
-| `SiegeSim.STEP_S` | 1/30 s | `[design guess]` |
+| villagers | 2000 | premise: "population of 2,000"; who they are: `DOCS-design-sim.md` section 2 |
 | `SiegeSim.SQUAD_SIZE` | 10 | `[design guess]` |
+| `SiegeSim.BUILDINGS` | 14 | `[design guess]` |
 | map bounds, village radius | 600 x 400 m, 110 m | `[design guess]` |
-| `STUB_WIN_COST`, `STUB_DECIDE_S` | 8, 20 s (+- 2 s) | the scaffold brief; deleted with the stub |
-| `STUB_SPEED_MPS`, `STUB_FLEE_MPS` | 18, 6 | stub only: the walk ends near the decision |
 | `LaunchOptions.DEFAULT_LAB_RUNS` | 200 | `[design guess]` |
 | `BattleScreen.PAYOFF_S` | 3.2 s | `[design guess]`; the battle view's other constants: `DOCS-design-battle.md` |
 | `LabScreen.FRAME_BUDGET_MS` | 6 ms | `[design guess]`: under half a 60 fps frame |

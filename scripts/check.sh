@@ -19,6 +19,7 @@
 #   tools  (~35 s)  audio    audio tool tests, rendered files current, offline
 #                            analysis, the boot probe
 #                   coverage 100 % branch coverage of tools/recording, tools/audio
+#   balance (~?? s) balance  the pinned balance checks of the sim
 #   build  (~20 s)  export   the Linux build plays without src/dev
 #                   round    scripts/build_round.sh in a throwaway folder
 #   web    (~25 s)  web      the Web build in an isolated headless Chromium
@@ -62,6 +63,7 @@ run_gate() {
         launcher) scripts/test_launcher.sh ;;
         audio) tools/audio/check.sh ;;
         coverage) scripts/coverage.sh ;;
+        balance) scripts/balance_gate.sh ;;
         export) scripts/test_export.sh ;;
         round) scripts/test_build_round.sh ;;
         web) scripts/test_web.sh ;;

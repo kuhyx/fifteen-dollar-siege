@@ -207,14 +207,7 @@ func _step(dt_sim: float) -> void:
 	_take(next, dt_sim)
 	if was == SiegeSim.Outcome.RUNNING and sim.outcome() != was:
 		payoff_active = true
-		if sim.outcome() == SiegeSim.Outcome.LOSE:
-			crowd.ignite(SiegeSnapshot.Team.ARMY)
-			crowd.spotlight(SiegeSnapshot.Team.ARMY, CrowdLayer.DIM_LOSS)
-			effects.veil_goal = 1.0
-		else:
-			effects.flag_up = true
-			crowd.spotlight(SiegeSnapshot.Team.ARMY, CrowdLayer.DIM_WIN)
-		beats.start_payoff(payoff_s)
+		BattlePayoff.begin(self)
 		decided.emit(sim.outcome())
 	meter.end()
 
@@ -232,6 +225,10 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 		effects.spawn(event)
 		if event.get("kind") in [SiegeEvent.BELL_RING, SiegeEvent.ALARM]:
 			hud.meters.ringing = RING_S
+	# The ring follows the snapshot's own hold, so it also empties when the hold
+	# is broken (the sim sends CENTRE_HELD only while it grows).
+	if not shot.events.any(func(e: Dictionary) -> bool: return e["kind"] == SiegeEvent.CENTRE_HELD):
+		effects.centre_progress = shot.centre_hold
 
 
 func _fit() -> void:

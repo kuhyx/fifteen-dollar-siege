@@ -11,7 +11,12 @@ var village_radius := 110.0
 ## Building footprints (axis-aligned), all inside the village circle.
 var buildings: Array[Rect2] = []
 ## Where the army starts.
-var army_spawn := Vector2(60.0, 200.0)
+var army_spawn := SiegeTuning.ARMY_SPAWN
+## The church (also buildings[0]) and its bell, which spreads the alarm.
+var church := Rect2()
+var bell := Vector2.ZERO
+## The plaza around village_center the army must hold to win.
+var centre_radius := 0.0
 
 
 func in_village(point: Vector2) -> bool:

@@ -97,6 +97,11 @@ func _buy() -> bool:
 func _fight() -> bool:
 	var battle := main.screen as BattleScreen
 	await frames(20)
+	for tries in 6:  # the night before and the pep talk: a tap skips each
+		if battle.beats.staging():
+			await tap(battle.hud.skip_button)
+	if not check(not battle.beats.staging(), "taps skip the staged beats"):
+		return false
 	return await _rally(battle) and await _pause_resume(battle) and await _menu(battle)
 
 

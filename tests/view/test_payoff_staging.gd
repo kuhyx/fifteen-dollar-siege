@@ -10,7 +10,7 @@ func _payoff(ids: Array) -> BattleScreen:
 	battle.loadout = Loadout.of(ids)
 	battle.setup(SiegeSim.create(battle.loadout, 5), &"watch", 1.0)
 	add_child_autofree(battle)
-	battle.speed = 64.0
+	battle.speed = 400.0
 	return battle
 
 

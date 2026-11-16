@@ -112,6 +112,7 @@ func test_staged_beats_hold_the_clock_and_can_be_skipped() -> void:
 	_click(battle, Vector2(900, 500))
 	await wait_frames(3)
 	assert_false(battle.beats.staging(), "a tap skips too")
+	await wait_until(func() -> bool: return battle.sim.clock_s() > 0.0, 2.0)
 	assert_gt(battle.sim.clock_s(), 0.0, "now the siege runs")
 	assert_false(battle.hud.skip_button.is_visible_in_tree())
 	assert_false(battle.held, "the skip key did not also pause")
@@ -200,7 +201,7 @@ func test_orders_have_keys_buttons_and_a_pad() -> void:
 
 func test_the_win_payoff_shows_the_flag_before_the_result() -> void:
 	var battle := _battle(&"watch", [&"double_men", &"fifty_men"])
-	battle.speed = 64.0
+	battle.speed = 400.0
 	battle.payoff_s = 0.4
 	watch_signals(battle)
 	await wait_until(func() -> bool: return battle.payoff_active, 10.0)
@@ -219,7 +220,7 @@ func test_the_win_payoff_shows_the_flag_before_the_result() -> void:
 
 func test_the_lose_payoff_sets_the_army_on_fire() -> void:
 	var battle := _battle(&"watch", [&"stew"])
-	battle.speed = 64.0
+	battle.speed = 400.0
 	watch_signals(battle)
 	await wait_until(func() -> bool: return battle.payoff_active, 10.0)
 	for squad in battle.crowd.squads:

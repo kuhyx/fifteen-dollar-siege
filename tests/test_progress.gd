@@ -16,8 +16,8 @@ func before_each() -> void:
 func _start() -> void:
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child(main)
-	main.options.speed = 32.0
-	main.options.sim_seed = 5
+	main.options.speed = 400.0
+	main.options.sim_seed = SiegeFixtures.WIN_SEED
 	main.options.lab_runs = 6
 
 
@@ -35,6 +35,7 @@ func _play_to_the_result(mode: StringName, ids: Array) -> void:
 	main.mode = mode
 	main.start_siege(Loadout.of(ids))
 	(main.screen as BattleScreen).payoff_s = 0.05
+	(main.screen as BattleScreen).beats.skip_all()
 	await wait_until(func() -> bool: return main.screen_name == &"result", 20.0)
 
 
@@ -77,7 +78,9 @@ func test_the_shelf_only_reports_what_is_new() -> void:
 
 func test_the_lab_ranking_survives_a_restart() -> void:
 	main.mode = &"lab"
-	main.start_siege(Loadout.of([&"double_men", &"fifty_men"]))
+	var winner := Loadout.of(SiegeFixtures.WIN_IDS)
+	var won := Lab.run_batch(winner, 6, SiegeFixtures.WIN_SEED)
+	main.start_siege(winner)
 	var lab := main.screen as LabScreen
 	await wait_until(func() -> bool: return lab.done, 20.0)
 	main.start_siege(Loadout.of([&"stew"]))
@@ -86,14 +89,14 @@ func test_the_lab_ranking_survives_a_restart() -> void:
 	_restart()
 	var ranked := LabBook.ranked()
 	assert_eq(ranked.size(), 2)
-	assert_eq(ranked[0]["key"], "double_men,fifty_men", "the winner leads")
-	assert_eq(ranked[0]["wins"], 6)
+	assert_eq(ranked[0]["key"], "double_men,fifty_men,knight_armor,pep_talk", "the winner leads")
+	assert_eq(ranked[0]["wins"], won["wins"], "the book holds what the core ran")
 	assert_eq(ranked[0]["runs"], 6)
 	assert_eq(ranked[1]["key"], "stew")
 	assert_eq(ranked[1]["rate"], 0.0)
 	var hub := main.screen as HubScreen
-	assert_eq(hub.best_lab.rate, 1.0, "the hub shows the best rate so far")
-	assert_eq(hub.best_lab.ids, [&"double_men", &"fifty_men"] as Array[StringName])
+	assert_eq(hub.best_lab.rate, won["wins"] / 6.0, "the hub shows the best rate so far")
+	assert_eq(hub.best_lab.ids, SiegeFixtures.WIN_IDS)
 
 
 func test_the_lab_book_adds_batches_up_and_ignores_the_buying_order() -> void:

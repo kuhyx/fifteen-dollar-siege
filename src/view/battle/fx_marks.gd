@@ -49,12 +49,13 @@ static func rally_flag(canvas: CanvasItem, at: Vector2, age: float, view_zoom :=
 
 ## The hold on the centre: a faint full ring and a bright arc for the part
 ## of the 30 seconds that is done.
-static func centre_ring(canvas: CanvasItem, at: Vector2, held: float) -> void:
+static func centre_ring(canvas: CanvasItem, at: Vector2, held: float, radius: float) -> void:
 	if held <= 0.0:
 		return
-	canvas.draw_arc(at, CENTRE_RING_M, 0.0, TAU, 64, Color(WorldPalette.WHITE, 0.22), 1.0)
+	var reach := radius if radius > 0.0 else CENTRE_RING_M
+	canvas.draw_arc(at, reach, 0.0, TAU, 64, Color(WorldPalette.WHITE, 0.22), 1.0)
 	var end := -PI / 2.0 + TAU * clampf(held, 0.0, 1.0)
-	canvas.draw_arc(at, CENTRE_RING_M, -PI / 2.0, end, 64, Palette.GOOD, 1.6)
+	canvas.draw_arc(at, reach, -PI / 2.0, end, 64, Palette.GOOD, 1.6)
 
 
 ## The army's flag on the church tower, `raised` 0..1 of the way up the pole.
