@@ -11,7 +11,7 @@
 #   - the music and sound effects, rendered from code into assets/audio/
 #     (tools/audio/build.sh: its own Python venv with the pinned music toolkit)
 #   - ~/data/fifteen-dollar-siege_binaries with assets/ builds/ feedback/, and
-#     the gitignored links assets -> .../assets and builds -> .../builds
+#     the gitignored links assets, builds and feedback -> .../<name>
 #   - git hooks (skip with SKIP_HOOKS=1; never in CI)
 # CI=1 (GitHub Actions) installs only what the CI gates use (plus the export
 # templates and the web venv: the web smoke gate runs there too).
@@ -165,8 +165,10 @@ link_binaries() {
     mkdir -p "$BINARIES/feedback"
     link_dir assets
     link_dir builds
+    link_dir feedback
     # Godot must never import exported builds.
     : >"$BINARIES/builds/.gdignore"
+    : >"$BINARIES/feedback/.gdignore"
 }
 
 install_hooks() {

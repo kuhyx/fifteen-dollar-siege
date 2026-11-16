@@ -10,6 +10,7 @@ coverage.xml
 # binaries live in ~/data/fifteen-dollar-siege_binaries (install.sh); the links are files to git
 /assets
 /builds
+/feedback
 # OS / editor
 .DS_Store
 .vscode/

@@ -56,6 +56,7 @@ func _ready() -> void:
 	_build_overlay()
 	add_child(AudioDirector.new())
 	add_child(WebProbe.new())
+	add_child(StateDump.new())
 	if options.problem != "":
 		printerr("fifteen-dollar-siege: %s" % options.problem)
 		get_tree().quit(2)
@@ -63,10 +64,24 @@ func _ready() -> void:
 	_load_extra(DEV_TOOLS, "DevTools", options.dev)
 	_load_extra(AUTODRIVE, "Autodrive", options.autodrive != &"")
 	if options.mode != &"":
-		mode = options.mode
-		start_siege(options.loadout)
+		open_first()
 	else:
 		open_hub()
+
+
+## The screen the command line asked for: the mode's shop, the result of the
+## siege --loadout and --seed play, or (the default) that siege itself.
+func open_first() -> void:
+	mode = options.mode
+	match options.screen:
+		&"shop":
+			open_loadout(mode)
+		&"result":
+			loadout = options.loadout.duplicate()
+			sim_seed = maxi(options.sim_seed, 0)
+			open_result(SiegeSim.create(loadout, sim_seed).run_to_end())
+		_:
+			start_siege(options.loadout)
 
 
 func open_hub() -> void:
@@ -152,40 +167,7 @@ func pick_at(point: Vector2) -> Dictionary:
 
 ## The whole visible state as plain data (dev feedback's snapshot.json).
 func debug_state() -> Dictionary:
-	var out := {
-		"screen": String(screen_name),
-		"mode": String(mode),
-		"loadout": loadout.ids.map(func(id: StringName) -> String: return String(id)),
-		"cost": loadout.cost(),
-		"men": SiegeSim.army_size(loadout),
-		"seed": sim_seed,
-		"speed": options.speed,
-		"paused": get_tree().paused,
-	}
-	var battle := screen as BattleScreen
-	if battle != null:
-		out["siege"] = _siege_state(battle)
-	var lab := screen as LabScreen
-	if lab != null:
-		out["lab"] = lab.result.duplicate()
-	return out
-
-
-func _siege_state(battle: BattleScreen) -> Dictionary:
-	var shot := battle.shot
-	var entities: Array[Dictionary] = []
-	for i in shot.entity_count():
-		entities.append(battle.pick_at(battle.map_to_canvas(shot.ent_pos[i])))
-	return {
-		"clock_s": snappedf(shot.clock_s, 0.001),
-		"outcome": SiegeSim.Outcome.keys()[shot.outcome],
-		"army_morale": shot.army_morale,
-		"village_morale": shot.village_morale,
-		"alarm": shot.alarm,
-		"state_hash": battle.sim.state_hash(),
-		"commands_sent": battle.commands_sent,
-		"entities": entities,
-	}
+	return DebugState.of(self)
 
 
 func _on_decided(outcome: int, battle: BattleScreen) -> void:

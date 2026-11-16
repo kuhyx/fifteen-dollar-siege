@@ -8,7 +8,7 @@ name: ci
 # builder and the Web build in a headless Chrome (scripts/test_web.sh). The
 # shared gates (file length, markdown naming, dependency freshness, repo
 # contract) have their own workflows. Locally the same gates run in groups
-# under 60 s: scripts/check.sh --group fast|play|bots|tools|sim|build|web.
+# under 60 s: scripts/check.sh --group fast|play|bots|tools|sim|build|web|handoff.
 on:
   push:
     branches: [main]
@@ -67,6 +67,9 @@ jobs:
 
       - name: Every buff seen and heard on the battle screen, headless
         run: BOT_HEADLESS=1 scripts/test_buffs.sh
+
+      - name: Hand-off scripts, the answer file and every item with --check, headless
+        run: BOT_HEADLESS=1 scripts/test_handoff.sh
 
       - name: Audio tool tests, rendered files, offline analysis, boot probe
         run: tools/audio/check.sh

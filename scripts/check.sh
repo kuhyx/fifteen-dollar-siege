@@ -25,6 +25,8 @@
 #   build  (~20 s)  export   the Linux build plays without src/dev
 #                   round    scripts/build_round.sh in a throwaway folder
 #   web    (~25 s)  web      the Web build in an isolated headless Chromium
+#   handoff (~15 s) handoff  scripts/handoff/*.sh: the answer file format, the walk of
+#                            playtest.sh, every item with --check (muted, private screen)
 # Inside a group smoke runs first, the middle gates side by side (each in its own
 # capped scope), export / round / web last and one by one (they re-import). One
 # line per gate; a failed gate prints the tail of its log.
@@ -67,6 +69,7 @@ run_gate() {
         coverage) scripts/coverage.sh ;;
         balance) scripts/balance_gate.sh ;;
         buffs) scripts/test_buffs.sh ;;
+        handoff) scripts/test_handoff.sh ;;
         export) scripts/test_export.sh ;;
         round) scripts/test_build_round.sh ;;
         web) scripts/test_web.sh ;;

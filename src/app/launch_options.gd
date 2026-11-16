@@ -4,6 +4,10 @@ extends RefCounted
 ##   --dev                    dev feedback mode (run.sh passes it)
 ##   --mode=watch|command|lab open straight into that mode's siege
 ##   --loadout=id,id          the loadout for --mode (default: nothing bought)
+##   --screen=shop|result     with --mode: open that mode's shop, or the result
+##                            of the siege --loadout and --seed play, not a siege
+##   --check-state=PATH       a hand-off check: write the screen's state to PATH
+##                            (and PATH.png) after a moment, then quit 0
 ##   --seed=N                 every siege uses this seed (default: random)
 ##   --speed=N                sim seconds per real second (default 2)
 ##   --lab-runs=N             sieges per Lab batch (default 200)
@@ -20,6 +24,8 @@ const MODES: Array[StringName] = [&"watch", &"command", &"lab"]
 const BOT_MODES: Array[StringName] = [
 	&"watch", &"command", &"lab", &"showcase", &"touch", &"reel", &"buffs", &"fun"
 ]
+## The screens --screen= opens straight on.
+const SCREENS: Array[StringName] = [&"shop", &"result"]
 const DEFAULT_LAB_RUNS := 200
 ## A siege lasts about 100 sim seconds and the first 30 are a march: x2 is
 ## about a minute of watching [design guess]. x1 to x8 are on the HUD.
@@ -28,6 +34,8 @@ const MAX_SPEED := 64.0
 const VALUES: Array[String] = [
 	"--mode=",
 	"--loadout=",
+	"--screen=",
+	"--check-state=",
 	"--seed=",
 	"--speed=",
 	"--lab-runs=",
@@ -47,6 +55,9 @@ const VALUES: Array[String] = [
 var dev := false
 var mode: StringName = &""
 var loadout := Loadout.new()
+## The screen to open on instead of a siege ("" = the siege or the hub).
+var screen: StringName = &""
+var check_state := ""
 ## -1 = a fresh random seed per siege.
 var sim_seed := -1
 var speed := DEFAULT_SPEED
@@ -68,6 +79,8 @@ static func parse(args: Array = OS.get_cmdline_user_args()) -> LaunchOptions:
 	var out := LaunchOptions.new()
 	for arg: Variant in args:
 		out._take(str(arg))
+	if out.screen != &"" and out.mode == &"" and out.problem == "":
+		out.problem = "--screen=%s needs --mode" % out.screen
 	return out
 
 
@@ -100,6 +113,10 @@ func _apply(prefix: String, value: String) -> void:
 			loadout = Loadout.of(Array(value.split(",", false)))
 			if not loadout.is_legal():
 				problem = "--loadout=%s is not a legal loadout" % value
+		"--screen=":
+			_screen(value)
+		"--check-state=":
+			check_state = value
 		"--seed=":
 			sim_seed = _number(prefix, value, 0.0, float(1 << 53))
 		"--speed=":
@@ -125,6 +142,13 @@ func _mode(value: String, known: Array[StringName] = MODES) -> StringName:
 		problem = "unknown mode '%s' (watch, command or lab)" % value
 		return &""
 	return StringName(value)
+
+
+func _screen(value: String) -> void:
+	if not SCREENS.has(StringName(value)):
+		problem = "unknown screen '%s' (shop or result)" % value
+		return
+	screen = StringName(value)
 
 
 func _float(prefix: String, value: String, low: float, high: float) -> float:
