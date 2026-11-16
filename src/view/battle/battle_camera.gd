@@ -147,8 +147,9 @@ func resume_auto() -> void:
 
 
 ## What the auto camera should show: the army, the stretch ahead of it and
-## every villager it has reached. The whole map when there is no army.
-static func action_box(shot: SiegeSnapshot, map: SiegeMap) -> Rect2:
+## every villager it has reached, and the rally flag when one stands. The
+## whole map when there is no army.
+static func action_box(shot: SiegeSnapshot, map: SiegeMap, rally := Vector2.INF) -> Rect2:
 	var army := PackedVector2Array()
 	for i in shot.entity_count():
 		if shot.ent_team[i] == SiegeSnapshot.Team.ARMY and shot.ent_count[i] > 0:
@@ -165,6 +166,8 @@ static func action_box(shot: SiegeSnapshot, map: SiegeMap) -> Rect2:
 	box = box.expand(middle + (map.village_center - middle).limit_length(LEAD_M))
 	if inside:
 		box = box.expand(map.village_center)
+	if rally != Vector2.INF:
+		box = box.expand(rally)
 	for i in shot.entity_count():
 		if shot.ent_team[i] == SiegeSnapshot.Team.VILLAGE and _reached(shot, i, army):
 			box = box.expand(shot.ent_pos[i])

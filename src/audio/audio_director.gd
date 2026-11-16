@@ -13,10 +13,9 @@ extends Node
 ## A bot (--autodrive) and a GUT run are muted on both buses; with no audio
 ## files (no ./install.sh yet) every call is a quiet no-op.
 ## Volume: `set_music_volume`, `set_sfx_volume`, `set_muted`, `toggle_muted`
-## (saved through SaveStore); the on-screen control is the view's to draw.
+## (saved through SaveStore). `heard` counts the cues asked for, per cue.
 
-## Seconds one band riff keeps the rock loop over the bed (the sim sends a
-## riff every 6 s while the band lives) [design guess].
+## Seconds one band riff keeps the rock loop over the bed [design guess].
 const ROCK_HOLD_S := 8.0
 ## Louder per doubling of same-kind events in one snapshot, up to a cap.
 const CROWD_DB := 1.5
@@ -41,6 +40,7 @@ var silent := false
 var clock_s := 0.0
 ## Menu cues that sounded, newest last (tests and the dev tools read it).
 var ui_log: Array[StringName] = []
+var heard := {}
 
 var _main: Main
 var _rng := RandomNumberGenerator.new()
@@ -210,12 +210,13 @@ func _take(shot: SiegeSnapshot, view: Rect2) -> void:
 		var cue := AudioCues.for_event(event)
 		if cue == &"":
 			continue
+		heard[cue] = int(heard.get(cue, 0)) + 1
 		if event.get("kind") == SiegeEvent.BAND_RIFF:
 			music.band(ROCK_HOLD_S)
-		if not groups.has(cue):
-			groups[cue] = {"count": 0, "sum": Vector2.ZERO, "event": event}
-		groups[cue]["count"] += 1
-		groups[cue]["sum"] += event.get("pos", Vector2.ZERO) as Vector2
+		var group: Dictionary = groups.get(cue, {"count": 0, "sum": Vector2.ZERO, "event": event})
+		group["count"] += 1
+		group["sum"] += event.get("pos", Vector2.ZERO) as Vector2
+		groups[cue] = group
 	for cue: StringName in groups:
 		if limiter.allow(cue, clock_s, _of(cue, "gap", 0.1)):
 			_place(cue, groups[cue], view)

@@ -38,6 +38,9 @@ var alarmed := false
 ## `veil_goal`): burning figures are drawn above it, so only they stay lit.
 var veil := 0.0
 var veil_goal := 0.0
+## How many effects of each event kind this screen has spawned (the bots and
+## tests read it: an event with no effect is a hole).
+var seen := {}
 ## _draw calls so far (tests read it).
 var draws := 0
 ## The camera's pixels per metre (the screen sets it): marks that must stay
@@ -76,6 +79,7 @@ func spawn(event: Dictionary) -> void:
 	var recipe: Array = FxRecipes.all()[kind]
 	var fx := BattleFx.new()
 	_spawned += 1
+	seen[kind] = int(seen.get(kind, 0)) + 1
 	fx.kind = kind
 	fx.painter = recipe[0]
 	fx.life = recipe[1]

@@ -20,6 +20,7 @@ const TOP_CLEAR := HudMeters.TOP + HudMeters.TALL + 8.0
 const BOTTOM_CLEAR := EDGE + HudButton.SIZE + 8.0
 
 var meters := HudMeters.new()
+var chips := BuffChips.new()
 var pause_button: HudButton
 ## One per SiegeActions.SPEEDS entry (x1, x2, x4, x8).
 var speed_buttons: Array[HudButton] = []
@@ -34,11 +35,13 @@ var _left := HBoxContainer.new()
 var _right := HBoxContainer.new()
 
 
-func setup(with_orders: bool) -> void:
+func setup(with_orders: bool, loadout := Loadout.new()) -> void:
 	SiegeActions.ensure()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(meters)
+	chips.setup(loadout)
+	add_child(chips)
 	_row(_left, Control.PRESET_BOTTOM_LEFT, Control.GROW_DIRECTION_END)
 	_row(_right, Control.PRESET_BOTTOM_RIGHT, Control.GROW_DIRECTION_BEGIN)
 	pause_button = _add(_left, HudGlyphs.texture(HudGlyphs.PAUSE), "Pause", SiegeActions.PAUSE)
@@ -80,6 +83,7 @@ func buttons() -> Dictionary:
 func show_state(shot: SiegeSnapshot, state: Dictionary, delta: float) -> void:
 	meters.show_levels(shot, state.get("centre", 0.0), delta)
 	var staged: bool = state.get("staged", false)
+	chips.advance(delta, staged)
 	_left.visible = not staged
 	_right.visible = not staged
 	skip_button.visible = staged

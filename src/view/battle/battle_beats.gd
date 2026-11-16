@@ -24,6 +24,9 @@ const SKIP_AFTER_S := 0.3
 const ARMY_PAD_M := 30.0
 ## Metres around the church the win payoff shows [design guess].
 const CHURCH_BOX := Rect2(-70.0, -62.0, 150.0, 96.0)
+## The largest box church and army may share at a win: the auto camera's
+## whole view [design guess].
+const BOTH_MAX_M := Vector2(300.0, 170.0)
 
 ## Beats still to play, in the sim's order.
 var queue: Array[Dictionary] = []
@@ -132,18 +135,28 @@ func payoff_progress() -> float:
 	return clampf(1.0 - _payoff_left / _payoff_total, 0.0, 1.0)
 
 
-## What the camera shows during the payoff: the church at a win, the army
-## (what is left of it) at a loss.
+## What the camera shows during the payoff: the army (what is left of it) at
+## a loss; at a win the church with its flag AND the army that took it, when
+## both fit one view (the village breaks wherever the army stands, often far
+## from the church): the last blow is not cut away.
 static func payoff_box(won: bool, plan: MapPlan, shot: SiegeSnapshot) -> Rect2:
+	var army := _army_box(shot, won)
 	if won:
-		return Rect2(plan.bell + CHURCH_BOX.position, CHURCH_BOX.size)
+		var church := Rect2(plan.bell + CHURCH_BOX.position, CHURCH_BOX.size)
+		var both := church.merge(army) if army.has_area() else church
+		return both if both.size.x <= BOTH_MAX_M.x and both.size.y <= BOTH_MAX_M.y else church
+	return army if army.has_area() else plan.map.bounds
+
+
+## The box around the army's squads (the living ones only when `living`).
+static func _army_box(shot: SiegeSnapshot, living: bool) -> Rect2:
 	var box := Rect2()
 	var found := false
 	for i in shot.entity_count():
-		if shot.ent_team[i] == SiegeSnapshot.Team.ARMY:
+		if shot.ent_team[i] == SiegeSnapshot.Team.ARMY and (shot.ent_count[i] > 0 or not living):
 			box = box.expand(shot.ent_pos[i]) if found else Rect2(shot.ent_pos[i], Vector2.ZERO)
 			found = true
-	return box.grow(ARMY_PAD_M) if found else plan.map.bounds
+	return box.grow(ARMY_PAD_M) if found else Rect2()
 
 
 func _end(skipped: bool) -> void:

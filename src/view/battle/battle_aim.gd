@@ -20,4 +20,4 @@ static func focus(screen: BattleScreen) -> Rect2:
 	if screen.payoff_active:
 		var won := screen.sim.outcome() == SiegeSim.Outcome.WIN
 		return BattleBeats.payoff_box(won, screen.plan, screen.shot)
-	return BattleCamera.action_box(screen.shot, screen.sim.map())
+	return BattleCamera.action_box(screen.shot, screen.sim.map(), screen.effects.rally)

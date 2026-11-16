@@ -18,6 +18,9 @@ signal command_given(kind: int, pos: Vector2)
 const PAYOFF_S := 3.2
 ## Real seconds the HUD bell swings after a ring [design guess].
 const RING_S := 1.5
+## The siege plays on at no more than this speed once decided, so the last
+## blows and the rout are seen as they happen [design guess].
+const PAYOFF_SPEED := 1.0
 
 var sim: SiegeSim
 var mode: StringName = &"watch"
@@ -69,7 +72,7 @@ func setup(p_sim: SiegeSim, p_mode: StringName, p_speed: float) -> void:
 	crowd.setup(sim.map().bounds, FigureLook.of(loadout))
 	crowd.set_blocks(plan.blocks())
 	effects.setup(plan, crowd, meter)
-	hud.setup(mode == &"command")
+	hud.setup(mode == &"command", loadout)
 	add_child(hud)
 	charge_button = hud.charge_button
 	retreat_button = hud.retreat_button
@@ -88,7 +91,7 @@ func _process(delta: float) -> void:
 	if beats.staging():
 		beats.update(delta)
 	elif not held:
-		_step(delta * speed)
+		_step(delta * (minf(speed, PAYOFF_SPEED) if payoff_active else speed))
 	meter.begin()
 	if not held:
 		_clock += delta
@@ -163,6 +166,7 @@ func order(kind: int, pos: Vector2) -> void:
 func dress(p_loadout: Loadout) -> void:
 	loadout = p_loadout.duplicate()
 	crowd.dress(FigureLook.of(loadout))
+	hud.chips.setup(loadout)
 
 
 ## 0 at the decision, 1 when the result opens.
