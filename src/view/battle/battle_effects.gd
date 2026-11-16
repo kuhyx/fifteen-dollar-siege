@@ -117,6 +117,24 @@ func plant(at: Vector2) -> void:
 	rally = at
 
 
+## A soft ring at `at`: "click the map" (the rally button's hint).
+func pulse(at: Vector2) -> void:
+	var fx := BattleFx.new()
+	fx.kind = &"hint"
+	fx.painter = FxSignals.order
+	fx.life = 0.9
+	fx.pos = at
+	fx.to = at
+	live.append(fx)
+	queue_redraw()
+
+
+## Takes the effects of `kind` off the stage (a skipped beat).
+func drop(kind: StringName) -> void:
+	live = live.filter(func(fx: BattleFx) -> bool: return fx.kind != kind)
+	queue_redraw()
+
+
 func has_rally() -> bool:
 	return rally != Vector2.INF
 

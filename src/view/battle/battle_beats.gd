@@ -1,0 +1,113 @@
+class_name BattleBeats
+extends RefCounted
+## The staged moments around the siege. BEFORE the first tick: the sim's
+## pre-battle events (the UFO the night before, the pep talk) play one after
+## the other while the clock stands still, and each can be skipped. AFTER the
+## decision: the payoff holds the screen for a while, so the flag on the
+## church or the flames on the army are seen before the result opens.
+
+signal beat_began(event: Dictionary)
+## `skipped` is true when the player cut it short.
+signal beat_ended(kind: StringName, skipped: bool)
+signal payoff_done
+
+## The events that are staged when they come before the first tick.
+const STAGED: Array[StringName] = [SiegeEvent.UFO_ABDUCT, SiegeEvent.PEP_TALK]
+## Half the map box the camera shows for a beat, by event [design guess].
+const FRAMES := {
+	SiegeEvent.UFO_ABDUCT: Vector2(150.0, 100.0),
+	SiegeEvent.PEP_TALK: Vector2(120.0, 135.0),
+}
+## Metres around the church the win payoff shows [design guess].
+const CHURCH_BOX := Rect2(-70.0, -62.0, 150.0, 96.0)
+
+## Beats still to play, in the sim's order.
+var queue: Array[Dictionary] = []
+## The beat on stage ({} when none).
+var current: Dictionary = {}
+
+var _beat_left := 0.0
+var _payoff_left := 0.0
+var _payoff_total := 0.0
+var _payoff_on := false
+
+
+static func stages(event: Dictionary) -> bool:
+	return STAGED.has(event.get("kind", &""))
+
+
+func add(event: Dictionary) -> void:
+	queue.append(event)
+
+
+## True while a beat plays or waits: the sim must not step.
+func staging() -> bool:
+	return not current.is_empty() or not queue.is_empty()
+
+
+## Plays the beats: starts the next one, ends the one whose time is up.
+func update(delta: float) -> void:
+	if current.is_empty():
+		if queue.is_empty():
+			return
+		current = queue.pop_front()
+		_beat_left = BattleEffects.life_of(current["kind"])
+		beat_began.emit(current)
+		return
+	_beat_left -= delta
+	if _beat_left <= 0.0:
+		_end(false)
+
+
+## Cuts the beat on stage short; the next one starts on the next frame.
+func skip() -> void:
+	if not current.is_empty():
+		_end(true)
+
+
+## The map box the camera should hold for the beat on stage (or, before the
+## first one starts, for the beat that is next).
+func beat_box() -> Rect2:
+	var beat := current
+	if beat.is_empty() and not queue.is_empty():
+		beat = queue[0]
+	var half: Vector2 = FRAMES.get(beat.get("kind", &""), Vector2(150.0, 100.0))
+	var at: Vector2 = beat.get("pos", Vector2.ZERO)
+	return Rect2(at - half, half * 2.0)
+
+
+## Starts the payoff: `seconds` of show before `payoff_done`.
+func start_payoff(seconds: float) -> void:
+	_payoff_total = maxf(seconds, 0.001)
+	_payoff_left = _payoff_total
+	_payoff_on = true
+
+
+func tick_payoff(delta: float) -> void:
+	if not _payoff_on:
+		return
+	_payoff_left -= delta
+	if _payoff_left <= 0.0:
+		_payoff_on = false
+		payoff_done.emit()
+
+
+## 0 at the decision, 1 when the result may open.
+func payoff_progress() -> float:
+	if _payoff_total <= 0.0:
+		return 0.0
+	return clampf(1.0 - _payoff_left / _payoff_total, 0.0, 1.0)
+
+
+## What the camera shows during the payoff: the church at a win, the army
+## (what is left of it) at a loss.
+static func payoff_box(won: bool, plan: MapPlan, shot: SiegeSnapshot) -> Rect2:
+	if won:
+		return Rect2(plan.bell + CHURCH_BOX.position, CHURCH_BOX.size)
+	return BattleCamera.action_box(shot, plan.map)
+
+
+func _end(skipped: bool) -> void:
+	var kind: StringName = current["kind"]
+	current = {}
+	beat_ended.emit(kind, skipped)
