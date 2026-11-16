@@ -54,6 +54,8 @@ var village_base := 0.0
 var army_aura := 0.0
 var village_aura := 0.0
 var lord_fell := false
+## True while a medic squad of the army stands (not routed).
+var medics_up := false
 var hold_s := 0.0
 ## Middle of the army squads that still stand; `standing` = how many. The
 ## followers (leaders, medics, crews) form up around `anchor`.

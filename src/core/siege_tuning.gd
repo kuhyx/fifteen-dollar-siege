@@ -14,8 +14,6 @@ const THINK_TICKS := 5
 const THINK_S := STEP_S * THINK_TICKS
 ## The siege ends in a loss when nothing decided it by then.
 const TIME_CAP_S := 300.0
-## Real slow processes (alarm, muster, tiring) run this many times faster.
-const TIME_COMPRESSION := 15.0
 
 # --- the map ---
 const ARMY_SPAWN := Vector2(190.0, 200.0)
@@ -34,7 +32,6 @@ const CROWD_HEADS := 100
 const MILITIA_SQUADS := 25
 const ARCHER_SQUADS := 3
 const RETINUE_SQUADS := 2
-const CROWD_SPEED := 2.2
 
 # --- detection, alarm, muster ---
 ## A visible army squad this near the village edge can be noticed.
@@ -68,7 +65,7 @@ const CONTACT_M := 6.0
 const ACQUIRE_M := 50.0
 const CHASE_M := 20.0
 ## Men one club-armed man puts down per second of melee.
-const MELEE_RATE := 0.012
+const MELEE_RATE := 0.014
 ## A squad can bring at most this many men per enemy head to bear.
 const FRONTAGE := 1.5
 ## A routing squad takes this many times the damage and deals none.
@@ -76,7 +73,7 @@ const ROUT_DAMAGE := 2.5
 ## Seconds of blows a squad takes from whoever it fights as it turns to run.
 const PARTING_S := 2.0
 ## Share of the men put down who are only lightly wounded (a medic's work).
-const LIGHT_WOUND_SHARE := 0.35
+const LIGHT_WOUND_SHARE := 0.4
 const SLING_RANGE_M := 20.0
 const SLING_ACC := 0.15
 ## A sling hit that puts a man down (the rest bruise and frighten).
@@ -111,7 +108,7 @@ const COHESION_STRANGERS := 0.6
 const COHESION_HOME := 1.3
 const COHESION_AWAY := 1.0
 ## Morale lost when a tenth of the squad goes down, at cohesion 1: 0.3.
-const CAS_SHOCK := 3.0
+const CAS_SHOCK := 2.4
 ## The same loss frightens one squad more than another: the shock varies by
 ## this share either way.
 const SHOCK_SPREAD := 0.5
@@ -121,9 +118,9 @@ const RALLY_AT := 0.45
 const ROUT_CAP_SHARE := 0.75
 ## A rout or a wiped squad shakes friends this near.
 const CONTAGION_M := 14.0
-const CONTAGION := 0.08
+const CONTAGION := 0.05
 ## Morale per second lost while two or more squads fight one.
-const GANG_SHOCK := 0.06
+const GANG_SHOCK := 0.03
 const RECOVER_PER_S := 0.03
 ## Seconds without a hit before a squad starts to recover.
 const QUIET_S := 2.0
@@ -137,7 +134,7 @@ const ROUTED_WEIGHT := 0.5
 ## Team morale (standing heads times morale, relative to the start) at which
 ## the side breaks.
 const ARMY_BREAK := 0.25
-const VILLAGE_BREAK := 0.6
+const VILLAGE_BREAK := 0.51
 ## The lord's retinue steadies the village while it stands.
 const LORD_AURA := 0.1
 const LORD_FALL_SHOCK := 0.15

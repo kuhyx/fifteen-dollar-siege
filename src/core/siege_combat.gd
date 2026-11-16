@@ -55,6 +55,8 @@ static func hit(s: SiegeState, e: int, heads: int) -> void:
 		s.reload[e] = 0.0
 		s.jolt(e, T.SURPRISE_SHOCK)
 	var dread := s.rng.randf_range(1.0 - T.SHOCK_SPREAD, 1.0 + T.SHOCK_SPREAD)
+	if s.medics_up and s.team[e] == ARMY:
+		dread *= B.MEDIC_CALM
 	s.jolt(e, T.CAS_SHOCK * dread * heads / s.start[e])
 	if s.count[e] <= 0:
 		SiegeMorale.wiped(s, e)
@@ -116,7 +118,7 @@ static func _melee(s: SiegeState, i: int, e: int) -> void:
 			expected *= 1.0 + (T.CHARGE_IMPACT - 1.0) * fresh
 			s.jolt(e, T.CHARGE_SHOCK * fresh)
 	if f & SiegeState.F_INVISIBLE != 0:
-		expected *= B.AMBUSH_DAMAGE
+		expected += blows(s, i, e, B.AMBUSH_S)
 		SiegeSpecials.reveal(s, i, e)
 	if s.tick - s.note[i] >= CLASH_TICKS and s.kind[i] != K.MOOSE:
 		s.note[i] = s.tick

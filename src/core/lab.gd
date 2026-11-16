@@ -4,6 +4,10 @@ extends RefCounted
 ## base_seed + i, so a batch is reproducible and two batches with different
 ## base seeds are independent samples.
 
+## Kept from the scaffold's API: every siege is decided long before this (the
+## sim's own cap is SiegeTuning.TIME_CAP_S).
+const MAX_SIM_S := 3600.0
+
 
 ## One whole siege with no player orders: {outcome: SiegeSim.Outcome,
 ## seconds: sim time when it was decided}. Every siege is decided by

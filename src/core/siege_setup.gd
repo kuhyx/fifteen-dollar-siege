@@ -58,7 +58,7 @@ static func _village(s: SiegeState) -> void:
 		var e := _villager(s, hall + Vector2(0.0, 12.0 * i - 6.0), K.RETINUE, SiegeSim.SQUAD_SIZE)
 		s.wait[e] = 0.0
 		s.retinue.append(e)
-		s.flag[e] &= ~SiegeState.F_DEAF
+		s.flag[e] = SiegeKinds.flags(K.RETINUE)
 		s.morale[e] = minf(s.morale[e] + 0.1, 1.0)
 		s.cap[e] = s.morale[e]
 
@@ -68,9 +68,10 @@ static func _villager(s: SiegeState, at: Vector2, kind: int, heads: int) -> int:
 	var e := s.add(at, kind, VILLAGE, heads, clampf(spirit, 0.3, 1.0))
 	s.fatigue[e] = s.mods.village_fatigue
 	s.wait[e] = s.rng.randf_range(0.05, 1.0)
-	s.reload[e] = s.rng.randf_range(B.DEAF_DELAY_MIN_S, B.DEAF_DELAY_MAX_S)
 	if s.rng.randf() < s.mods.deaf_share:
+		# Deaf: it will not muster, so the village does not count on it.
 		s.flag[e] |= SiegeState.F_DEAF
+		s.flag[e] &= ~SiegeState.F_FIGHTER
 	var spot := Vector2(s.rng.randf_range(-18.0, 18.0), s.rng.randf_range(-18.0, 18.0))
 	s.slot[e] = s.map.village_center + spot
 	return e

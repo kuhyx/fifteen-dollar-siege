@@ -52,10 +52,10 @@ static func run(s: SiegeState) -> void:
 
 
 ## The men nobody can see go for the lord: the nearest retinue squad that still
-## stands, else `enemy`.
+## stands within QUARRY_M, else `enemy`.
 static func _quarry(s: SiegeState, i: int, enemy: int) -> int:
 	var best := enemy
-	var best_d := INF
+	var best_d := BuffTuning.QUARRY_M * BuffTuning.QUARRY_M
 	for e in s.retinue:
 		if s.count[e] <= 0 or s.state[e] == ST.FLEE:
 			continue

@@ -17,6 +17,7 @@ const Plan = preload("res://tools/sim/balance_plan.gd")
 
 var _deadline := 0
 var _ran := 0
+var _sample := {}
 
 
 func _init() -> void:
@@ -25,6 +26,8 @@ func _init() -> void:
 	var shards := int(args.get("shards", "1"))
 	_deadline = Time.get_ticks_msec() + int(float(args.get("budget-s", "45")) * 1000.0)
 	Plan.configure(args)
+	for index in Plan.sample_size:
+		_sample[Space.key(Space.sample(index))] = true
 	var store: RefCounted = Store.open(args.get("store", Store.default_root()))
 	var left := 1
 	while left > 0 and Time.get_ticks_msec() < _deadline:
@@ -66,9 +69,12 @@ func _work(store: RefCounted, shard: int, shards: int, climb: bool) -> int:
 	return left
 
 
-## The empty loadout first, then what already looks good, then the unknown.
+## The empty loadout first, then the random sample, then what already looks
+## good, then the unknown.
 func _priority(store: RefCounted, key: String) -> float:
 	if key == "none":
+		return 4.0
+	if _sample.has(key) and store.runs(key) < Plan.sample_runs:
 		return 3.0
 	if store.runs(key) == 0:
 		return 0.0

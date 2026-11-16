@@ -1,8 +1,8 @@
 class_name SiegeVillage
 extends RefCounted
 ## The village's side of a decision step. A squad sleeps until it hears the
-## alarm (at its own alarm level), sees the enemy or is pulled by the arm (the
-## deaf); a fighter squad then arms, goes for the nearest enemy it can reach
+## alarm (at its own alarm level) or sees the enemy (the deaf only see); a
+## fighter squad then arms, goes for the nearest enemy it can reach
 ## or musters in the plaza, and does not chase beyond the leash. Archers stand
 ## off and shoot. The crowds (everybody else) run for the church or out of the
 ## far side and hide.
@@ -72,15 +72,14 @@ static func scatter(s: SiegeState, i: int) -> void:
 	s.jolt_team(VILLAGE, s.pos[i], 0.0, T.PANIC_SHOCK, -1, false)
 
 
-## True once squad i has heard the alarm, seen the enemy or (deaf) been fetched.
+## True once squad i has heard the alarm or seen the enemy (the deaf only see).
 static func _alerted(s: SiegeState, i: int, enemy: int) -> bool:
 	if s.flag[i] & ALERT != 0:
 		return true
 	var deaf := s.flag[i] & SiegeState.F_DEAF != 0
 	var heard := s.alarm_on and not deaf and s.alarm >= s.wait[i]
-	var fetched := s.alarm_on and deaf and s.tick - s.alarm_tick >= SiegeState.ticks(s.reload[i])
 	var seen := enemy != -1 and s.pos[i].distance_squared_to(s.pos[enemy]) <= T.SEE_M * T.SEE_M
-	if not (heard or fetched or seen):
+	if not (heard or seen):
 		return false
 	s.flag[i] |= ALERT
 	return true

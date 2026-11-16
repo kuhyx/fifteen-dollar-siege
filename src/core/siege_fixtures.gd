@@ -7,7 +7,7 @@ extends RefCounted
 ## After any tuning change find new seeds with tools/sim/find_fixtures.gd.
 ## The winning loadout adds no heads to the army (the bot counts the men).
 
-const WIN_IDS: Array[StringName] = [&"double_men", &"golf_carts", &"knight_armor", &"pep_talk"]
-const WIN_SEED := 22
+const WIN_IDS: Array[StringName] = [&"double_men", &"fifty_men", &"knight_armor", &"pep_talk"]
+const WIN_SEED := 4
 const LOSE_IDS: Array[StringName] = [&"pep_talk", &"stew"]
-const LOSE_SEED := 1
+const LOSE_SEED := 4

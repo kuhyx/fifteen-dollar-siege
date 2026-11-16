@@ -107,18 +107,22 @@ func _body(loadout: Loadout) -> void:
 		melee *= B.BOOZE_MELEE
 		friendly_fire *= B.BOOZE_FRIENDLY_FIRE
 		ignore_orders = B.BOOZE_IGNORE
+		start_morale += B.BOOZE_MORALE
 	if loadout.has(&"stew"):
 		tire *= B.STEW_TIRE
+		start_morale += B.STEW_MORALE
 	if loadout.has(&"knight_armor"):
 		speed *= B.KNIGHT_SPEED
 		tire *= B.KNIGHT_TIRE
 		melee_hurt *= B.KNIGHT_MELEE_HURT
+		shock *= B.KNIGHT_SHOCK
 		ranged_hurt *= B.KNIGHT_RANGED_HURT
 		sling_acc *= B.KNIGHT_ACC
 	if loadout.has(&"football_helmets"):
 		melee_hurt *= B.HELMET_MELEE_HURT
 		ranged_hurt *= B.HELMET_RANGED_HURT
 		friendly_hurt *= B.HELMET_FRIENDLY_HURT
+		shock *= B.HELMET_SHOCK
 		sling_range *= B.HELMET_SLING_RANGE
 	if loadout.has(&"cardboard_armor"):
 		cardboard = true

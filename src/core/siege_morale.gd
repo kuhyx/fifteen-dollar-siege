@@ -72,6 +72,12 @@ static func _auras(s: SiegeState) -> void:
 	if s.band >= 0 and s.count[s.band] > 0:
 		aura += B.BAND_AURA
 	s.army_aura = aura
+	s.medics_up = false
+	if s.mods.medic_squads > 0:
+		for e in s.specials:
+			var medic := s.kind[e] == SiegeSnapshot.Kind.MEDICS
+			if medic and s.count[e] > 0 and s.state[e] != ST.FLEE:
+				s.medics_up = true
 	if s.fear > 0.0:
 		s.fear = maxf(s.fear - B.SHOTGUN_FEAR * T.THINK_S / B.SHOTGUN_FEAR_S, 0.0)
 	if s.lord_fell:

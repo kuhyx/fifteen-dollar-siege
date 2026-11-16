@@ -1,7 +1,7 @@
 extends RefCounted
 ## Where the balance search keeps what it measured, so every call can stop
 ## after a minute and the next one carries on. One folder per sim hash (a hash
-## of every src/core/*.gd file: any change to the sim or a constant starts a
+## of the code in src/core/*.gd: any change to the sim or a constant starts a
 ## fresh folder), one JSON file per shard:
 ##   ~/data/claude-scratch/fifteen-dollar-siege/balance/<sim hash>/shard-K-of-N.json
 ##   {"results": {"<loadout key>": [wins, runs, sim seconds summed, push summed]}}
@@ -11,6 +11,7 @@ extends RefCounted
 
 const SEED0 := 1000
 const CORE_DIR := "res://src/core"
+const NOT_SIM := "siege_fixtures.gd"
 
 ## key -> [wins, runs, seconds], every shard merged.
 var results := {}
@@ -31,15 +32,21 @@ static func default_root() -> String:
 	return home.path_join("data/claude-scratch/fifteen-dollar-siege/balance")
 
 
-## 12 hex digits over the text of every core script, in name order.
+## 12 hex digits over the code of every core script, in name order. Comments
+## and blank lines do not count (a reworded comment keeps the cache), and
+## neither does NOT_SIM (the pinned fixtures are not part of the model).
 static func hash_of_sim() -> String:
 	var files := Array(DirAccess.get_files_at(CORE_DIR))
 	files.sort()
 	var context := HashingContext.new()
 	context.start(HashingContext.HASH_SHA256)
 	for file: String in files:
-		if file.ends_with(".gd"):
-			context.update(FileAccess.get_file_as_bytes(CORE_DIR.path_join(file)))
+		if not file.ends_with(".gd") or file == NOT_SIM:
+			continue
+		for line in FileAccess.get_file_as_string(CORE_DIR.path_join(file)).split("\n"):
+			var code := line.get_slice("#", 0).strip_edges(false, true)
+			if code.strip_edges() != "":
+				context.update((code + "\n").to_utf8_buffer())
 	return context.finish().hex_encode().substr(0, 12)
 
 

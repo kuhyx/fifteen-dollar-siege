@@ -150,9 +150,13 @@ static func _wasps(s: SiegeState, i: int) -> void:
 	_sting(s, i)
 	var victim := s.foe[i]
 	if s.wait[i] <= 0.0 or victim < 0 or s.count[victim] <= 0:
-		# On to the nearest squad, whoever it is.
+		# On to the nearest villagers; now and then to whoever is nearest.
 		s.wait[i] = B.WASP_HOP_S
-		var next := _anyone(s, i, B.WASP_HOP_M, victim)
+		var next := -1
+		if s.rng.randf() < B.WASP_ANYONE:
+			next = _anyone(s, i, B.WASP_HOP_M, victim)
+		else:
+			next = s.grid.nearest(s, s.grid.village, s.pos[i], B.WASP_HOP_M, 0.0, victim)
 		if next != -1:
 			victim = next
 			s.foe[i] = next

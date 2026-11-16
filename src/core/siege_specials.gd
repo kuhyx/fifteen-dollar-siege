@@ -158,33 +158,43 @@ static func _pumpkins_land(s: SiegeState) -> void:
 			SiegeCombat.hit(s, e, s.sample(down))
 
 
-## Doctors treat the nearest lightly wounded squad in reach, whoever it is.
+## Doctors stay behind the line and run to whoever in reach needs them: the
+## nearest squad with lightly wounded men (their oath does not ask which
+## side), else the most shaken squad of their own army. A treatment puts one
+## wounded man back on his feet and steadies the squad.
 static func _medics(s: SiegeState, i: int) -> void:
-	var best := -1
-	var best_d := B.MEDIC_REACH_M * B.MEDIC_REACH_M
-	if s.state[i] != ST.FLEE and s.reload[i] <= T.THINK_S:
-		for e in s.pos.size():
-			if s.hurt[e] <= 0 or s.count[e] <= 0 or s.flag[e] & SiegeState.F_GONE != 0:
-				continue
-			var d := s.pos[i].distance_squared_to(s.pos[e])
-			if d < best_d:
-				best_d = d
-				best = e
-	if best == -1:
-		follow(s, i)
+	if not follow(s, i) or s.reload[i] > T.THINK_S:
 		return
-	if best_d > B.MEDIC_TOUCH_M * B.MEDIC_TOUCH_M:
-		SiegeMove.go(s, i, s.pos[best], SiegeMove.MARCH)
-		s.state[i] = ST.MOVE
+	var reach2 := B.MEDIC_REACH_M * B.MEDIC_REACH_M
+	var wounded := -1
+	var wounded_d := reach2
+	var shaken := -1
+	var worst := B.MEDIC_NERVES
+	for e in s.pos.size():
+		if e == i or s.count[e] <= 0 or s.flag[e] & SiegeState.F_GONE != 0:
+			continue
+		var d := s.pos[i].distance_squared_to(s.pos[e])
+		if d > reach2:
+			continue
+		if s.hurt[e] > 0 and d < wounded_d:
+			wounded_d = d
+			wounded = e
+		var nerves := s.cap[e] - s.morale[e]
+		var ours := s.team[e] == ARMY and s.flag[e] & SiegeState.F_WAVERS != 0
+		if ours and nerves > worst:
+			worst = nerves
+			shaken = e
+	var patient := wounded if wounded != -1 else shaken
+	if patient == -1:
 		return
-	SiegeMove.stand(s, i)
-	s.state[i] = ST.IDLE
 	s.reload[i] = B.HEAL_S
-	s.hurt[best] -= 1
-	s.count[best] += 1
-	s.morale[best] = minf(s.morale[best] + B.HEAL_MORALE, maxf(s.cap[best], s.morale[best]))
-	var data := {"team": s.team[best], "entity": best, "heads": 1}
-	s.emit_with(SiegeEvent.HEAL, s.pos[best], data)
+	var heads := mini(s.hurt[patient], 1)
+	s.hurt[patient] -= heads
+	s.count[patient] += heads
+	s.cap[patient] = minf(s.cap[patient] + B.HEAL_CAP, 1.0)
+	s.morale[patient] = minf(s.morale[patient] + B.HEAL_MORALE, s.cap[patient])
+	var data := {"team": s.team[patient], "entity": patient, "heads": heads}
+	s.emit_with(SiegeEvent.HEAL, s.pos[patient], data)
 
 
 static func _trumpet(s: SiegeState, i: int) -> void:

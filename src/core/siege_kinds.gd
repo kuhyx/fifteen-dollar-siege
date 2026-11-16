@@ -14,15 +14,15 @@ const AIMED_AT := SiegeState.F_TARGET
 
 ## Melee strength per head (a man with a wooden club = 1).
 const MELEE: Array[float] = [
-	1.0, 0.0, 1.3, 1.8, 0.6, 2.5, 0.6, 0.3, 0.0, 0.2, 12.0, 6.0, 0.0, 1.0, 0.5, 0.0, 0.0
+	1.0, 0.0, 1.3, 1.8, 0.6, 3.0, 0.6, 0.3, 0.0, 0.2, 14.0, 6.0, 0.0, 1.0, 0.5, 0.0, 0.0
 ]
 ## Blows it takes to put one head down (mail against clubs: 1 / 0.75).
 const TOUGH: Array[float] = [
-	1.0, 1.0, 1.0, 1.33, 1.0, 1.5, 1.0, 1.0, 1.0, 1.0, 14.0, 6.0, 1e9, 1.0, 1.0, 1.0, 1e9
+	1.0, 1.0, 1.0, 1.33, 1.0, 1.5, 1.0, 1.0, 1.0, 1.0, 10.0, 6.0, 1e9, 1.0, 1.0, 1.0, 1e9
 ]
 ## March speed in metres per second.
 const SPEED: Array[float] = [
-	3.4, 2.2, 3.2, 2.9, 3.2, 3.4, 3.4, 3.0, 3.2, 3.2, 2.8, 8.3, 6.0, 3.4, 2.0, 0.0, 20.0
+	3.4, 2.2, 3.2, 2.9, 3.2, 3.4, 3.4, 3.0, 3.2, 3.2, 3.0, 8.3, 6.0, 3.4, 2.0, 0.0, 20.0
 ]
 ## Nobody strikes the boy with the trumpet, the wasps or the UFO; the medics
 ## waver but are not counted among the fighters.
