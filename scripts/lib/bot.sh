@@ -49,7 +49,7 @@ bot_run() {
 }
 
 # Fail-closed verdict of one bot run. PASS needs ALL of: no timeout, no bot
-# failure or script error in the log, the bot's own PASS verdict file, its
+# failure or script error or exit leak in the log, the bot's own PASS verdict file, its
 # RESULT line and exit code 0 (a nonzero code after the verdict is a crash on
 # exit, never a wrapper's noise).
 #   bot_judge <label> <exit_code> <log> <result_file>
@@ -60,6 +60,8 @@ bot_judge() {
         why="timed out"
     elif grep -qE 'AUTODRIVE FAIL|SCRIPT ERROR' "$log"; then
         why="the bot reported a failure"
+    elif grep -q 'still in use at exit' "$log"; then
+        why="resources still in use at exit (a sound left playing)"
     elif ! grep -q '^PASS' "$result" 2>/dev/null; then
         why="no PASS verdict file"
     elif ! grep -q '^RESULT autodrive PASS' "$log"; then

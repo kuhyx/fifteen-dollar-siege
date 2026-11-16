@@ -64,6 +64,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	AudioExit.settle(self)
 	if _live == self:
 		_live = null
 

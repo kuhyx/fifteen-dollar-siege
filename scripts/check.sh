@@ -2,7 +2,8 @@
 
 # ============================================================================
 # Every gate of this repo in one exit code, under 60 s:
-#   smoke      godot --import, then --quit: no SCRIPT ERROR (build-game R9)
+#   smoke      godot --import, then --quit: no SCRIPT ERROR (build-game R9), no
+#              "resources still in use at exit" (a sound left playing)
 #   lint       gdlint, gdformat --check, shellcheck, ruff
 #   test       GUT suite              save_guard  GUT without the hook redirect
 #   recording  recorder unit tests    autodrive   the bot, all three modes
@@ -40,7 +41,7 @@ gate_smoke() {
     local out
     out="$(cap timeout 50 godot --headless --path "$REPO_ROOT" --import 2>&1)"
     out+="$(cap timeout 30 godot --headless --path "$REPO_ROOT" --quit 2>&1)"
-    if grep -E 'SCRIPT ERROR|Parse Error' <<<"$out"; then
+    if grep -E 'SCRIPT ERROR|Parse Error|still in use at exit' <<<"$out"; then
         return 1
     fi
     echo "import and quit: no SCRIPT ERROR"
