@@ -18,6 +18,8 @@ const FRAMES := {
 	SiegeEvent.UFO_ABDUCT: Rect2(-86.0, -66.0, 172.0, 100.0),
 	SiegeEvent.PEP_TALK: Rect2(-60.0, -48.0, 124.0, 88.0),
 }
+## Real seconds of the payoff nobody can skip: the moment is seen first.
+const SKIP_AFTER_S := 0.3
 ## Metres around the army the lose payoff shows.
 const ARMY_PAD_M := 30.0
 ## Metres around the church the win payoff shows [design guess].
@@ -83,6 +85,29 @@ func start_payoff(seconds: float) -> void:
 	_payoff_total = maxf(seconds, 0.001)
 	_payoff_left = _payoff_total
 	_payoff_on = true
+
+
+## True when a press may cut the payoff short (it has had its first look).
+func payoff_skippable() -> bool:
+	return _payoff_on and _payoff_total - _payoff_left >= SKIP_AFTER_S
+
+
+## Ends the payoff now: the result opens at once.
+func skip_payoff() -> void:
+	if _payoff_on:
+		_payoff_left = 0.0
+		tick_payoff(0.0)
+
+
+## Any key, click, touch or pad button going down (not a key held down).
+static func is_press(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return event.pressed and not event.echo
+	return (
+		(event is InputEventMouseButton and event.pressed)
+		or (event is InputEventScreenTouch and event.pressed)
+		or (event is InputEventJoypadButton and event.pressed)
+	)
 
 
 func tick_payoff(delta: float) -> void:

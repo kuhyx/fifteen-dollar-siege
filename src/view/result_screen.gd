@@ -1,11 +1,11 @@
 class_name ResultScreen
 extends Control
-## The end of one siege. First the payoff, with nothing over it: your flag
-## climbs over the village and the men cheer, or the leader goes up in flames
-## (ResultScene). The buffs you bought line up under it, and the ones that are
-## new on the hub's shelf get a spark. Then (after PAYOFF_S, or at once on any
-## press) the ways on appear: the same loadout again, change the loadout, the
-## hub, each with its key. No words.
+## The end of one siege, the second half of ONE beat with the battle's payoff:
+## the same scene in its end state (your flag over the village and the men
+## cheering, or the leader's ash; ResultScene, never played twice) with the
+## ways on already up: the same loadout again, change the loadout, the hub,
+## each with its key. The buffs you bought line up under it, and the ones that
+## are new on the hub's shelf get a spark. No words.
 ## Kept for the bot, the tests and the dev tools: `outcome`, `home_button`,
 ## `home_pressed` and `pick_at`.
 
@@ -13,8 +13,6 @@ signal home_pressed
 signal retry_pressed
 signal edit_pressed
 
-## Seconds the payoff plays before the controls come up. [design guess]
-const PAYOFF_S := 1.4
 const STAGE := Rect2(440, 24, 1040, 696)
 const ICON_PX := 84.0
 const STRIP_Y := 744.0
@@ -30,9 +28,7 @@ var home_button: PictoButton
 var retry_button: PictoButton
 var edit_button: PictoButton
 var controls: EndControls
-## False while the payoff plays alone.
 var controls_shown := false
-var payoff_s := PAYOFF_S
 
 var _age := 0.0
 var _frame: ScreenFrame
@@ -70,27 +66,21 @@ func _process(delta: float) -> void:
 	_stage.queue_redraw()
 	if _frame != null:
 		_frame.queue_redraw()
-	if _age >= payoff_s:
-		_show_controls()
+	_show_controls()
 
 
-## Any press during the payoff brings the controls up at once. A pointer
-## press is used up by that: it must not land on a button it could not see.
 func _input(event: InputEvent) -> void:
 	InputDevice.note(event)
-	if controls_shown or not event.is_pressed() or event.is_echo():
-		return
-	var pointer := event is InputEventMouseButton or event is InputEventScreenTouch
-	if pointer or event is InputEventKey or event is InputEventJoypadButton:
-		_show_controls()
-	if pointer:
-		get_viewport().set_input_as_handled()
+
+
+## Seconds the scene has played: it opens settled (ResultScene.SETTLED_S).
+func scene_age() -> float:
+	return _age + ResultScene.SETTLED_S
 
 
 ## What is under a canvas point (dev feedback's select tool).
 func pick_at(_point: Vector2) -> Dictionary:
-	var state := "controls" if controls_shown else "payoff"
-	return {"kind": "result", "id": "win" if won() else "combust", "state": state}
+	return {"kind": "result", "id": "win" if won() else "combust", "state": "controls"}
 
 
 func _show_controls() -> void:
@@ -104,7 +94,7 @@ func _show_controls() -> void:
 func _draw_scene() -> void:
 	var box := Rect2(Vector2.ZERO, _stage.size)
 	_stage.draw_rect(box, VignetteStage.SKY)
-	ResultScene.paint(VignettePen.fitted(_stage, box), won(), _age)
+	ResultScene.paint(VignettePen.fitted(_stage, box), won(), scene_age())
 	_stage.draw_rect(box, Color(Palette.GOOD if won() else Palette.BAD, 0.07))
 
 

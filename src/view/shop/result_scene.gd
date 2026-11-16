@@ -9,6 +9,9 @@ extends VignetteKit
 
 const FLAG_UP_S := 0.7
 const BURN_S := 0.9
+## The scene's age when it opens after the battle's payoff: the flag is up and
+## the pyre has burned down, so the moment is not played twice.
+const SETTLED_S := 2.4
 
 
 static func paint(p: VignettePen, won: bool, age: float) -> void:

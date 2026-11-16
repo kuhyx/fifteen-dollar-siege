@@ -13,6 +13,8 @@ const TOUCH_BUFF := &"moose"
 const FILLERS: Array[StringName] = [&"double_men", &"knight_armor"]
 const ONE_MORE := &"stew"
 const WAIT_FRAMES := 6000
+## Frames from the decision to the same loadout fighting again.
+const RETRY_FRAMES := 60
 
 
 ## The empty shop, a hovered card's vignette, a buy caught with its coins in
@@ -58,17 +60,21 @@ static func settled(bot: BotBase, shop: LoadoutScreen) -> bool:
 	return await bot.wait_for(still, 300, "the coins to land")
 
 
-## The result: the payoff alone first, then the controls. A win goes on with
+## The result: its controls are up at once (the battle's payoff was the beat).
+## A win goes on with
 ## "change the loadout" (the shop opens with it); a loss with "again" (the
 ## same loadout fights once more), then home.
 static func result(bot: BotBase, wins: bool, want: int, ids: Array[StringName]) -> bool:
 	var tag := "win" if wins else "lose"
 	var screen := bot.main.screen as ResultScreen
-	var alone := screen.outcome == want and not screen.controls_shown
-	if not bot.check(alone, "the %s payoff plays before any control" % tag):
-		return false
-	await bot.frames(40)
-	if not await bot.shot("result_" + tag) or not await _controls_up(bot, screen, tag):
+	await bot.frames(3)
+	var up := screen.outcome == want and screen.controls_shown
+	var ok := (
+		bot.check(up, "the %s result has its controls up at once, no second payoff" % tag)
+		and bot.all_inside(screen.controls.buttons(), "result control")
+		and await bot.shot("result_" + tag)
+	)
+	if not ok:
 		return false
 	if wins:
 		await bot.click(screen.edit_button)
@@ -82,14 +88,44 @@ static func result(bot: BotBase, wins: bool, want: int, ids: Array[StringName]) 
 		or not await bot.shot("retry")
 	):
 		return false
+	return await impatient_retry(bot, ids) and await _leave_by_pause(bot)
+
+
+## An impatient player: one press after the first look skips the payoff, the
+## result is up with its controls, and the same loadout fights again, all
+## inside RETRY_FRAMES frames (a second at the bot's fixed 60 fps) of the
+## siege being decided.
+static func impatient_retry(bot: BotBase, ids: Array[StringName]) -> bool:
+	var battle := bot.main.screen as BattleScreen
+	var decided := func() -> bool: return battle.sim.outcome() != SiegeSim.Outcome.RUNNING
+	if not await bot.wait_for(decided, WAIT_FRAMES, "the retried siege to be decided"):
+		return false
+	var started := Engine.get_process_frames()
+	await bot.frames(ceili(BattleBeats.SKIP_AFTER_S * 60.0) + 2)
+	InputSynth.key_tap(KEY_ENTER)
 	var over := func() -> bool: return bot.main.screen_name == &"result"
-	if not await bot.wait_for(over, WAIT_FRAMES, "the retried siege to end"):
+	if not await bot.wait_for(over, 30, "the result after one press"):
 		return false
-	screen = bot.main.screen as ResultScreen
-	var up := func() -> bool: return screen.controls_shown
-	if not await bot.wait_for(up, 300, "the controls after the retry"):
+	var screen := bot.main.screen as ResultScreen
+	await bot.frames(2)
+	if not bot.check(screen.controls_shown, "one press and the controls are up"):
 		return false
-	await bot.click(screen.home_button)
+	await bot.click(screen.retry_button)
+	var used := Engine.get_process_frames() - started
+	bot.numbers.append("retry_frames=%d" % used)
+	return (
+		bot.check(used < RETRY_FRAMES, "retry took %d frames after the outcome" % used)
+		and await bot.on_screen(&"battle")
+		and bot.check(bot.main.loadout.ids == ids, "the same loadout again")
+	)
+
+
+## Esc, then the pause menu's hub button.
+static func _leave_by_pause(bot: BotBase) -> bool:
+	await bot.press_escape()
+	if not bot.check(bot.main.pause_menu.is_open(), "Esc opens the pause menu"):
+		return false
+	await bot.click(bot.main.pause_menu.buttons["hub"])
 	return await bot.on_screen(&"hub")
 
 
@@ -150,15 +186,6 @@ static func _refusal(bot: BotBase, shop: LoadoutScreen) -> bool:
 	return (
 		bot.check(refused and kept, "a buy over the budget shakes the tray and buys nothing")
 		and await bot.shot("shop_refusal")
-	)
-
-
-static func _controls_up(bot: BotBase, screen: ResultScreen, tag: String) -> bool:
-	var up := func() -> bool: return screen.controls_shown
-	return (
-		await bot.wait_for(up, 300, "the result controls")
-		and bot.all_inside(screen.controls.buttons(), "result control")
-		and await bot.shot("result_%s_controls" % tag)
 	)
 
 

@@ -43,7 +43,12 @@ func _run() -> void:
 	await frames(3)
 	if _may_run():
 		await _play()
-	finish("mode=%s frames=%d hashes=%s" % [_mode, shots.count, ",".join(_hashes)])
+	finish(
+		(
+			"mode=%s frames=%d hashes=%s %s"
+			% [_mode, shots.count, ",".join(_hashes), " ".join(numbers)]
+		)
+	)
 
 
 func _may_run() -> bool:

@@ -110,6 +110,10 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	InputDevice.note(event)
+	var skips := BattleBeats.is_press(event) and not event.is_action_pressed(&"ui_cancel")
+	if payoff_active and skips and beats.payoff_skippable():
+		get_viewport().set_input_as_handled()
+		beats.skip_payoff()
 
 
 func _gui_input(event: InputEvent) -> void:

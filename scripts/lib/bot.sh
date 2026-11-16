@@ -14,8 +14,8 @@ readonly BOT_ENGINE_FLAGS=(--audio-driver Dummy --fixed-fps 60 --disable-vsync)
 # fails the gate). Keep in step with src/autodrive/autodrive.gd.
 bot_frames() {
     case "$1" in
-        watch) echo 19 ;;
-        command) echo 21 ;;
+        watch) echo 17 ;;
+        command) echo 19 ;;
         lab) echo 13 ;;
         showcase) echo 23 ;;
         *)

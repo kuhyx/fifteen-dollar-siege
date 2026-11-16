@@ -120,14 +120,12 @@ func test_ticks_share_out_a_big_batch_and_the_ranking_keeps_the_current_row() ->
 	assert_eq(ranking.places(), [0, 1, 2, 3, 4, 5, 6, 10] as Array[int], "the last row is its own")
 
 
-func test_the_payoff_plays_before_any_control_shows() -> void:
+func test_the_result_opens_with_its_controls_up() -> void:
 	var result: ResultScreen = await _to_result([&"double_men", &"fifty_men"])
 	assert_true(result.won())
-	assert_false(result.controls_shown, "the payoff has the screen to itself")
-	assert_false(result.retry_button.is_visible_in_tree())
+	await wait_process_frames(2)
+	assert_true(result.controls_shown, "the battle's payoff was the beat: no second one")
 	assert_eq(result.fresh, [&"double_men", &"fifty_men"] as Array[StringName], "new on the shelf")
-	result.payoff_s = 0.1
-	await wait_until(func() -> bool: return result.controls_shown, 5.0)
 	for button: Button in [result.retry_button, result.edit_button, result.home_button]:
 		assert_true(button.is_visible_in_tree())
 		assert_eq(button.text, "")
@@ -136,19 +134,8 @@ func test_the_payoff_plays_before_any_control_shows() -> void:
 	assert_true(_frame_holds(result.controls))
 
 
-func test_a_press_skips_the_payoff_but_does_not_click_through() -> void:
-	var result: ResultScreen = await _to_result([&"stew"])
-	assert_false(result.won())
-	await wait_process_frames(1)
-	InputSynth.canvas_tap(MOUSE_BUTTON_LEFT, result.retry_button.get_global_rect().get_center())
-	await wait_process_frames(2)
-	assert_true(result.controls_shown, "the press brought the controls up")
-	assert_eq(main.screen_name, &"result", "and pressed none of them")
-
-
 func test_retry_runs_the_same_loadout_and_edit_opens_it_in_the_shop() -> void:
 	var result: ResultScreen = await _to_result([&"moose", &"stew"])
-	result.payoff_s = 0.0
 	await wait_until(func() -> bool: return result.controls_shown, 5.0)
 	watch_signals(main)
 	InputSynth.key_tap(KEY_1)
