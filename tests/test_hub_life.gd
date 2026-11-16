@@ -9,12 +9,21 @@ func test_a_mode_button_swells_under_the_pointer_and_settles_back() -> void:
 	add_child_autofree(hub)
 	var button := hub.buttons[&"lab"] as Control
 	assert_eq(button.scale, Vector2.ONE)
-	button.mouse_entered.emit()
-	await wait_until(func() -> bool: return button.scale.x > 1.05, 2.0)
-	assert_gt(button.scale.x, HubScreen.HOVER_SCALE - 0.01)
-	button.mouse_exited.emit()
-	await wait_until(func() -> bool: return is_equal_approx(button.scale.x, 1.0), 2.0)
-	assert_almost_eq(button.scale.x, 1.0, 0.001)
+	_play_new_tweens(func() -> void: button.mouse_entered.emit(), HubScreen.SWELL_S * 2.0)
+	assert_almost_eq(button.scale.x, HubScreen.HOVER_SCALE, 0.001, "it ends at the hover size")
+	_play_new_tweens(func() -> void: button.mouse_exited.emit(), HubScreen.SWELL_S * 2.0)
+	assert_almost_eq(button.scale.x, 1.0, 0.001, "and settles back")
+
+
+## Runs `action`, then drives the tweens it started by `seconds` on the test's
+## own clock (they are paused first), so no frame timing can change the result.
+func _play_new_tweens(action: Callable, seconds: float) -> void:
+	var before := get_tree().get_processed_tweens()
+	action.call()
+	for tween: Tween in get_tree().get_processed_tweens():
+		if not before.has(tween):
+			tween.pause()
+			tween.custom_step(seconds)
 
 
 func test_the_wave_crosses_the_shelf_then_rests() -> void:
