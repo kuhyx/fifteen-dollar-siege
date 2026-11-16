@@ -1,0 +1,35 @@
+class_name VignetteStage
+extends Control
+## A window onto one buff's looping vignette: sky, then the scene, clipped to
+## the control. It plays while it is visible and holds no words.
+
+const SKY := Color(0.09, 0.11, 0.17)
+
+## The buff on show ("" = an empty stage).
+var buff: StringName = &"":
+	set(value):
+		if value != buff:
+			buff = value
+			time = 0.0
+			queue_redraw()
+## Seconds into the loop.
+var time := 0.0
+var playing := true
+
+
+func _init() -> void:
+	clip_contents = true
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _process(delta: float) -> void:
+	if not playing or buff == &"" or not is_visible_in_tree():
+		return
+	time = fposmod(time + delta, BuffVignettes.LOOP_S)
+	queue_redraw()
+
+
+func _draw() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), SKY)
+	if buff != &"":
+		BuffVignettes.draw(buff, self, Rect2(Vector2.ZERO, size), time)

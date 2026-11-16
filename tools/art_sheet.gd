@@ -18,6 +18,23 @@ class Sheet:
 
 	func _ready() -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var defs := BuffCatalog.all()
+		if kind == "vignettes":  # six columns, 300 x 190 units each
+			for i in defs.size():
+				_stage(defs[i].id, at_s, Rect2(i % 6 * 300 + 4, i / 6 * 190 + 4, 276, 184))
+		elif kind == "vignette":  # one buff at eight moments, two columns
+			for i in 8:
+				var moment := BuffVignettes.LOOP_S * i / 8.0
+				_stage(buff, moment, Rect2(i % 2 * 450 + 6, i / 2 * 270 + 6, 396, 264))
+
+	func _stage(id: StringName, moment: float, box: Rect2) -> void:
+		var stage := VignetteStage.new()
+		stage.playing = false
+		stage.buff = id
+		stage.time = moment
+		stage.position = box.position
+		stage.size = box.size
+		add_child(stage)
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), Palette.PANEL.darkened(0.4))
@@ -28,10 +45,6 @@ class Sheet:
 				_buffs_big()
 			"ui":
 				_ui()
-			"vignettes":
-				_vignettes()
-			"vignette":
-				_one_vignette()
 
 	## Six columns of card-sized panels (the size a shop card has), then every
 	## buff again large. Crop 900x750 canvas units for the card-size check.
@@ -58,21 +71,6 @@ class Sheet:
 			picture.draw(self, Rect2(corner + Vector2(10, 20), Vector2(64, 64)))
 			picture.draw(self, Rect2(corner + Vector2(84, 20), Vector2(150, 150)))
 		KeyGlyph.draw_sheet(self, Vector2(40, size.y * 0.78), 96.0)
-
-	func _vignettes() -> void:
-		var defs := BuffCatalog.all()
-		var cell := Vector2(size.x / 5.0, size.y / 5.0)
-		for i in defs.size():
-			var corner := Vector2(i % 5, i / 5) * cell
-			var stage := Rect2(corner + Vector2(6, 4), cell - Vector2(12, 8))
-			BuffVignettes.draw(defs[i].id, self, stage, at_s)
-
-	func _one_vignette() -> void:
-		var cell := Vector2(size.x / 4.0, size.y / 2.0)
-		for i in 8:
-			var corner := Vector2(i % 4, i / 4) * cell
-			var stage := Rect2(corner + Vector2(6, 6), cell - Vector2(12, 12))
-			BuffVignettes.draw(buff, self, stage, BuffVignettes.LOOP_S * i / 8.0)
 
 
 func _initialize() -> void:
