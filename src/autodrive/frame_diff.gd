@@ -48,3 +48,18 @@ static func softness(image: Image) -> float:
 				elif step >= SOFT * 255.0:
 					soft += 1
 	return float(soft) / maxf(soft + hard, 1.0)
+
+
+## Mean luminance (0..1) of the pixels of `region` (image pixels) when
+## `inside`, else of every pixel outside it: how bright the subject is
+## against what surrounds it.
+static func brightness(image: Image, region: Rect2i, inside: bool) -> float:
+	var total := 0.0
+	var count := 0
+	for y in range(0, image.get_height(), 3):
+		for x in range(0, image.get_width(), 3):
+			if region.has_point(Vector2i(x, y)) == inside:
+				var pixel := image.get_pixel(x, y)
+				total += pixel.r * 0.3 + pixel.g * 0.59 + pixel.b * 0.11
+				count += 1
+	return total / maxf(count, 1.0)

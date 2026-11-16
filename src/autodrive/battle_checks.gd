@@ -23,6 +23,11 @@ const CLOUD_FLOOR := 4000
 ## Compatibility renderer there is no MSAA 2D, so the edges are feathered by
 ## hand (tests/view/test_antialias.gd). A staircase frame scores about 0.37.
 const SOFT_EDGES := 0.5
+## How many times brighter than the rest of the frame the payoff's subject
+## must be: the burning army at a loss (the village dims, the night falls),
+## the army under its flag at a win. Measured before the staging: 1.25, 1.34.
+const SUBJECT_LOSS := 1.6
+const SUBJECT_WIN := 1.4
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 
@@ -110,3 +115,24 @@ static func edges_soft(bot: BotBase) -> bool:
 	var share := FrameDiff.softness(image)
 	bot.numbers.append("soft_edges=%.2f" % share)
 	return bot.check(share >= SOFT_EDGES, "edges are %.2f soft, want %.2f" % [share, SOFT_EDGES])
+
+
+## The payoff's subject (`region`, canvas units) is brighter than the rest of
+## the frame by `floor_ratio`: the flames are what the eye lands on.
+static func subject_stands_out(
+	bot: BotBase, region: Rect2, what: String, floor_ratio: float
+) -> bool:
+	var view := bot.get_viewport()
+	var image: Image = await bot.shots.grab(view)
+	if image == null:
+		return true
+	var px := view.get_final_transform() * region
+	var box := Rect2i(Vector2i(px.position), Vector2i(px.size))
+	var ratio := (
+		FrameDiff.brightness(image, box, true)
+		/ maxf(FrameDiff.brightness(image, box, false), 0.001)
+	)
+	bot.numbers.append("%s_ratio=%.2f" % [what, ratio])
+	return bot.check(
+		ratio >= floor_ratio, "%s: %.2f times the rest, want %.2f" % [what, ratio, floor_ratio]
+	)

@@ -20,6 +20,8 @@ const SHED_BELOW_S := 2.4
 const DEFAULT_REACH := 60.0
 ## Real seconds for the win flag to climb its pole [design guess].
 const FLAG_RISE_S := 1.4
+## Real seconds the night veil takes to fall [design guess].
+const VEIL_S := 0.6
 
 ## The latest snapshot: targets are found in it.
 var shot := SiegeSnapshot.new()
@@ -32,6 +34,10 @@ var centre_progress := 0.0
 ## True once the army's flag is going up on the church.
 var flag_up := false
 var alarmed := false
+## The night veil over the map and the crowd at a loss (0..1, falling toward
+## `veil_goal`): burning figures are drawn above it, so only they stay lit.
+var veil := 0.0
+var veil_goal := 0.0
 ## _draw calls so far (tests read it).
 var draws := 0
 ## The camera's pixels per metre (the screen sets it): marks that must stay
@@ -77,7 +83,7 @@ func spawn(event: Dictionary) -> void:
 	fx.team = int(event.get("team", SiegeSnapshot.Team.ARMY))
 	fx.seed_value = hash([kind, _spawned])
 	fx.data = event
-	fx.to = _aim(fx, recipe[2])
+	fx.to = FxAim.target(shot, _plan, fx, recipe[2])
 	_react(fx)
 	live.append(fx)
 	_shed()
@@ -128,13 +134,21 @@ func clear() -> void:
 func advance(delta: float) -> void:
 	_clock += delta
 	_rally_age += delta
+	veil = move_toward(veil, veil_goal, delta / VEIL_S)
 	if flag_up:
 		_flag_raised = minf(_flag_raised + delta / FLAG_RISE_S, 1.0)
 	for fx in live:
 		fx.age += delta
 	live = live.filter(func(fx: BattleFx) -> bool: return fx.age < fx.life)
 	var swarming := crowd != null and crowd.has_swarm()
-	if not live.is_empty() or has_rally() or flag_up or centre_progress > 0.0 or swarming:
+	if (
+		not live.is_empty()
+		or has_rally()
+		or flag_up
+		or centre_progress > 0.0
+		or swarming
+		or veil > 0.0
+	):
 		queue_redraw()
 
 
@@ -164,6 +178,7 @@ func _draw() -> void:
 		fx.painter.call(self, fx)
 	if crowd != null:
 		FxSwarm.paint(self, crowd, _clock, view_zoom)
+		FxSwarm.night(self, crowd, _plan.map.bounds.grow(60.0) if _plan != null else Rect2(), veil)
 	if flag_up and _plan != null:
 		FxMarks.win_flag(self, _plan.bell, _flag_raised, _clock)
 	if _meter != null:
@@ -184,7 +199,7 @@ func _react(fx: BattleFx) -> void:
 				plant(fx.pos)
 			else:
 				rally = Vector2.INF
-			fx.to = _middle(SiegeSnapshot.Team.ARMY, fx.pos)
+			fx.to = FxAim.middle(shot, SiegeSnapshot.Team.ARMY, fx.pos)
 		SiegeEvent.CENTRE_HELD:
 			centre_progress = clampf(float(fx.data.get("progress", 0.0)), 0.0, 1.0)
 		SiegeEvent.VICTORY:
@@ -210,34 +225,3 @@ func _react(fx: BattleFx) -> void:
 			crowd.cheer(1.2)
 		SiegeEvent.COMBUST:
 			crowd.ignite(SiegeSnapshot.Team.ARMY)
-
-
-## Where the effect points: the nearest enemy within `reach`, else straight
-## at the other side's ground (the village for the army, the camp for it).
-func _aim(fx: BattleFx, reach: float) -> Vector2:
-	if reach <= 0.0:
-		return fx.pos
-	var best := Vector2.INF
-	for i in shot.entity_count():
-		if shot.ent_team[i] == fx.team or shot.ent_count[i] <= 0:
-			continue
-		var gap := shot.ent_pos[i].distance_to(fx.pos)
-		if gap <= reach and gap < best.distance_to(fx.pos):
-			best = shot.ent_pos[i]
-	if best != Vector2.INF:
-		return best
-	var home := Vector2.ZERO
-	if _plan != null:
-		home = _plan.map.village_center if fx.team == SiegeSnapshot.Team.ARMY else _plan.camp
-	return fx.pos + (home - fx.pos).limit_length(reach * 0.7)
-
-
-## The middle of `team`'s entities (`fallback` when it has none).
-func _middle(team: int, fallback: Vector2) -> Vector2:
-	var sum := Vector2.ZERO
-	var count := 0
-	for i in shot.entity_count():
-		if shot.ent_team[i] == team and shot.ent_count[i] > 0:
-			sum += shot.ent_pos[i]
-			count += 1
-	return sum / count if count > 0 else fallback

@@ -45,6 +45,8 @@ uniform float burn = 0.0;
 uniform float flame = 0.0;
 // Metres of jumping for joy (the pep talk).
 uniform float cheer = 0.0;
+// 1 = as drawn; less dims and ghosts the squad (the payoff's spotlight).
+uniform float dim = 1.0;
 
 // The buildings (x, y, w, h in metres, one texel each): nobody stands on a roof.
 // The same sums as CrowdScatter.clear_of.
@@ -129,7 +131,8 @@ void vertex() {
 		COLOR.rgb = mix(COLOR.rgb, glint_tint.rgb, shimmer * 0.45);
 	}
 	float glint = 0.3 + 0.18 * sin(t * 3.0);
-	COLOR.a *= fade * mix(1.0, glint, shimmer);
+	COLOR.rgb *= dim;
+	COLOR.a *= fade * mix(1.0, glint, shimmer) * (0.5 + 0.5 * dim);
 	vec2 spot = anchor + home * spread * grow - lag * phase;
 	VERTEX = v + shift + (1.0 - fallen) * cleared(spot);
 }

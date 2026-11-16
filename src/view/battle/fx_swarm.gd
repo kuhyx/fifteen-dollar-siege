@@ -35,3 +35,16 @@ static func is_flying(squad: SquadVisual) -> bool:
 	if squad == null or squad.kind != SiegeSnapshot.Kind.WASPS:
 		return false
 	return squad.alive > 0 and squad.state != SiegeSnapshot.State.DOWN
+
+
+## The night over a loss: a veil on the map and the crowd, and a warm glow
+## around every burning squad (above the veil, under the flames).
+static func night(canvas: CanvasItem, crowd: CrowdLayer, area: Rect2, veil: float) -> void:
+	if veil <= 0.0:
+		return
+	canvas.draw_rect(area, Color(Palette.NIGHT, Palette.NIGHT.a * veil))
+	for squad in crowd.squads:
+		if squad != null and squad.burning:
+			var reach := squad.spread * squad.grow + 5.0
+			canvas.draw_circle(squad.anchor, reach, Color(Palette.FLAME_MID, 0.1 * veil))
+			canvas.draw_circle(squad.anchor, reach * 0.6, Color(Palette.FLAME_MID, 0.12 * veil))

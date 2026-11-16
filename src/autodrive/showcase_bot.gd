@@ -149,8 +149,19 @@ func _ending(won: bool) -> bool:
 	var seen: bool = await BattleChecks.payoff_seen(self, battle)
 	_saw(battle)
 	var show := battle.effects.flag_raised() >= 0.99 if won else battle.crowd.squads[0].burning
+	var subject := Rect2()
+	for squad in battle.crowd.squads:
+		if squad.team == SiegeSnapshot.Team.ARMY:
+			var at := battle.map_to_canvas(squad.anchor)
+			subject = Rect2(at, Vector2.ZERO) if subject == Rect2() else subject.expand(at)
 	var ok := (
 		check(seen, "%s shows before the result" % tag)
+		and await BattleChecks.subject_stands_out(
+			self,
+			subject.grow(60.0),
+			tag,
+			BattleChecks.SUBJECT_WIN if won else BattleChecks.SUBJECT_LOSS
+		)
 		and check(show, "%s: the flag is up / the army burns" % tag)
 		and await shot(tag)
 		and await on_screen(&"result")

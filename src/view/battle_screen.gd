@@ -205,8 +205,11 @@ func _step(dt_sim: float) -> void:
 		payoff_active = true
 		if sim.outcome() == SiegeSim.Outcome.LOSE:
 			crowd.ignite(SiegeSnapshot.Team.ARMY)
+			crowd.spotlight(SiegeSnapshot.Team.ARMY, CrowdLayer.DIM_LOSS)
+			effects.veil_goal = 1.0
 		else:
 			effects.flag_up = true
+			crowd.spotlight(SiegeSnapshot.Team.ARMY, CrowdLayer.DIM_WIN)
 		beats.start_payoff(payoff_s)
 		decided.emit(sim.outcome())
 	meter.end()

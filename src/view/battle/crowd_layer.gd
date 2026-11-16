@@ -30,6 +30,11 @@ const PIXEL := &"pixel_m"
 ## (x, y, w, h) and how many of its texels are used.
 const BLOCKS := &"blocks"
 const BLOCK_COUNT := &"block_count"
+## How dark the other side's crowd goes at the payoff (1 = not at all): a
+## loss lets the flames be the only bright thing, a win leaves the village
+## visible but second [design guess].
+const DIM_LOSS := 0.3
+const DIM_WIN := 0.4
 ## A rout within this many metres throws a squad apart.
 const SCATTER_M := 30.0
 const SCATTER_KICK := 1.2
@@ -154,6 +159,13 @@ func scatter(pos: Vector2, team: int) -> void:
 	var nearest := nearest_squad(pos, team)
 	if nearest != null and nearest.anchor.distance_to(pos) < SCATTER_M:
 		nearest.kick(SCATTER_KICK)
+
+
+## Dims every squad that is not `team`'s to `level` (the payoff's subject).
+func spotlight(team: int, level: float) -> void:
+	for squad in squads:
+		var lit := squad.team == team
+		squad.material.set_shader_parameter("dim", 1.0 if lit else level)
 
 
 ## The army jumps for joy for a moment (the pep talk).
