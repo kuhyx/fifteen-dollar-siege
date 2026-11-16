@@ -18,7 +18,7 @@
 set -euo pipefail
 
 readonly PIN_URL="https://github.com/kuhyx/utils"
-readonly PIN_TAG="godot-dev-tools-v0.1.0"
+readonly PIN_TAG="godot-dev-tools-v0.1.1"
 readonly ADDON_IN_REPO="godot_dev_tools/addons/dev_tools"
 readonly MOUNT_REL="addons/dev_tools"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

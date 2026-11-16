@@ -14,7 +14,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 readonly MOUNT="$REPO_ROOT/scripts/mount_dev_tools.sh"
-readonly EXPECTED_PIN="https://github.com/kuhyx/utils godot-dev-tools-v0.1.0"
+readonly EXPECTED_PIN="https://github.com/kuhyx/utils godot-dev-tools-v0.1.1"
 TMP=""
 
 cleanup() {

@@ -21,7 +21,7 @@ data. On screen and in ids they are neutral (`emperor`, `pep_talk`,
 | Godot Engine | 4.7.2 | MIT | system package / CI download |
 | GUT (Godot Unit Test) | 9.7.1 | MIT | `install.sh` clones the tag into `addons/gut` (gitignored) |
 | `game_recording`, the session recorder (`kuhyx/utils`) | `game-recording-v0.1.0` | MIT | `tools/recording/build.sh` installs the pinned git tag into a cached venv |
-| `godot_dev_tools`, the dev feedback mode (`kuhyx/utils`): annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry | `godot-dev-tools-v0.1.0` | MIT | `scripts/mount_dev_tools.sh` fetches the pinned tag; `install.sh` links it at `addons/dev_tools` (gitignored, not in this repo) |
+| `godot_dev_tools`, the dev feedback mode (`kuhyx/utils`): annotator, toolbar, shapes, glyphs, hint, log, logger, saver, entry | `godot-dev-tools-v0.1.1` | MIT | `scripts/mount_dev_tools.sh` fetches the pinned tag; `install.sh` links it at `addons/dev_tools` (gitignored, not in this repo) |
 | gdtoolkit, pre-commit, ruff, coverage | `requirements-dev.txt` | MIT / MIT / MIT / Apache-2.0 | `install.sh` |
 
 ## Shared helpers
