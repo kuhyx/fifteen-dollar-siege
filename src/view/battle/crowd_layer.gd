@@ -23,6 +23,9 @@ const MIN_MAN_PX := 18.0
 const MAX_BOOST := 4.0
 ## The shader's global for it, set once a frame beside the clock.
 const BOOST := &"figure_boost"
+## The shader's global for the metres one real pixel spans: the feather
+## around every figure is one pixel wide at any zoom.
+const PIXEL := &"pixel_m"
 ## The shader's globals for the buildings: a one-row float texture of
 ## (x, y, w, h) and how many of its texels are used.
 const BLOCKS := &"blocks"
@@ -87,6 +90,7 @@ func draw_frame(
 	RenderingServer.global_shader_parameter_set(CLOCK, clock)
 	var boost := boost_for(zoom_px)
 	RenderingServer.global_shader_parameter_set(BOOST, boost)
+	RenderingServer.global_shader_parameter_set(PIXEL, pixel_m_for(zoom_px))
 	var cheering := _cheer > 0.0
 	_cheer = maxf(_cheer - delta * CHEER_FADE, 0.0)
 	for i in mini(squads.size(), shot.entity_count()):
@@ -103,6 +107,11 @@ func draw_frame(
 ## metre): 1 once a man is tall enough, more as the camera goes out.
 static func boost_for(zoom_px: float) -> float:
 	return clampf(MIN_MAN_PX / maxf(zoom_px * MAN_M, 0.001), 1.0, MAX_BOOST)
+
+
+## Metres one real pixel spans at `zoom_px` (real pixels per metre).
+static func pixel_m_for(zoom_px: float) -> float:
+	return 1.0 / maxf(zoom_px, 0.001)
 
 
 ## True while any swarm of wasps is in the air.

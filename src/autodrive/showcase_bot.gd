@@ -178,6 +178,7 @@ func _crowd() -> bool:
 	await watch(battle, 70)
 	return (
 		check(battle.crowd.squads[0].fallen() == 3, "the fallen lie in the fight")
+		and await BattleChecks.edges_soft(self)
 		and await shot("fight_close")
 	)
 

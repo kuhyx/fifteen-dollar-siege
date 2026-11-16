@@ -24,12 +24,12 @@ func _draw() -> void:
 	for i in plan.trees.size():
 		if i % 5 == 0:
 			var patch := Vector2(plan.trees[i].x, plan.trees[i].y)
-			draw_circle(patch, plan.trees[i].z * 7.0, Color(WorldPalette.GRASS_LIGHT, 0.5))
+			_haze(patch, plan.trees[i].z * 7.0, Color(WorldPalette.GRASS_LIGHT, 0.5))
 	for i in plan.fields.size():
 		_field(plan.fields[i], i)
 	draw_circle(map.village_center, map.village_radius, WorldPalette.YARD)
-	draw_arc(map.village_center, map.village_radius, 0.0, TAU, 96, WorldPalette.PATH, 1.2)
-	draw_polyline(plan.path, WorldPalette.PATH, PATH_M)
+	draw_arc(map.village_center, map.village_radius, 0.0, TAU, 96, WorldPalette.PATH, 1.2, true)
+	draw_polyline(plan.path, WorldPalette.PATH, PATH_M, true)
 	for point in plan.path:
 		draw_circle(point, PATH_M / 2.0, WorldPalette.PATH)
 	for tree in plan.trees:
@@ -87,18 +87,33 @@ func _church() -> void:
 	for i in 4:
 		var slope := PackedVector2Array([corners[i], corners[(i + 1) % 4], plan.bell])
 		draw_colored_polygon(slope, stone.darkened(0.08 * i))
+		_rim(slope, stone.darkened(0.08 * i))
 	draw_circle(plan.bell, 2.3, WorldPalette.SOOT)
 	draw_circle(plan.bell, 1.7, WorldPalette.BRASS)
 
 
+## A translucent disc with a soft edge: three discs, each a little smaller,
+## so the rim is a gradient instead of a staircase.
+func _haze(at: Vector2, radius: float, tint: Color) -> void:
+	var soft := Color(tint, tint.a / 3.0)
+	for share: float in [1.0, 0.94, 0.88]:
+		draw_circle(at, radius * share, soft)
+
+
+## An antialiased hairline of the same colour around a filled polygon.
+func _rim(outline: PackedVector2Array, tint: Color) -> void:
+	draw_polyline(outline + PackedVector2Array([outline[0]]), tint, 0.5, true)
+
+
 func _tree(at: Vector2, crown: float) -> void:
 	draw_circle(at, crown, WorldPalette.TREE)
+	draw_arc(at, crown, 0.0, TAU, 24, WorldPalette.TREE, 0.5, true)
 	draw_circle(at + Vector2(-0.25, -0.25) * crown, crown * 0.55, WorldPalette.TREE_LIGHT)
 
 
 ## The army's start: three tents around a fire and a pole with its colour.
 func _camp(at: Vector2) -> void:
-	draw_circle(at, 26.0, Color(WorldPalette.PATH, 0.45))
+	_haze(at, 26.0, Color(WorldPalette.PATH, 0.45))
 	for offset in MapPlan.TENTS:
 		var tent := Rect2(at + offset - MapPlan.TENT_SIZE / 2.0, MapPlan.TENT_SIZE)
 		_roof(tent, WorldPalette.TENT, WorldPalette.TENT.darkened(0.2), WorldPalette.WOOD_DARK)

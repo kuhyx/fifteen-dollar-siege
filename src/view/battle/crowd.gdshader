@@ -21,6 +21,9 @@ uniform float pose = 0.0;
 global uniform float siege_clock;
 // Times life size at a far zoom (a man never shrinks to a speck), about the feet.
 global uniform float figure_boost;
+// Metres one real pixel spans: the feather (UV.y above 0.5 = a fringe vertex,
+// its outward angle plus 4) is one pixel wide at every zoom.
+global uniform float pixel_m;
 uniform float flip = 1.0;
 // Amplitudes: bob (walk), shake (fight), lean (flee), swing (weapon arm).
 uniform vec4 motion = vec4(0.38, 0.09, 0.42, 0.9);
@@ -84,7 +87,9 @@ void vertex() {
 	float t = siege_clock + phase * 6.2831853;
 	float state = mix(pose, 4.0, fallen);
 	float side = phase > 0.5 ? 1.0 : -1.0;
-	vec2 v = VERTEX * figure_boost;
+	float rim = step(0.5, UV.y);
+	vec2 outward = vec2(cos(UV.y - 4.0), sin(UV.y - 4.0));
+	vec2 v = VERTEX * figure_boost + rim * outward * pixel_m * 0.8;
 	vec2 shift = vec2(0.0);
 	float tilt = 0.0;
 	if (flame > 0.0) {

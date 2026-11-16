@@ -70,6 +70,10 @@ blocks={
 "type": "sampler2D",
 "value": ""
 }
+pixel_m={
+"type": "float",
+"value": 1.0
+}
 block_count={
 "type": "int",
 "value": 0

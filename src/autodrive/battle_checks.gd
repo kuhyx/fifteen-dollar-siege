@@ -19,6 +19,10 @@ const FLAG_FLOOR := 5000
 const CHEVRON_FLOOR := 1500
 ## The same for the wasps' cloud on the whole-map view.
 const CLOUD_FLOOR := 4000
+## The share of soft (antialiased) edges a battle frame must have: on the
+## Compatibility renderer there is no MSAA 2D, so the edges are feathered by
+## hand (tests/view/test_antialias.gd). A staircase frame scores about 0.37.
+const SOFT_EDGES := 0.5
 ## Entering the screen may take this long, whole [lesson L9: under 1 s].
 const ENTER_BUDGET_MS := 1000.0
 
@@ -96,3 +100,13 @@ static func reads_at_a_glance(
 	return bot.check(
 		seen < 0 or seen >= floor_px, "%s: %d px of %d changed" % [what, seen, floor_px]
 	)
+
+
+## The frame on screen has soft edges (SOFT_EDGES). True headless.
+static func edges_soft(bot: BotBase) -> bool:
+	var image: Image = await bot.shots.grab(bot.get_viewport())
+	if image == null:
+		return true
+	var share := FrameDiff.softness(image)
+	bot.numbers.append("soft_edges=%.2f" % share)
+	return bot.check(share >= SOFT_EDGES, "edges are %.2f soft, want %.2f" % [share, SOFT_EDGES])

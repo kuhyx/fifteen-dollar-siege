@@ -9,6 +9,9 @@ extends RefCounted
 
 const NEAR_SEGMENTS := 14
 const FAR_SEGMENTS := 6
+## Added to a fringe vertex's outward angle in the mesh's UV.y, so the crowd
+## shader can tell it from a body vertex (whose UV.y is 0). Angles run -PI..PI.
+const FRINGE_FLAG := 4.0
 
 var detail := true
 var swing := 0.0
@@ -22,6 +25,16 @@ var points := PackedVector2Array()
 var colors := PackedColorArray()
 var tags := PackedVector2Array()
 var indices := PackedInt32Array()
+## The one-pixel feather around every shape (antialiasing by hand: MSAA 2D
+## does nothing on the Compatibility renderer). Fringe vertices sit on the
+## outline; the shader pushes them out. Kept apart from the body so the
+## figure's own measures (bounds, triangles, spans) ignore them.
+var fringe_points := PackedVector2Array()
+var fringe_colors := PackedColorArray()
+var fringe_angles := PackedFloat32Array()
+var fringe_tags := PackedFloat32Array()
+## Triangle corners: 0 or more = a body vertex, -1 - k = fringe vertex k.
+var fringe_indices := PackedInt32Array()
 
 
 static func make(p_detail: bool, p_scale := 1.0) -> FigureBuilder:
@@ -41,6 +54,31 @@ func poly(outline: PackedVector2Array, tint: Color) -> void:
 		tags.append(Vector2(swing, gear))
 	for index in order:
 		indices.append(base + index)
+	_feather(outline, base, tint)
+
+
+## A fringe around the outline whose vertices are `base`... in `points`.
+func _feather(outline: PackedVector2Array, base: int, tint: Color) -> void:
+	var count := outline.size()
+	var area := 0.0
+	for i in count:
+		area += outline[i].cross(outline[(i + 1) % count])
+	var first := fringe_points.size()
+	for i in count:
+		var before := (outline[i] - outline[(i + count - 1) % count]).normalized()
+		var after := (outline[(i + 1) % count] - outline[i]).normalized()
+		var normal := Vector2(before.y + after.y, -before.x - after.x)
+		if normal.is_zero_approx():
+			normal = Vector2(before.y, -before.x)
+		normal = normal.normalized() * signf(area)
+		fringe_points.append(outline[i] * scale + offset)
+		fringe_colors.append(Color(tint, 0.0))
+		fringe_angles.append(normal.angle() + FRINGE_FLAG)
+		fringe_tags.append(swing)
+	for i in count:
+		var next := (i + 1) % count
+		fringe_indices.append_array([base + i, base + next, -1 - (first + next)])
+		fringe_indices.append_array([base + i, -1 - (first + next), -1 - (first + i)])
 
 
 ## The same from flat numbers: [x0, y0, x1, y1, ...].
@@ -157,12 +195,24 @@ func signature() -> int:
 
 
 func mesh() -> ArrayMesh:
+	var all_points := points.duplicate()
+	var all_colors := colors.duplicate()
+	var all_tags := PackedVector2Array()
+	for tag in tags:
+		all_tags.append(Vector2(tag.x, 0.0))
+	for i in fringe_points.size():
+		all_points.append(fringe_points[i])
+		all_colors.append(fringe_colors[i])
+		all_tags.append(Vector2(fringe_tags[i], fringe_angles[i]))
+	var all_indices := indices.duplicate()
+	for corner in fringe_indices:
+		all_indices.append(corner if corner >= 0 else points.size() - 1 - corner)
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = points
-	arrays[Mesh.ARRAY_COLOR] = colors
-	arrays[Mesh.ARRAY_TEX_UV] = tags
-	arrays[Mesh.ARRAY_INDEX] = indices
+	arrays[Mesh.ARRAY_VERTEX] = all_points
+	arrays[Mesh.ARRAY_COLOR] = all_colors
+	arrays[Mesh.ARRAY_TEX_UV] = all_tags
+	arrays[Mesh.ARRAY_INDEX] = all_indices
 	var out := ArrayMesh.new()
 	out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return out
