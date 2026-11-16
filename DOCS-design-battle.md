@@ -10,16 +10,20 @@ are in `DOCS-design.md`; nothing here is a task.
 | Map | `src/view/battle/map_layer.gd`, `map_plan.gd` | grass, fields, the path, the village yard, houses as roofs, the church with its bell tower, trees, the camp |
 | Crowd | `crowd_layer.gd`, `squad_visual.gd`, `crowd.gdshader` | one figure per head of every entity |
 | Effects | `battle_effects.gd`, `fx_*.gd` | one effect per sim event, the rally flag, the centre ring, the win flag |
-| HUD | `battle_hud.gd`, `hud_meters.gd`, `hud_button.gd` | meters, speed and camera buttons, orders |
+| HUD | `battle_hud.gd`, `hud_meters.gd`, `hud_button.gd`, `buff_chips.gd` | meters, speed and camera buttons, orders, a chip per bought buff |
 
 The first three sit in one `world` node whose transform is the camera, so
 their unit is the metre and everything is vector: sharp at any zoom and any
 window size.
 
-**The map adds what `SiegeMap` does not hold.** `MapPlan` derives a church at
-`village_center`, fields, a path from `army_spawn` and trees from the map's
-own numbers with a fixed seed. The sim does not know them. A building under
-the church is not drawn.
+**The map adds what `SiegeMap` does not hold.** `MapPlan` lays a cross church
+(long nave, transept, a bell tower on the crossing) inside `SiegeMap.church`
+with the bell at `SiegeMap.bell`, and derives fields, a path from `army_spawn`
+to the plaza and trees from the map's own numbers with a fixed seed. A map
+that names no church (the showcase's) gets the sim's default one. A building
+under the church is not drawn; houses that touch or overlap are one box for
+the crowd (`MapPlan._merged`), or figures pushed off one roof land on the next.
+The hold ring is `SiegeMap.centre_radius` wide and follows `centre_hold`.
 
 **The crowd.** The sim is squad-level; the view draws heads. Each entity is
 one MultiMesh per figure variant, drawn through the RenderingServer. Every
@@ -76,6 +80,18 @@ All of it is already in the frozen contract; this is how the view reads it.
   pad A / a tap / the skip button cuts one short. Later they are plain effects.
 - The payoff starts when `outcome()` leaves RUNNING, with or without a
   `VICTORY` / `COMBUST` event. `finished` fires `payoff_s` real seconds later.
+  The siege plays on during it at x1 at most (`PAYOFF_SPEED`), and a win
+  frames the church AND the army when both fit one view (`BOTH_MAX_M`).
+- **Time.** The sim ticks every 0.1 s; `SnapshotTween` shows the world one
+  tick behind on the straight line between the two latest snapshots, so a
+  squad glides at any frame rate and speed (`tests/view/test_real_motion.gd`).
+  The HUD reads `village_morale`, `army_morale`, `alarm` and `centre_hold` of
+  the snapshot as they are (`tests/view/test_real_siege.gd`).
+- **Chips and marks.** `BuffChips` shows what was bought: large above the
+  army for `SHOW_S` then in the strip (small while a beat plays); a buff that
+  only changes numbers has no other sign. `FxHeroes` rings the army's single
+  figures (captain, trumpet boy, gunman, monster). `BattleEffects.seen` and
+  `AudioDirector.heard` count effects and cues: `--autodrive=buffs` reads them.
 - A squad whose `ent_count` drops loses that many figures (bodies stay). An
   entity whose kind changes, or that grows past the heads it was first seen
   with, is rebuilt and loses its bodies.
@@ -161,6 +177,10 @@ oldest short ones until they fit.
 | `BattleScreen.PAYOFF_S`, `RING_S`, `BattleBeats.SKIP_AFTER_S` | 3.2 s, 1.5 s, 0.3 s |
 | `CrowdLayer.MIN_MAN_PX`, `MAX_BOOST`, `DIM_LOSS`, `DIM_WIN` | 18 px, 4x, 0.3, 0.4 |
 | `BattleCamera.AUTO_MIN_ZOOM`, `ANCHOR_SLACK` | 6 px/m, 0.4 |
+| `BuffChips.SHOW_S`, `SETTLE_S`, `CHIP`, `BIG_CHIP`, `BIG_AT` | 1.2 s, 0.6 s, 56 px, 112 px, 0.27 of the height |
+| `FxHeroes.RING_PX`, `LINE_PX`, `POINTER_PX` | 30, 3, 14 px |
+| `BattleScreen.PAYOFF_SPEED`, `BattleBeats.BOTH_MAX_M` | x1, 300 x 170 m |
+| `LaunchOptions.DEFAULT_SPEED` | x2 |
 | `BattleEffects.VEIL_S`; `FxSwarm.MIN_CLOUD_PX` | 0.6 s; 44 px |
 | `FxHiding.PER_PAIR`, `MAX_PAIRS`, `EYE_PX` | 12 people, 4, 7 px |
 | `FxSignals.CHEVRON_PX`, `CHARGE_CHEVRONS`, `RETREAT_CHEVRONS` | 40 px, 3, 2 |

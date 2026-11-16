@@ -113,6 +113,15 @@ func test_launch_options_defaults_and_problems() -> void:
 	assert_eq(LaunchOptions.value_of(["--a=1"], "--b="), "")
 
 
+func test_the_reel_and_buffs_bots_take_their_arguments() -> void:
+	var options := LaunchOptions.parse(["--autodrive=buffs", "--shard=1/5", "--every=2.5"])
+	assert_eq(options.autodrive, &"buffs")
+	assert_eq(options.shard, "1/5")
+	assert_eq(options.every_s, 2.5)
+	assert_eq(LaunchOptions.parse(["--autodrive=reel"]).autodrive, &"reel")
+	assert_string_contains(LaunchOptions.parse(["--every=0"]).problem, "--every=0")
+
+
 func test_a_bot_refuses_the_real_save_and_a_missing_save_dir() -> void:
 	assert_string_contains(BotReport.save_dir_problem(""), "pass --save-dir")
 	assert_string_contains(BotReport.save_dir_problem("relative/dir"), "absolute")

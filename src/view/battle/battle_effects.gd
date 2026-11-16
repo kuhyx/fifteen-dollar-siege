@@ -145,6 +145,7 @@ func advance(delta: float) -> void:
 		fx.age += delta
 	live = live.filter(func(fx: BattleFx) -> bool: return fx.age < fx.life)
 	var swarming := crowd != null and (crowd.has_swarm() or FxHiding.any(crowd))
+	swarming = swarming or (crowd != null and FxHeroes.any(crowd))
 	if (
 		not live.is_empty()
 		or has_rally()
@@ -184,6 +185,7 @@ func _draw() -> void:
 		fx.painter.call(self, fx)
 	if crowd != null:
 		FxSwarm.paint(self, crowd, _clock, view_zoom)
+		FxHeroes.paint(self, crowd, _clock, view_zoom)
 		if _plan != null:
 			FxHiding.paint(self, crowd, _plan, _clock, view_zoom)
 		FxSwarm.night(self, crowd, _plan.map.bounds.grow(60.0) if _plan != null else Rect2(), veil)
@@ -208,8 +210,6 @@ func _react(fx: BattleFx) -> void:
 			else:
 				rally = Vector2.INF
 			fx.to = FxAim.middle(shot, SiegeSnapshot.Team.ARMY, fx.pos)
-		SiegeEvent.CENTRE_HELD:
-			centre_progress = clampf(float(fx.data.get("progress", 0.0)), 0.0, 1.0)
 		SiegeEvent.VICTORY:
 			flag_up = true
 			fx.pos = _plan.map.village_center if _plan != null else fx.pos

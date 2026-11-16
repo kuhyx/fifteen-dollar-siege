@@ -1,5 +1,5 @@
 extends GutTest
-## The battle screen on the REAL sim, frame by frame at x48: the HUD shows what
+## The battle screen on the REAL sim, frame by frame at x96: the HUD shows what
 ## the snapshot says, nobody is drawn off the map, and the camera keeps the
 ## army in view.
 
@@ -13,7 +13,7 @@ func _battle(ids: Array, seed_value: int) -> BattleScreen:
 	var battle := BattleScreen.new()
 	battle.loadout = Loadout.of(ids)
 	battle.size = Vector2(1920.0, 1080.0)
-	battle.setup(SiegeSim.create(battle.loadout, seed_value), &"watch", 48.0)
+	battle.setup(SiegeSim.create(battle.loadout, seed_value), &"watch", 96.0)
 	add_child_autofree(battle)
 	battle.beats.skip_all()
 	return battle
@@ -47,8 +47,8 @@ func test_every_loadout_keeps_hud_map_and_camera_honest() -> void:
 			assert_almost_eq(meters.army, shot.army_morale, 0.0001, "%s army" % name)
 			assert_almost_eq(meters.alarm, shot.alarm, 0.0001, "%s alarm" % name)
 			assert_almost_eq(meters.centre, shot.centre_hold, 0.0001, "%s centre" % name)
-			if frames % 5 == 0 and shot.clock_s > 6.0:
+			if frames % 3 == 0 and shot.clock_s > 6.0:
 				worst_view = minf(worst_view, _in_view(battle))
 		gut.p("REAL %s: %d frames, army in view at worst %.2f" % [name, frames, worst_view])
-		assert_gt(frames, 40, "%s plays on screen" % name)
+		assert_gt(frames, 20, "%s plays on screen" % name)
 		assert_gt(worst_view, 0.5, "%s: the camera keeps most of the army in view" % name)

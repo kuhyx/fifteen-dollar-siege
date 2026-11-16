@@ -115,7 +115,7 @@ func test_orders_plant_and_pull_the_rally_flag() -> void:
 
 func test_the_sim_s_progress_and_endings_leave_marks() -> void:
 	effects.spawn(_event(SiegeEvent.CENTRE_HELD))
-	assert_eq(effects.centre_progress, 0.5)
+	assert_eq(effects.centre_progress, 0.0, "the ring is the snapshot's, not the event's")
 	assert_false(effects.flag_up)
 	effects.spawn(_event(SiegeEvent.VICTORY))
 	assert_true(effects.flag_up, "the flag goes up on the church")

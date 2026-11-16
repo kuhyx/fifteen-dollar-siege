@@ -45,7 +45,6 @@ run_shard() {
         cat "$dir/frames.txt" >&2
         return 1
     }
-    mkdir -p "$OUT"
     cp "${shots[@]}" "$OUT/"
 }
 
@@ -64,6 +63,7 @@ main() {
     mkdir -p "$SCRATCH"
     OUT="$(realpath -m "${1:-$SCRATCH/shots/buffs}")"
     rm -rf "$OUT"
+    mkdir -p "$OUT"
     RUN_DIR="$(mktemp -d "$SCRATCH/buffs.XXXXXX")"
     trap finish EXIT
     local shard pids=() code=0 start="$SECONDS"

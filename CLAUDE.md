@@ -11,12 +11,13 @@ Lab, result): `DOCS-menus.md`. The battle screen (layers, controls, showcase,
 frame gate): `DOCS-design-battle.md`. Feature map and core flows:
 `DOCS-features.md`.
 
-**State (2026-11-16):** the menus (hub, shop, Lab, result), the battle screen
-and its art, all sound (rendered music and effects, the director, a volume
-control on the pause menu), the dev tools, the session recorder, the bot and
-every gate are real, and the Web build is played in a browser by a gate. The
-sim in `src/core/` is another agent's work behind the Core API contract; its
-state is `DOCS-design.md` section 6, not this file. Sound: `DOCS-audio.md`.
+**State (2026-11-16):** everything is real and plays together: the sim
+(`DOCS-design-sim.md`; balance 0 % with no buffs, 39.7 % random, 95.8 % best,
+all 25 buffs in the top 50), the menus, the battle screen, all sound, the dev
+tools, the session recorder, the bots and every gate; the Web build is played
+in a browser by a gate. The sim stays behind the Core API contract
+(`DOCS-design.md`); its numbers are keyed to its hash (`scripts/balance_gate.sh`
+fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 
 ## Settled decisions
 
@@ -54,7 +55,8 @@ state is `DOCS-design.md` section 6, not this file. Sound: `DOCS-audio.md`.
 
 | Path | Holds | Owner after the scaffold |
 |---|---|---|
-| `src/core/` | buffs, loadout, map, snapshot, sim, lab | sim agent |
+| `src/core/` | buffs, loadout, map, snapshot, the sim and its systems, lab, fixtures | sim agent |
+| `tools/sim/` | balance search, report, pins, the scripted commander (headless) | sim agent |
 | `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`) | shared |
 | `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit` | audio agent |
 | `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
@@ -62,7 +64,7 @@ state is `DOCS-design.md` section 6, not this file. Sound: `DOCS-audio.md`.
 | `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera) | view agent |
 | `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf; the Lab's runner, ranking, book | menu-screen agent |
-| `src/autodrive/` | the `--autodrive` bot (ships in builds too) | whoever changes the flow |
+| `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
 | `tools/recording/` | the session recorder (Python) | shared |
 | `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
@@ -73,7 +75,7 @@ state is `DOCS-design.md` section 6, not this file. Sound: `DOCS-audio.md`.
 ## Contracts the three agents must keep
 
 - **Core API** (`DOCS-design.md`): signatures only grow. `tests/core/` pins
-  them; a stub-only assertion may change, a contract assertion may not.
+  them; a contract assertion may not change.
 - **View hooks:** `Main` keeps its signals (`screen_changed`,
   `siege_started`, `siege_ended`, `lab_finished`, `loadout_changed`,
   `command_given`, `quitting`), `screen` / `screen_name`, `pause_menu`,
@@ -133,9 +135,10 @@ is recorded beside the game with moments as chapters
 ## Game CLI (after `--`)
 
 `--dev` | `--mode=watch|command|lab` with `--loadout=id,id` opens straight
-into a siege | `--seed=N` | `--speed=N` (0.1 to 64) | `--lab-runs=N` |
-`--save-dir=DIR` | `--autodrive=MODE` (a mode, or `showcase`) with
-`--result-file=`, `--screenshot-dir=`, `--expect-window=WxH` |
+into a siege | `--seed=N` | `--speed=N` (0.1 to 64, default 2) | `--lab-runs=N` |
+`--save-dir=DIR` | `--autodrive=MODE` (a mode, `showcase`, `touch`, `reel` or
+`buffs`) with `--result-file=`, `--screenshot-dir=`, `--expect-window=WxH`,
+`--every=S` (reel), `--shard=I/N` (buffs) |
 `--feedback-dir=DIR`, `--session-id=ID`, `--dev-tag=T`,
 `--dev-shot=/abs/out.png` (dev tools).
 
@@ -156,6 +159,13 @@ Other gates, each one call under 60 s:
   the 2,400-figure frame gate); frames land in
   `~/data/claude-scratch/fifteen-dollar-siege/<checkout>/shots/<mode>/`
 - `scripts/screenshot.sh <out_dir> [mode] [WxH]` one mode's frames
+- `scripts/reel.sh <out_dir> <id,id|-> <seed> [every_s] [WxH]` ONE siege on
+  the real screen, a frame every few sim seconds plus the payoff (to LOOK)
+- `scripts/test_buffs.sh` each of the 25 buffs alone on the battle screen until
+  its chip, figure, look, effect and cue show; one frame each (5 shards)
+- `scripts/balance_gate.sh` the pinned balance checks (30, about 17 s);
+  `scripts/balance_search.sh` (sharded, resumable), `balance_report.sh`,
+  `balance_lift.sh <base>`, `balance_quick.sh`: `DOCS-design-sim.md` section 9
 - `scripts/art_sheet.sh <kind> <out.png> [WxH]` contact sheet of the
   code-drawn art (`buffs`, `buffs_big`, `ui`, `vignettes`, `vignette`, `shop`)
 - `scripts/check_palette.sh` no colour literal outside `src/ui/palette.gd`
@@ -179,11 +189,12 @@ Other gates, each one call under 60 s:
 
 | Group | Gates | Time |
 |---|---|---|
-| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, recording | ~13 s |
-| `scripts/check.sh --group play` | test, autodrive, launcher | ~26 s |
-| `scripts/check.sh --group tools` | audio, coverage | ~33 s |
-| `scripts/check.sh --group build` | export, round | ~17 s |
-| `scripts/check.sh --group web` | web | ~20 s |
+| `scripts/check.sh --group fast` | smoke, lint, static, shared, save_guard, recording | ~15 s |
+| `scripts/check.sh --group play` | test, autodrive, launcher | ~42 s |
+| `scripts/check.sh --group tools` | audio, coverage | ~43 s |
+| `scripts/check.sh --group sim` | balance, buffs | ~20 s |
+| `scripts/check.sh --group build` | export, round | ~24 s |
+| `scripts/check.sh --group web` | web | ~21 s |
 
 `scripts/check.sh <gate> ...` runs single gates, `--list` names groups and
 gates, and `--all` runs every group in turn (about 2 minutes: for people and

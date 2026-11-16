@@ -229,10 +229,9 @@ func _take(next: SiegeSnapshot, dt_sim: float) -> void:
 		effects.spawn(event)
 		if event.get("kind") in [SiegeEvent.BELL_RING, SiegeEvent.ALARM]:
 			hud.meters.ringing = RING_S
-	# The ring follows the snapshot's own hold, so it also empties when the hold
-	# is broken (the sim sends CENTRE_HELD only while it grows).
-	if not shot.events.any(func(e: Dictionary) -> bool: return e["kind"] == SiegeEvent.CENTRE_HELD):
-		effects.centre_progress = shot.centre_hold
+	# The ring is the snapshot's own hold, not the CENTRE_HELD events': they
+	# come every 3 s and never when the hold is broken or a frame spans ticks.
+	effects.centre_progress = shot.centre_hold
 
 
 func _fit() -> void:

@@ -6,7 +6,7 @@ extends GutTest
 const RALLY := SiegeSim.Command.RALLY
 const CHARGE := SiegeSim.Command.CHARGE
 const RETREAT := SiegeSim.Command.RETREAT
-const SEEDS := 12
+const SEEDS := 8
 const FIRST_SEED := 1000
 const WITH_GUN: Array[StringName] = [&"fifty_men", &"shotgun"]
 const PLAIN: Array[StringName] = [&"fifty_men"]

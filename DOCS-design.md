@@ -150,7 +150,7 @@ Contract notes:
 - `create()` copies the loadout and does not validate it; callers pass a
   legal one.
 
-## 6. What is a stub today
+## 6. State: nothing is a stub
 
 The sim is real: `DOCS-design-sim.md`. The bot and the flow tests play the
 pinned sieges of `SiegeFixtures`.
