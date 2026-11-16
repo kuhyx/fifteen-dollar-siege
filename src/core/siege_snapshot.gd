@@ -5,8 +5,29 @@ extends RefCounted
 ## scatters `ent_count` individual figures around `ent_pos`.
 
 enum Team { ARMY, VILLAGE }
-## What an entity is. The sim agent adds kinds (specials, animals) at the END.
-enum Kind { MEN, VILLAGERS }
+## What an entity is. Frozen contract between sim and view: append at the END
+## only. MEN = ordinary army squad, VILLAGERS = non-combatants (flee, hide).
+## Village fighters: MILITIA (farm tools), RETINUE (the lord's mailed men),
+## ARCHERS. The rest are buff specials on the army side; UFO is neutral.
+enum Kind {
+	MEN,
+	VILLAGERS,
+	MILITIA,
+	RETINUE,
+	ARCHERS,
+	BAT_MEN,
+	SHOTGUNNER,
+	EMPEROR,
+	TRUMPET_BOY,
+	MEDICS,
+	MONSTER,
+	MOOSE,
+	WASPS,
+	GOLF_CARTS,
+	CATAPULT,
+	ROCK_BAND,
+	UFO,
+}
 enum State { IDLE, MOVE, FIGHT, FLEE, DOWN, HIDDEN }
 
 ## Sim seconds since the siege began.
