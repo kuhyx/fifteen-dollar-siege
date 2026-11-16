@@ -123,6 +123,6 @@ func _draw_strip() -> void:
 		var box := Rect2(centre - Vector2.ONE * px / 2.0, Vector2.ONE * px)
 		BuffPictograms.of(ids[i]).draw(_frame, box, 0.0 if won() else 0.6, Palette.PANEL)
 		if fresh.has(ids[i]):
-			var twinkle := 34.0 + sin(_age * 6.0 + i) * 5.0
+			var twinkle := (34.0 + sin(_age * 6.0 + i) * 5.0) * grown
 			var spark := Rect2(box.position - Vector2(10, 10), Vector2.ONE * twinkle)
 			UiPictograms.of(&"spark").draw(_frame, spark)
