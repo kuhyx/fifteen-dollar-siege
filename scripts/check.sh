@@ -12,6 +12,7 @@
 #              no colour literal outside the palette file
 #   shared     file length, md naming, no binaries, dependency freshness, contract
 #   audio      audio tool tests, rendered files current, offline analysis of each
+#   coverage   100 % branch coverage of tools/recording and tools/audio (scripts/coverage.sh)
 #   export     the Linux build plays without src/dev
 # smoke runs first, the middle gates run side by side (each in its own capped
 # scope), export runs last (it re-imports). One line per gate; a failed gate
@@ -27,7 +28,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 readonly FIRST=(smoke)
-readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio)
+readonly PARALLEL=(lint test save_guard recording autodrive launcher static shared audio coverage)
 readonly LAST=(export)
 LOGS=""
 FAILED=0
@@ -114,6 +115,7 @@ run_gate() {
         autodrive) scripts/autodrive_all.sh ;;
         launcher) scripts/test_launcher.sh ;;
         audio) tools/audio/check.sh ;;
+        coverage) scripts/coverage.sh ;;
         export) scripts/test_export.sh ;;
     esac
 }
