@@ -61,9 +61,12 @@ static func shop_tour(bot: BotBase, shop: LoadoutScreen) -> bool:
 ## shop empty again.
 static func _dice(bot: BotBase, shop: LoadoutScreen) -> bool:
 	await bot.click(shop.dice.button)
-	await bot.frames(20)
-	var rolling := shop.dice.rolling and not shop.loadout.ids.is_empty()
-	if not bot.check(rolling, "the dice roll and buy cards") or not await bot.shot("shop_dice"):
+	# The first card lands within a few frames; a roll of three cards is over in
+	# 20 (the dice are random), so the frame is taken the moment it buys.
+	var buying := func() -> bool: return shop.dice.rolling and not shop.loadout.ids.is_empty()
+	if not await bot.wait_for(buying, 20, "the dice to roll and buy a card"):
+		return false
+	if not await bot.shot("shop_dice"):
 		return false
 	var stopped := func() -> bool: return not shop.dice.rolling
 	if not await bot.wait_for(stopped, 600, "the dice to stop") or not await settled(bot, shop):
