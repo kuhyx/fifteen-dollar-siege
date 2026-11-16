@@ -41,7 +41,7 @@ func take(shot: SiegeSnapshot, now: float, screen: BattleScreen) -> void:
 	for pop: Dictionary in fallen.pops:
 		effects.flourish(&"pop", FxToll.pop, 0.55, pop.pos, pop)
 	for ring: Dictionary in fallen.tolls:
-		effects.flourish(&"toll", FxToll.toll, BattleFlair.KEEP_S, ring.pos, ring)
+		FxToll.land(effects, ring)
 		var nth := int(ring.total) / BattleToll.MILESTONE
 		FunCue.play(&"fun_toll", minf(0.9 + 0.04 * nth, 1.5))
 		impact.on_event({"kind": &"squad_wiped"})

@@ -34,7 +34,7 @@
 | Watch | hub -> eye -> go | the real siege: every man and villager is a drawn figure on a map with the sim's church (north of the plaza, its bell where the map says); two morale bars, an alarm bell, a hold-the-centre ring and a clock, each equal to the snapshot's value; it ends by itself in about a minute at x2 (the siege lasts about 100 sim seconds) |
 | Buff chips | battle, under the meters strip | one pictogram per bought buff; large above the army for 1.2 s at the start, then small; small while a beat plays. The buffs that only change numbers also get a moment on the field (rows below) |
 | Weight of blows | battle: a smash, crash, blast, charge, splat, wipe, reveal, win or loss | the camera shakes (at most 16 px, decaying) and the world holds a few frames; the same kind kicks again only after 0.6 s |
-| Pops and tally | battle: heads fall | a pop where each squad loses heads; every 10th villager down, a gold number over the fight, a rising bell, the men hop |
+| Pops and tally | battle: heads fall | a pop where each squad loses heads; every 10th villager down, a gold number over the fight, a rising bell, the men hop; one number at a time, a new milestone rolls it, so numbers never overlap at any speed |
 | Heartbeat edge | battle: army morale under 0.3 | a red frame at the screen's edge pulses lub-dub with a heartbeat; back above 0.45 it flashes gold once |
 | Finale | the siege is won | 8 rockets burst over the church, the men jump, invisible squads appear one by one |
 | Buff moments | battle, 1.5 s in (or at the alarm) | stew: a bowl badge and steam; prep times: a sweeping clock with ticks; double or fifty men: the army number rolls up; sleepless village: its badge at the alarm; deaf village: its crossed ear a beat later |

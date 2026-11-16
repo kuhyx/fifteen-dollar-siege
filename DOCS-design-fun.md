@@ -43,7 +43,7 @@ fails when it stops firing.
 |---|---|---|---|
 | Weight of blows: camera shake and a hit pause | a smash, crash, blast, charge, splat, wipe, reveal, win, loss (`BattleImpact.HEAVY`), at most once a kind per 0.6 s | `tests/view/test_impact.gd` (incl. 300 frames of smashes keep the sim at 85 %) | `monster_shake_ring` |
 | Pops | any squad loses heads, one pop a squad per 0.25 s | `tests/view/test_toll.gd`; the watch bot asserts pops in a win and a loss | `watch_win_tally` |
-| Gold tally | every 10th villager down: a gold number over the fight, a rising bell, the men hop | `test_toll.gd`, `test_finale.gd`; the watch bot asserts it in the win | `watch_win_tally` |
+| Gold tally | every 10th villager down: a gold number over the fight, a rising bell, the men hop. ONE number at a time: a milestone that lands while one is up rolls its number (new pop, fresh stay), so tallies never overlap at x16 or x64 | `test_toll.gd`, `test_toll_stack.gd` (no two number rectangles meet at x1 to x64), `test_finale.gd`; the watch bot asserts it in the win | `watch_win_tally` |
 | Heartbeat edge | army morale under 0.3: a red frame pulses lub-dub with a sound; above 0.45 a gold flash once | `tests/view/test_danger_edge.gd`; the watch bot asserts beats in a loss | `loss_heartbeat_edge` |
 | Fireworks and a jump | the siege is won: 8 rockets over the church, the men jump | `test_finale.gd`; the watch bot asserts rockets in a win | `watch_win_fireworks` |
 | Unmasking | a win with invisible squads: each appears in a flash, one by one | `test_finale.gd`; `--autodrive=fun` scene `reveal` | `invisible_unmasked` |
