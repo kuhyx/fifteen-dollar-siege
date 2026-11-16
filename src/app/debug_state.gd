@@ -18,6 +18,11 @@ static func of(main: Main) -> Dictionary:
 	var battle := main.screen as BattleScreen
 	if battle != null:
 		out["siege"] = _siege(battle)
+	var hub := main.screen as HubScreen
+	if hub != null:
+		out["stars"] = {}
+		for mode: StringName in hub.stars:
+			out["stars"][String(mode)] = (hub.stars[mode] as StarRow).earned
 	var lab := main.screen as LabScreen
 	if lab != null:
 		out["lab"] = lab.result.duplicate()

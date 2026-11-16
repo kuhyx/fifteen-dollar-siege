@@ -6,6 +6,7 @@
 #   ITEM_ID      name of the answer          ITEM_QUESTION  ONE yes/no question
 #   ITEM_KIND    game (default) or web       ITEM_SOUND     1 = the game plays sound
 #   ITEM_SCREEN  the screen --check expects  ITEM_JQ        extra jq test on the state
+#   ITEM_SAVE    a folder of save files to start from (default: an empty save)
 #   ITEM_ARGS    game arguments (after `--`)   ITEM_HINT  one line before it opens
 # and ends with `handoff_main "$@"`. Run for kuhy it opens the game (or the
 # browser) in the state to judge, asks the question, and on a no asks for one
@@ -83,12 +84,19 @@ engine_flags() {
     echo --audio-driver Dummy
 }
 
-# Runs the game once with the item's arguments; a fresh throwaway save, so the
-# real save never changes. The log is in $HANDOFF_TMP/game.log.
+# A fresh throwaway save (the item's ITEM_SAVE folder copied in, or empty), so the
+# real save never changes.
+fresh_save() {
+    rm -rf "$HANDOFF_TMP/save"
+    mkdir -p "$HANDOFF_TMP/save"
+    [[ -z "${ITEM_SAVE:-}" ]] || cp -r "$ITEM_SAVE/." "$HANDOFF_TMP/save/"
+}
+
+# Runs the game once with the item's arguments. The log is in $HANDOFF_TMP/game.log.
 run_game() {
     local flags=() save="$HANDOFF_TMP/save" code=0
     read -r -a flags < <(engine_flags) || true # no flags: the sound item
-    rm -rf "$save"
+    fresh_save
     godot "${flags[@]}" --path "$REPO_ROOT" -- "${ITEM_ARGS[@]}" "--save-dir=$save" \
         >"$HANDOFF_TMP/game.log" 2>&1 </dev/null || code=$?
     if ((code == 0)) && grep -q 'SCRIPT ERROR' "$HANDOFF_TMP/game.log"; then
@@ -127,6 +135,7 @@ check_game() {
     local code=0 launch=("$REPO_ROOT/scripts/xvfb_run.sh" "$CHECK_SIZE")
     [[ "${BOT_HEADLESS:-0}" != 1 ]] || launch=(env)
     CHECKING=1
+    fresh_save
     refresh_class_cache >/dev/null 2>&1
     local flags=(--audio-driver Dummy)
     [[ "${BOT_HEADLESS:-0}" != 1 ]] || flags+=(--headless)

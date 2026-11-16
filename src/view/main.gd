@@ -175,6 +175,7 @@ func _on_decided(outcome: int, battle: BattleScreen) -> void:
 	_fresh.clear()
 	if last_outcome == SiegeSim.Outcome.WIN:
 		_fresh = WinShelf.record(loadout)
+		StarBook.record(mode, StarRating.of(last_outcome, loadout))
 	siege_ended.emit(outcome, battle.sim.clock_s())
 
 

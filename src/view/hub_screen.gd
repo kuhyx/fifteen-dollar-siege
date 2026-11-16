@@ -4,7 +4,8 @@ extends Control
 ## flag and a pointing hand, Lab = a flask in a win-rate ring), each with its
 ## key. Under them, what the player has built up: the best Lab win rate so far
 ## with its loadout, and a shelf of 25 slots that fills with every buff a won
-## siege was won with. No words.
+## siege was won with, and under Watch and Command the best stars won in that
+## mode (`StarBook`). No words.
 ## Kept for the bot, the tests and the dev tools: `mode_picked`, `buttons`,
 ## `pick_at`.
 
@@ -26,6 +27,8 @@ const SWELL_S := 0.22
 var buttons: Dictionary = {}
 var shelf := TrophyShelf.new()
 var best_lab := BestLab.new()
+## Mode id -> its best stars (Watch and Command only), under the mode's button.
+var stars: Dictionary = {}
 
 
 func _init() -> void:
@@ -45,6 +48,12 @@ func _init() -> void:
 		button.focus_entered.connect(_swell.bind(button, HOVER_SCALE))
 		button.mouse_exited.connect(_swell.bind(button, 1.0))
 		button.focus_exited.connect(_swell.bind(button, 1.0))
+	for kept in StarBook.MODES:
+		var star_row := StarRow.new()
+		var from := (buttons[kept] as Control).position
+		var at := Vector2(from.x + (BUTTON.x - StarRow.wide()) / 2.0, from.y + BUTTON.y + 22.0)
+		frame.place(star_row, Rect2(at, Vector2(StarRow.wide(), StarRow.HEIGHT)))
+		stars[kept] = star_row
 	var lab := buttons[&"lab"] as Control
 	var under := Rect2(
 		lab.position.x - 140.0, BUTTONS_TOP + BUTTON.y + 20.0, BUTTON.x + 280.0, 84.0
@@ -62,6 +71,8 @@ func _swell(button: Control, to: float) -> void:
 func _ready() -> void:
 	shelf.won = WinShelf.won()
 	best_lab.show_line(LabBook.best())
+	for kept: StringName in stars:
+		(stars[kept] as StarRow).earned = StarBook.best(kept)
 	(buttons[LaunchOptions.MODES[0]] as Button).grab_focus()
 
 
