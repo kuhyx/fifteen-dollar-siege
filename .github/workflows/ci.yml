@@ -1,11 +1,14 @@
 name: ci
 
-# Lint, a headless import and boot (every script must parse), the GUT suite,
-# the save guard, the session recorder's unit tests, and the autodrive bot
-# playing all three modes headless (asserts only: the frame gate needs a
-# display and stays local in scripts/autodrive_all.sh). The shared gates
-# (file length, markdown naming, dependency freshness, repo contract) have
-# their own workflows.
+# Lint, a headless import and boot (every script must parse), the greps, the
+# GUT suite, the save guard, the session recorder's unit tests, the autodrive
+# bot playing every mode headless (asserts only: the frame gate needs a
+# display and stays local in scripts/autodrive_all.sh), the audio build and
+# its gate, the 100 % Python coverage gate, the Linux export, the round
+# builder and the Web build in a headless Chrome (scripts/test_web.sh). The
+# shared gates (file length, markdown naming, dependency freshness, repo
+# contract) have their own workflows. Locally the same gates run in groups
+# under 60 s: scripts/check.sh --group fast|play|tools|build|web.
 on:
   push:
     branches: [main]
@@ -30,14 +33,22 @@ jobs:
           sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           rm godot.zip
 
-      - name: Install project tooling and GUT
+      # The Web smoke and the exports need the export templates (a large
+      # download install.sh makes only when they are missing).
+      - name: Cache the Godot export templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-export-templates-${{ env.GODOT_VERSION }}
+
+      - name: Install project tooling, GUT, the audio build and the web venv
         run: ./install.sh
 
       - name: Lint (gdlint, gdformat, shellcheck, ruff)
         run: scripts/lint.sh
 
-      - name: Headless import and boot, no SCRIPT ERROR
-        run: scripts/check.sh smoke
+      - name: Headless import and boot, no SCRIPT ERROR, no exit leak
+        run: scripts/check.sh smoke static
 
       - name: GUT
         run: scripts/test.sh
@@ -50,3 +61,17 @@ jobs:
 
       - name: Autodrive bot, all three modes, headless
         run: BOT_HEADLESS=1 scripts/autodrive_all.sh
+
+      - name: Audio tool tests, rendered files, offline analysis, boot probe
+        run: tools/audio/check.sh
+
+      - name: Python coverage, 100 percent branch
+        run: scripts/coverage.sh
+
+      - name: Linux export plays without src/dev, and the round builder
+        run: |
+          scripts/check.sh export
+          scripts/check.sh round
+
+      - name: Web build in an isolated headless Chrome (hub, touch to a battle, audio)
+        run: scripts/test_web.sh
