@@ -10,13 +10,16 @@
 #         within one frame (tests/recording/flasher.py, e2e_check.py sync)
 #   gap   the game window is unmapped for 2 s (an i3 workspace switch): the
 #         recorder restarts into a second part on the same timeline (gap_driver.sh)
+#   launcher  run.sh's own record_wrap around the stand-in game: a bundle with its
+#         moments and chapters comes out (tests/recording/launcher_driver.sh)
 #   game  the real game, --autodrive=watch for ~10 s (--max-seconds), recorded with
 #         --force (bots are never recorded otherwise); ffprobe shows a video
 #         stream at the window size and an audio stream, the moments sit inside
 #         the file and become chapters (e2e_check.py game)
-#   scripts/e2e_recording.sh [never|sync|gap|game|all]   (one case per call
+#   scripts/e2e_recording.sh [never|sync|gap|launcher|game|all]   (one case per call
 #   for an agent: each is under 60 s, `all` is not). KEEP=1 keeps the temp dir.
 # gpu-screen-recorder cannot run under Xvfb, so this proves the x11grab path.
+# The recorder is the game_recording package of kuhyx/utils (tools/recording/build.sh).
 # Needs: Xvfb, ffmpeg/ffprobe, xdotool, xprop, jq, tkinter (sync and gap).
 # ============================================================================
 
@@ -24,11 +27,13 @@ set -euo pipefail
 
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+# shellcheck source=scripts/lib/recording.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/recording.sh"
 
 readonly SIZE=1280x720
-readonly RECORD="$REPO_ROOT/tools/recording/record.py"
 readonly CHECK="$REPO_ROOT/tests/recording/e2e_check.py"
 TMP=""
+REC_PY=""
 SINK_MODULE=""
 AUDIO=lavfi
 
@@ -66,7 +71,7 @@ wrap() {
     [[ "${FORCE:-0}" != 1 ]] || force=(--force)
     # Xvfb + a software-rendered game + ffmpeg need more than the default 10 % CPU cap.
     CAP_MEM=4G CAP_CPU_PCT=20 cap timeout -k 3 "$limit" "$REPO_ROOT/scripts/xvfb_run.sh" "$SIZE" \
-        python3 -I "$RECORD" wrap "${force[@]}" --audio "$AUDIO" --session "$session" "$@"
+        "$REC_PY" -I "$SIEGE_RECORDING_PY" wrap "${force[@]}" --audio "$AUDIO" --session "$session" "$@"
 }
 
 # Bot-marked and headless runs must pass through without a recording.
@@ -97,6 +102,15 @@ test_gap() {
     python3 -I "$CHECK" gap "$fb/recordings" "$session" "$fb/truth.json"
 }
 
+# The launcher's own path (record_wrap, as run.sh calls it) around the stand-in
+# game: venv, wrap, policy and finalize must still end in a bundle with moments.
+test_launcher() {
+    local session="e2e-launch-$$" fb="$TMP/launch"
+    SIEGE_RECORD_AUDIO="$AUDIO" CAP_MEM=4G CAP_CPU_PCT=20 cap timeout -k 3 50 "$REPO_ROOT/scripts/xvfb_run.sh" "$SIZE" \
+        "$REPO_ROOT/tests/recording/launcher_driver.sh" "$session" "$fb"
+    python3 -I "$CHECK" launcher "$fb/recordings" "$session" "$fb/truth.json"
+}
+
 test_game() {
     local session="e2e-game-$$" fb="$TMP/game" code=0
     FORCE=1 wrap "$session" 50 --max-seconds 10 -- godot --audio-driver Dummy --max-fps 60 \
@@ -113,6 +127,7 @@ test_game() {
 
 main() {
     need Xvfb ffmpeg ffprobe xdotool xprop python3 jq
+    REC_PY="$(recording_python)"
     mkdir -p "$SCRATCH"
     TMP="$(mktemp -d "$SCRATCH/e2e.XXXXXX")"
     trap cleanup EXIT
@@ -121,15 +136,17 @@ main() {
         never) test_never ;;
         sync) test_sync ;;
         gap) test_gap ;;
+        launcher) test_launcher ;;
         game) test_game ;;
         all)
             test_never
             test_sync
             test_gap
+            test_launcher
             test_game
             ;;
         *)
-            echo "usage: e2e_recording.sh [never|sync|gap|game|all]" >&2
+            echo "usage: e2e_recording.sh [never|sync|gap|launcher|game|all]" >&2
             exit 2
             ;;
     esac

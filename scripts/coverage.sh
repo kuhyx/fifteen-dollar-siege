@@ -2,12 +2,13 @@
 
 # ============================================================================
 # Line + branch coverage of the Python in this repo from its unit tests: the
-# session recorder (tools/recording/, tests/recording/) and the audio tools
+# game's recorder settings (tools/recording/, tests/recording/) and the audio tools
 # (tools/audio/, tests/audio/). One command, one number, FAILS under 100 %
 # (COVERAGE_MIN=N lowers the floor while a gap is being closed). Writes
 # coverage.xml at the repo root (gitignored) for `coverage-gaps coverage.xml`.
-# Both packages run under the audio venv's python (numpy lives only there);
-# coverage is installed into that venv at its requirements-dev.txt pin.
+# Each tree runs under its own venv's python (the audio venv holds numpy, the
+# recorder venv holds game_recording); coverage is installed into both at the
+# requirements-dev.txt pin. The recorder itself is tested in kuhyx/utils.
 # GDScript has no coverage tool; its gates are GUT and the autodrive bot.
 #   scripts/coverage.sh
 # ============================================================================
@@ -16,6 +17,9 @@ set -euo pipefail
 
 # shellcheck source=scripts/lib/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+
+# shellcheck source=scripts/lib/recording.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/recording.sh"
 
 readonly VENV="${SIEGE_AUDIO_VENV:-${XDG_CACHE_HOME:-$HOME/.cache}/$REPO_NAME/audio-venv}"
 readonly FLOOR="${COVERAGE_MIN:-100}"
@@ -47,17 +51,19 @@ run_tree() {
 
 main() {
     need ffmpeg ffprobe
-    local python="$VENV/bin/python"
+    local python="$VENV/bin/python" recording_py
+    recording_py="$(recording_python)"
     [[ -x "$python" ]] || {
         echo "Error: the audio venv is missing (run ./install.sh)" >&2
         exit 1
     }
     ensure_coverage "$python"
+    ensure_coverage "$recording_py"
     cd "$REPO_ROOT"
     mkdir -p "$SCRATCH"
     local data="$SCRATCH/coverage.data" pkg total
     rm -f "$data"
-    run_tree "$python" "$data" tests/recording
+    run_tree "$recording_py" "$data" tests/recording
     run_tree "$python" "$data" tests/audio
     "$python" -m coverage xml --data-file="$data" -o coverage.xml -q
     for pkg in recording audio; do

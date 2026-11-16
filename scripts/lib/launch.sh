@@ -7,6 +7,9 @@
 # machine after an NVIDIA driver upgrade (build-game lesson L2).
 # ============================================================================
 
+# shellcheck source=scripts/lib/recording.sh
+source "$(dirname "${BASH_SOURCE[0]}")/recording.sh"
+
 # After an NVIDIA driver upgrade the new userspace libraries no longer match
 # the still-loaded kernel module until a reboot, and no OpenGL context can be
 # made at all. Probe once; if GPU GL is dead, use Mesa's software renderer so
@@ -81,10 +84,13 @@ refresh_class_cache() {
     fi
 }
 
-# Runs a game command under the session recorder (tools/recording/): kuhy's
+# Runs a game command under the session recorder (game_recording from kuhyx/utils,
+# configured in tools/recording/): kuhy's
 # own dev play is recorded beside the game (window + audio); bot, test, muted
 # and headless runs pass straight through. Returns the game's exit code.
 #   record_wrap <session-id> <command...>
+# SIEGE_RECORD_AUDIO picks the audio source (default|lavfi|<pulse source>): the e2e gate
+# records silence instead of the live audio server.
 record_wrap() {
     local session="$1" tool
     shift
@@ -95,5 +101,11 @@ record_wrap() {
             return
         }
     done
-    python3 -I "$REPO_ROOT/tools/recording/record.py" wrap --session "$session" -- "$@"
+    local python
+    python="$(recording_python)" || {
+        echo "record: the recorder venv failed (run ./install.sh), playing without a recording" >&2
+        "$@"
+        return
+    }
+    "$python" -I "$SIEGE_RECORDING_PY" wrap --audio "${SIEGE_RECORD_AUDIO:-default}" --session "$session" -- "$@"
 }

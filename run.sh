@@ -2,7 +2,8 @@
 
 # ============================================================================
 # kuhy's windowed run: a real window, sound on, dev feedback mode on (--dev:
-# F12 annotates the frame), the session recorded (tools/recording/).
+# F12 annotates the frame), the session recorded (game_recording from kuhyx/utils,
+# set up in tools/recording/).
 #   ./run.sh [game args]     e.g. ./run.sh --mode=watch --loadout=double_men
 # Agents never run this on the live display: they use scripts/autodrive_all.sh
 # (muted, Xvfb). SIEGE_ENGINE_ARGS adds engine flags before `--` (the launcher

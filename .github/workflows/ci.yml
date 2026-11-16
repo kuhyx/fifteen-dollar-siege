@@ -1,7 +1,7 @@
 name: ci
 
 # Lint, a headless import and boot (every script must parse), the greps, the
-# GUT suite, the save guard, the session recorder's unit tests, the autodrive
+# GUT suite, the save guard, the recorder's pin and settings tests, the autodrive
 # bot playing every mode headless (asserts only: the frame gate needs a
 # display and stays local in scripts/autodrive_all.sh), the audio build and
 # its gate, the 100 % Python coverage gate, the Linux export, the round
@@ -41,7 +41,7 @@ jobs:
           path: ~/.local/share/godot/export_templates
           key: godot-export-templates-${{ env.GODOT_VERSION }}
 
-      - name: Install project tooling, GUT, the audio build and the web venv
+      - name: Install project tooling, GUT, the recorder venv, the audio build and the web venv
         run: ./install.sh
 
       - name: Lint (gdlint, gdformat, shellcheck, ruff)
@@ -56,7 +56,7 @@ jobs:
       - name: Save guard without the hook redirect
         run: scripts/test_save_guard.sh
 
-      - name: Session recorder unit tests
+      - name: Recorder requirement pin and this game's recorder settings
         run: scripts/test_recording.sh
 
       - name: Autodrive bot, all three modes, headless

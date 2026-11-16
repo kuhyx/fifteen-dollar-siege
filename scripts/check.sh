@@ -12,13 +12,13 @@
 #                   shared   file length, md naming, no binaries, dependency
 #                            freshness, contract
 #                   save_guard  GUT without the hook redirect
-#                   recording   recorder unit tests
+#                   recording   the recorder's pinned requirement and this game's settings of it
 #   play   (~35 s)  test     the GUT suite
 #   bots   (~15 s)  autodrive   the bot, every mode (frames on a private Xvfb)
 #                   launcher    run.sh on a broken GPU GL + the F12 bundle
 #   tools  (~35 s)  audio    audio tool tests, rendered files current, offline
 #                            analysis, the boot probe
-#                   coverage 100 % branch coverage of tools/recording, tools/audio
+#                   coverage 100 % branch coverage of tools/recording (the settings), tools/audio
 #   sim    (~20 s)  balance  the pinned balance checks of the sim (balance_gate.sh)
 #                   buffs    each of the 25 buffs seen and heard on the real battle
 #                            screen (test_buffs.sh)

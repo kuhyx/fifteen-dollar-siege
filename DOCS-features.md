@@ -57,7 +57,7 @@
 | Lab ranking | the Lab screen, right side | every loadout tried, best first: place number, its pictograms, a bar and the rate; the one on the bench is framed; survives a restart |
 | Lab controls | the Lab screen | again (a new batch of the same loadout, added to its line), change the loadout, hub |
 | Dev annotate | `./run.sh`, then F12, the camera glyph or the pause menu's camera | the frame freezes; toolbar rect, arrow, circle, pen, text, select, undo, clear; a save writes the bundle folder and a Markdown entry under `~/data/fifteen-dollar-siege_binaries/feedback/` |
-| Session recording | `./run.sh` (kuhy's own play only) | `feedback/recordings/<session>.mkv` with moments as chapters; `scripts/recordings.sh latest` lists them |
+| Session recording | `./run.sh` (kuhy's own play only) | `feedback/recordings/<session>.mkv` with moments as chapters; `scripts/recordings.sh latest` lists them; the recorder is `game_recording` from `kuhyx/utils`, set up in `tools/recording/` |
 | Straight into a siege | `./run.sh --mode=watch --loadout=double_men,stew --seed=7` | the battle opens with that loadout and seed |
 
 ## Core flows

@@ -129,6 +129,20 @@ def gap(rec: Path, session: str, truth_path: Path) -> None:
     )
 
 
+def launcher(rec: Path, session: str, truth_path: Path) -> None:
+    """record_wrap's run ended in a bundle: video, events.json, every flip a moment and a chapter."""
+    doc = json.loads((rec / f"{session}.events.json").read_text())
+    video = rec / doc["video"]["file"]
+    truth = json.loads(truth_path.read_text())
+    flips = [e for e in doc["events"] if e["kind"] == "command" and not e.get("before_recording")]
+    assert video.is_file() and (rec / f"{session}.rec.json").is_file(), "no video or rec.json"
+    assert not doc["sync"]["approx"], "sync must come from recording_sync"
+    assert len(flips) >= len(truth) - 1, f"{len(flips)} flip moments for {len(truth)} flips"
+    chapters = ffprobe("-show_chapters", str(video))["chapters"]
+    assert len(chapters) >= len(flips), f"{len(chapters)} chapters for {len(flips)} flip moments"
+    print(f"launcher PASS video={video.name} flip_moments={len(flips)} chapters={len(chapters)}")
+
+
 def game(rec: Path, session: str, size: str) -> None:
     doc = json.loads((rec / f"{session}.events.json").read_text())
     video = rec / doc["video"]["file"]
@@ -160,5 +174,7 @@ if __name__ == "__main__":
         sync(Path(rec_dir), sess, Path(extra))
     elif mode == "gap":
         gap(Path(rec_dir), sess, Path(extra))
+    elif mode == "launcher":
+        launcher(Path(rec_dir), sess, Path(extra))
     else:
         game(Path(rec_dir), sess, extra)

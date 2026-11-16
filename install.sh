@@ -10,6 +10,8 @@
 #   - Godot export templates for the installed Godot (downloaded if missing)
 #   - the music and sound effects, rendered from code into assets/audio/
 #     (tools/audio/build.sh: its own Python venv with the pinned music toolkit)
+#   - the session recorder's venv (tools/recording/build.sh: the pinned game_recording
+#     package of kuhyx/utils)
 #   - ~/data/fifteen-dollar-siege_binaries with assets/ builds/ feedback/, and
 #     the gitignored links assets -> .../assets and builds -> .../builds
 #   - git hooks (skip with SKIP_HOOKS=1; never in CI)
@@ -189,6 +191,7 @@ main() {
         link_binaries
         install_hooks
     fi
+    "$REPO_ROOT/tools/recording/build.sh"
     "$REPO_ROOT/tools/audio/build.sh"
     godot --headless --path "$REPO_ROOT" --import >/dev/null 2>&1 || true
     echo "install: done. Run ./run.sh"

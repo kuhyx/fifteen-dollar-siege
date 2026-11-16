@@ -24,7 +24,7 @@ The sim is being rewritten: see `DOCS-design.md` section 6.
 ```
 
 Esc (or the menu button, top left) opens the pause menu. `run.sh` records
-your play; `scripts/recordings.sh latest` lists the moments.
+your play (the recorder is `game_recording` from `kuhyx/utils`, installed by `./install.sh`); `scripts/recordings.sh latest` lists the moments.
 
 ## Check
 
@@ -44,7 +44,7 @@ Agents: read `CLAUDE.md` first (run rules, contracts, the save guard).
 | `src/core/` | buffs, loadout rules, the sim, the Lab: pure logic |
 | `src/view/`, `src/ui/` | the flow, the screens, the pictograms |
 | `src/autodrive/` | the bot behind `--autodrive=<mode>` |
-| `src/dev/`, `tools/recording/` | dev feedback mode and the session recorder |
+| `src/dev/`, `tools/recording/` | dev feedback mode; this game's settings of the session recorder (`game_recording` from `kuhyx/utils`) |
 | `tests/`, `scripts/` | GUT and unittest suites, every gate |
 | `DOCS-design.md` | goal, rules, Core API, constant sources |
 | `DOCS-features.md` | feature map and the five core flows |

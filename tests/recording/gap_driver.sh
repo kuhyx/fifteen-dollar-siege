@@ -15,7 +15,9 @@ readonly UNMAP_FOR_S=2
 
 main() {
     local session="$1" feedback="$2" audio="$3" win="" tick
-    python3 -I "$ROOT/tools/recording/record.py" wrap --audio "$audio" --session "$session" -- \
+    local python
+    python="$("$ROOT/tools/recording/build.sh" --venv)"
+    "$python" -I "$ROOT/tools/recording/siege_recording.py" wrap --audio "$audio" --session "$session" -- \
         python3 "$ROOT/tests/recording/flasher.py" --dev "--session-id=$session" "--feedback-dir=$feedback" &
     local wrapper=$!
     # The recorder writes the game window's id into its meta file once it has found it.
