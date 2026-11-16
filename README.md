@@ -11,9 +11,9 @@ loadout, then:
 
 Godot 4.7.2, GDScript. Linux desktop and a single-threaded Web build.
 
-**State:** scaffold. The flow, the gates and the dev tools are real; the sim
-and the screens are stubs (the siege is WIN at 8 dollars or more). See
-`DOCS-design.md`.
+**State:** the menus, the battle screen, the sound (music, effects, a volume
+control), the dev tools and the gates are real, on desktop and in the browser.
+The sim is being rewritten: see `DOCS-design.md` section 6.
 
 ## Run
 
@@ -31,7 +31,8 @@ your play; `scripts/recordings.sh latest` lists the moments.
 ```bash
 scripts/test.sh            # GUT, headless
 scripts/autodrive_all.sh   # the bot plays all three modes on a private Xvfb
-scripts/check.sh           # every gate, about 20 s
+scripts/check.sh --group fast   # lint, greps, saves; then play, tools, build, web
+scripts/test_web.sh        # the Web build, played in headless Chromium
 ```
 
 Agents: read `CLAUDE.md` first (run rules, contracts, the save guard).

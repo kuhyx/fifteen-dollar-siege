@@ -145,10 +145,11 @@ drains linearly toward the loser. The win conditions of section 3 are not
 simulated yet. `tests/core/test_siege_sim.gd` marks which assertions are
 stub-only (their names say "stub").
 
-The battle screen is a placeholder (dots) and `Glyphs` holds placeholder
-pictograms. The hub, the shop, the Lab and the result screen are real
-(`DOCS-menus.md`). There is no sound yet (R4 baseline: music at boot, win and
-combust cues are the art and audio agents' work).
+The screens are real: the hub, the shop, the Lab and the result screen
+(`DOCS-menus.md`) and the battle screen (`DOCS-design-battle.md`; it draws the
+snapshot, so it follows whatever the sim sends). Sound is real too
+(`DOCS-audio.md`): music at boot, a cue for every event and menu action, win
+and combust stingers, a volume control on the pause menu.
 
 ## 7. View contract
 

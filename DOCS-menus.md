@@ -67,3 +67,27 @@ Each is a `[design guess]` unless a source is named.
 | `TrophyShelf` slots | 25, 13 on the first board | one per buff of the source |
 | `ArmyMeter.PER_FIGURE`, `BuffVignettes.MEN_PER_FIGURE` | 10 men | `SiegeSim.SQUAD_SIZE` |
 | `MenuKeys.DEFAULT_KEYS` | 1, 2, 3, Backspace | `[design guess]` |
+
+## Pause menu and volume
+
+Esc, pad B or the menu button (top left, every screen) pauses the tree and
+opens one card (`src/view/pause_menu.gd`): resume (it has the focus and shows
+the key that closes the menu), back to the hub, quit, and under them the
+volume of the two sound channels (`src/view/volume/`). No words.
+
+- **One row per channel**, music (a quaver) and effects (a burst): a quieter
+  speaker button (one wave), a bar of 10 steps lit up to the level, a louder
+  speaker button (three waves). A click on a step sets it. Every button has an
+  `accessibility_name` and the key that does the same, drawn by `KeyHint` from
+  the InputMap for the device in use: music 4 and 5, effects 6 and 7 (digits
+  because `KeyGlyph` draws digits; they only act while the menu is open)
+  `[design guess]`. A touch screen shows no key.
+- **The level is the director's.** A row asks `AudioDirector.live()` for the
+  level and sets it through `set_music_volume` / `set_sfx_volume`, which put it
+  on the bus and save it in `audio.json` (`SaveStore`). Boot restores it. At
+  level 0 the bus is muted. Defaults: music 7 of 10, effects 10 of 10
+  (`AudioSettings`).
+- **Checked by** `tests/test_volume.gd` (frees and rebuilds the whole scene
+  and finds the volumes on the buses again) and by the bots: the watch bot
+  clicks both speakers, presses a key and clicks a step, checking the row, the
+  bus and the save after each move; the touch bot taps quieter.

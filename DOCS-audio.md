@@ -119,7 +119,8 @@ gets a fresh one with each main scene.
   is a quiet no-op.
 - **Volume:** `AudioDirector.live()` then `set_music_volume(0..1)`,
   `set_sfx_volume(0..1)`, `set_muted(bool)`, `toggle_muted()`; saved in
-  `audio.json` through `SaveStore`. No control is drawn: that is the view's.
+  `audio.json` through `SaveStore`, restored at boot. The pause menu draws the
+  control (`DOCS-menus.md`, "Pause menu and volume"): ten steps per channel.
 
 Events of one kind in one snapshot become ONE sound at their mean position,
 up to 4 dB louder for a crowd. A cue then waits its `gap` before it may
@@ -169,11 +170,20 @@ Every value is a `[design guess]` unless a source is named.
   checks the loaded stream, not the sidecar.
 - **`AudioStreamPlayback.start(seconds)` truncates to a frame:** `N / rate`
   can land a frame early. Tests add half a frame.
-- **Exit message under the Dummy driver:** any player that played leaves
-  "1 resources still in use at exit". A bare Godot scene does the same; no
-  gate reads it.
+- **Exit message:** a player that was playing at exit left its playback with
+  the audio server, which frees it on its next mix step, so Godot printed "1
+  resources still in use at exit" (found with `godot --verbose`: the hub loop).
+  `AudioExit.settle` stops every voice as the director leaves the tree and waits
+  100 ms (a few mix steps; not in a GUT run). The smoke gate and every bot
+  verdict fail on that line.
 - **Web:** music players force `PLAYBACK_TYPE_STREAM` (sample playback
-  cannot run a synchronized stream). Not verified in a browser.
+  cannot run a synchronized stream). `scripts/test_web.sh` plays the export in
+  headless Chromium: before a touch the audio context is `suspended`, after the
+  first touch it is `running` and the hub music starts, and in a battle the
+  bed's position advances. No "tap to start" screen is needed: the engine
+  resumes the context on the first gesture. The mixer works frame by frame on
+  the single thread, so the gate counts sound per frame (software GL runs the
+  page at a few frames a second).
 
 ## 7. Offline gate (`tools/audio/analyze.py`, limits in `checks.py`)
 
@@ -198,8 +208,7 @@ centroid 2644 Hz. The demo mix (23 s) peaks at -4.1 dBFS and reads -18.7 LUFS.
 
 ## 8. Not done
 
-No ear has judged any of it; no blind A/B. The battle screen does not call
-`on_snapshot` yet (section 4): until it does, a siege has the sneak bed,
-`ui_go` and the stingers only. No on-screen volume control. Python coverage
-of `tools/audio` and the recorder is 100 % branch (`scripts/coverage.sh`, a gate of
-`scripts/check.sh`).
+No ear has judged any of it; no blind A/B. Python coverage of `tools/audio`
+and the recorder is 100 % branch (`scripts/coverage.sh`, a gate of
+`scripts/check.sh`); the web harness (`tools/web`) is a browser end-to-end
+check and has no unit tests.

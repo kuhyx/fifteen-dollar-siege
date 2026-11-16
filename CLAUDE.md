@@ -11,9 +11,12 @@ Lab, result): `DOCS-menus.md`. The battle screen (layers, controls, showcase,
 frame gate): `DOCS-design-battle.md`. Feature map and core flows:
 `DOCS-features.md`.
 
-**Scaffold state (2026-11-16):** the sim in `src/core/siege_sim.gd` and the
-screens in `src/view/` are STUBS behind a fixed contract. Three agents build
-the real sim, view and art against it.
+**State (2026-11-16):** the menus (hub, shop, Lab, result), the battle screen
+and its art, all sound (rendered music and effects, the director, a volume
+control on the pause menu), the dev tools, the session recorder, the bot and
+every gate are real, and the Web build is played in a browser by a gate. The
+sim in `src/core/` is another agent's work behind the Core API contract; its
+state is `DOCS-design.md` section 6, not this file. Sound: `DOCS-audio.md`.
 
 ## Settled decisions
 
@@ -28,7 +31,7 @@ the real sim, view and art against it.
 - **No real names or brands on screen.** Buff ids are neutral (`pep_talk`,
   `emperor`, `rock_band`, `stitched_monster`). The verbatim meme text, typos
   included, lives only in `BuffCatalog.ROWS`; never "fix" it. No AC/DC music:
-  an original riff comes later (skill `procedural-music`).
+  the `rock_band` riff is original (`DOCS-audio.md` section 3).
 - **No AI art.** Procedural or code-drawn first, then sourced CC0 with a
   `CREDITS.md` row in the same edit. Pictograms are `VectorGlyph` shapes in a
   128-unit square, never fixed-size rasters. Never shrink or compress assets.
@@ -39,24 +42,32 @@ the real sim, view and art against it.
 - **Pure core.** `src/core` has no Node, scene, global RNG or clock. The same
   loadout, seed and orders give the same `state_hash()` sequence. Core API
   changes are additive only.
+- **Sound is rendered from code, lossless.** 16-bit 44.1 kHz WAV from
+  `tools/audio/` (skill `procedural-music`), never compressed or trimmed.
+  The browser starts it at the first touch (`DOCS-audio.md` section 6).
 - **Binaries never enter git.** `~/data/fifteen-dollar-siege_binaries/` holds
-  `assets/`, `builds/` and `feedback/`. `assets` and `builds` in the repo are
-  gitignored links made by `install.sh`.
+  `assets/` (the rendered audio), `builds/` (`vNN/` per round) and
+  `feedback/`. `assets` and `builds` in the repo are gitignored links made by
+  `install.sh`.
 
 ## Layout
 
 | Path | Holds | Owner after the scaffold |
 |---|---|---|
 | `src/core/` | buffs, loadout, map, snapshot, sim, lab | sim agent |
-| `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves) | shared |
+| `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`) | shared |
+| `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit` | audio agent |
 | `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
 | `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
-| `src/view/` | `Main` flow and the five screens, `PauseMenu` | view agent |
+| `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera) | view agent |
+| `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf; the Lab's runner, ranking, book | menu-screen agent |
 | `src/autodrive/` | the `--autodrive` bot (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
 | `tools/recording/` | the session recorder (Python) | shared |
-| `tests/` | GUT (`test_*.gd`), `tests/recording/` (unittest) | with the code |
+| `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
+| `tools/web/` | the browser smoke gate: isolated headless Chromium over CDP (`smoke.py`, `browser.py`, `venv.sh`) | shared |
+| `tests/` | GUT (`test_*.gd`, `view/`, `core/`), `tests/recording/` and `tests/audio/` (unittest) | with the code |
 | `scripts/` | every gate; `scripts/lib/` is shared shell | shared |
 
 ## Contracts the three agents must keep
@@ -68,6 +79,10 @@ the real sim, view and art against it.
   `command_given`, `quitting`), `screen` / `screen_name`, `pause_menu`,
   `menu_button`, `pick_at(point)` and `debug_state()`. Each screen keeps the
   fields its header comment lists: the bot and the dev tools read them.
+- **Sound:** every `SiegeEvent` and menu action has a cue in
+  `src/audio/audio_cues.gd`; the battle screen calls
+  `AudioDirector.on_snapshot` once per snapshot. Volumes change only through
+  `AudioDirector.live()`, which saves them (`audio.json`) and sets the buses.
 - **Bot:** a mode with no autodrive path is not playable. When the flow
   changes, change `src/autodrive/autodrive.gd` and `bot_frames` in
   `scripts/lib/bot.sh` in the same commit.
