@@ -34,6 +34,9 @@ var flag_up := false
 var alarmed := false
 ## _draw calls so far (tests read it).
 var draws := 0
+## The camera's pixels per metre (the screen sets it): marks that must stay
+## readable grow when it is small.
+var view_zoom := 6.0
 
 var _plan: MapPlan
 var _meter: FrameMeter
@@ -154,7 +157,8 @@ func _draw() -> void:
 	if _plan != null:
 		FxMarks.centre_ring(self, _plan.map.village_center, centre_progress)
 	if has_rally():
-		FxMarks.rally_flag(self, rally, _rally_age)
+		var size := maxf(1.0, FxMarks.RALLY_POLE_PX / FxMarks.RALLY_POLE_M / view_zoom)
+		FxMarks.rally_flag(self, rally, _rally_age, size)
 	for fx in live:
 		fx.painter.call(self, fx)
 	if flag_up and _plan != null:

@@ -5,19 +5,23 @@ extends RefCounted
 ## centre, and the flag that goes up on the church at a win.
 
 const RALLY_POLE_M := 10.0
+## The rally flag's pole is never shorter than this on screen.
+const RALLY_POLE_PX := 60.0
 const WIN_POLE_M := 22.0
 const CENTRE_RING_M := 18.0
 
 
-## The player's rally flag: it drops in with a bounce, then waves.
-static func rally_flag(canvas: CanvasItem, at: Vector2, age: float) -> void:
+## The player's rally flag: it drops in with a bounce, then waves. `size`
+## scales it up when the camera is far, so it never shrinks to a speck.
+static func rally_flag(canvas: CanvasItem, at: Vector2, age: float, size := 1.0) -> void:
 	var drop := minf(age * 5.0, 1.0)
 	var bounce := 1.0 + 0.25 * sin(minf(age * 5.0, 2.0) * PI) * exp(-age * 4.0)
-	var top := at + Vector2(0, -RALLY_POLE_M * drop * bounce)
-	canvas.draw_arc(at, 2.2, 0.0, TAU, 20, Color(WorldPalette.WHITE, 0.8), 0.5)
-	canvas.draw_line(at, top, WorldPalette.WHITE, 0.5)
-	banner(canvas, top, Vector2(7.0, 4.4), age, Palette.ARMY)
-	canvas.draw_circle(top, 0.6, Palette.COIN)
+	var top := at + Vector2(0, -RALLY_POLE_M * size * drop * bounce)
+	canvas.draw_arc(at, 2.2 * size, 0.0, TAU, 20, Color(WorldPalette.WHITE, 0.8), 0.5 * size)
+	canvas.draw_line(at, top, WorldPalette.SOOT, 0.9 * size)
+	canvas.draw_line(at, top, WorldPalette.WHITE, 0.5 * size)
+	banner(canvas, top, Vector2(7.0, 4.4) * size, age, Palette.ARMY)
+	canvas.draw_circle(top, 0.6 * size, Palette.COIN)
 
 
 ## The hold on the centre: a faint full ring and a bright arc for the part

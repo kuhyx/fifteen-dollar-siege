@@ -145,12 +145,13 @@ oldest short ones until they fit.
 | `CrowdLayer.SCATTER_M`, `SCATTER_KICK`, `CHEER_FADE` | 30 m, 1.2, 0.5 m/s |
 | `SquadVisual.LAG_S`, `SETTLE_S` | 0.3 s, 0.35 s |
 | `SquadVisual.FLEE_SPREAD`, `FIGHT_SPREAD`, `MOVE_SPREAD` | 1.6, 0.9, 1.1 |
+| `SquadVisual.DEPTH_PER_M`, `BattleFx.MIN_STAR_M` | 2 draw-order steps per metre, 0.3 m |
 | `FigureLibrary.MOVES` | per kind: spacing, bob, shake, lean, swing, buzz, hover, down turn |
 | `FigureParts` sizes, `FigureBeasts.MONSTER_SCALE` | a man 3.4 m tall; 1.6 |
 | `BattleEffects.MAX_LIVE`, `MIN_LIVE`, `DRAW_BUDGET_MS`, `SHED_BELOW_S` | 72, 12, 1 ms, 2.4 s |
 | `BattleEffects.FLAG_RISE_S`, `DEFAULT_REACH` | 1.4 s, 60 m |
 | `FxRecipes` | per event: life 0.45 to 3 s, reach 0 to 120 m |
-| `FxMarks.RALLY_POLE_M`, `WIN_POLE_M`, `CENTRE_RING_M` | 10 m, 22 m, 18 m |
+| `FxMarks.RALLY_POLE_M`, `RALLY_POLE_PX`, `WIN_POLE_M`, `CENTRE_RING_M` | 10 m, at least 60 px, 22 m, 18 m |
 | `BattleBeats.FRAMES`, `CHURCH_BOX`, `ARMY_PAD_M` | 172 x 100 m and 124 x 88 m, 150 x 96 m, 30 m |
 | `MapPlan.FIELDS`, `PATH_STEPS`, `PATH_SWAY_M`, tries | 9, 14, 14 m, 60 and 160 |
 | `MapLayer.FURROW_M`, `PATH_M` | 3.2 m, 5.5 m |

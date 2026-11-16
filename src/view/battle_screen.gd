@@ -98,6 +98,7 @@ func _process(delta: float) -> void:
 		camera.resume_auto()
 	camera.update(delta)
 	world.transform = camera.transform()
+	effects.view_zoom = camera.zoom
 	crowd.draw_frame(tween, shot, _clock, delta, camera.zoom * _pixel_scale())
 	var state := {"speed": speed, "held": held, "auto": camera.auto}
 	state["centre"] = effects.centre_progress
