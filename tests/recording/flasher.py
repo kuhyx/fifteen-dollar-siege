@@ -56,7 +56,7 @@ def main() -> None:
         root.configure(bg=color)
         root.update()
         flipped = time.time()
-        write("reject", item=f"flip{n}", why=color)
+        write("command", order=f"flip{n}", pos=[n, 0], colour=color)
         truth.append({"n": n, "color": color, "unix": flipped})
     time.sleep(1.0)
     (out / "truth.json").write_text(json.dumps(truth))

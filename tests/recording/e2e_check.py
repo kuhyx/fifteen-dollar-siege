@@ -74,7 +74,7 @@ def sync(rec: Path, session: str, truth_path: Path) -> None:
     frame = frame_s(meta)
     doc = json.loads((rec / f"{session}.events.json").read_text())
     truth = json.loads(truth_path.read_text())
-    flips = {e["item"]: e for e in doc["events"] if e["kind"] == "reject"}
+    flips = {e["order"]: e for e in doc["events"] if e["kind"] == "command"}
     seen = transitions(luma_per_frame(rec / meta["video"]))
     assert not doc["sync"]["approx"], "sync must come from recording_sync"
     assert len(seen) == len(truth), f"{len(seen)} flips in the video, {len(truth)} made"
@@ -107,12 +107,12 @@ def gap(rec: Path, session: str, truth_path: Path) -> None:
     parts = doc["video"]["parts"]
     assert len(parts) >= 2, f"the recorder did not restart after the unmap: {parts}"
     assert parts[1]["start_s"] > parts[0]["start_s"] + parts[0]["duration_s"], "parts overlap"
-    flips = [e for e in doc["events"] if e["kind"] == "reject"]
+    flips = [e for e in doc["events"] if e["kind"] == "command"]
     assert any(e.get("in_gap") for e in flips), "no flip fell in the gap"
     after = [e for e in flips if e.get("file") == parts[1]["file"]]
     assert len(after) >= 3, f"only {len(after)} flips after the window came back; parts {parts}"
     seen = transitions(luma_per_frame(rec / parts[1]["file"]))
-    tail = [t for t in truth if f"flip{t['n']}" in {e["item"] for e in after}]
+    tail = [t for t in truth if f"flip{t['n']}" in {e["order"] for e in after}]
     assert abs(len(seen) - len(tail)) <= 1, f"{len(seen)} flips in part 2, {len(tail)} made"
     lag = [p - (t["unix"] - meta["t0_unix"]) for t, p in zip(tail[-len(seen) :], seen[-len(tail) :], strict=False)]
     # the first flip can land in the recorder's start-up frames; the rest must be exact
