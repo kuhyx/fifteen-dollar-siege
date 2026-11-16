@@ -25,6 +25,9 @@ static func paint(id: StringName, b: PictoBrush) -> bool:
 			b.ink(PictoInk.BLUE)
 			b.man(56, 72, 1.1)
 			b.bar(74, 74, 90, 66, 12)
+		&"pawn":  # one figure of a crowd
+			b.ink(PictoInk.BLUE)
+			b.man(64, 70, 1.25)
 		&"clock":
 			b.ink(PictoInk.LIGHT)
 			b.ring(64, 64, 48, 10)

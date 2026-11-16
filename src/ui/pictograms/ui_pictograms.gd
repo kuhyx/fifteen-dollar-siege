@@ -17,6 +17,7 @@ const IDS: Array[StringName] = [
 	&"coin",
 	&"slot",
 	&"men",
+	&"pawn",
 	&"clock",
 	&"flag",
 	&"flame",

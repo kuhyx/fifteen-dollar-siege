@@ -19,10 +19,14 @@ func _key(code: Key) -> InputEventKey:
 	return event
 
 
+## A button with a hint, one frame old. Input synthesized in the frame a node
+## is made can miss it: while the tree is processing, the engine skips any
+## node whose address matches one removed earlier in that frame.
 func _button_with_hint(action: StringName) -> Button:
 	var button := Button.new()
 	add_child_autofree(button)
 	KeyHint.attach(button, action)
+	await wait_process_frames(1)
 	return button
 
 
@@ -56,7 +60,7 @@ func test_a_rebind_to_a_letter_fails_the_gate() -> void:
 
 
 func test_the_hinted_key_presses_its_button() -> void:
-	var button := _button_with_hint(MenuKeys.PICKS[1])
+	var button: Button = await _button_with_hint(MenuKeys.PICKS[1])
 	watch_signals(button)
 	InputSynth.key_tap(KEY_2)
 	await wait_process_frames(2)
@@ -69,7 +73,7 @@ func test_the_hinted_key_presses_its_button() -> void:
 
 
 func test_the_hint_follows_the_device() -> void:
-	var button := _button_with_hint(MenuKeys.PICKS[0])
+	var button: Button = await _button_with_hint(MenuKeys.PICKS[0])
 	var hint := button.get_node("KeyHint") as KeyHint
 	assert_true(hint.glyph_event() is InputEventKey, "keyboard: the 1 key")
 	var pad := InputEventJoypadButton.new()

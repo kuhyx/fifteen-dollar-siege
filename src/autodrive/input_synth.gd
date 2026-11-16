@@ -84,5 +84,17 @@ static func canvas_motion(relative: Vector2, at: Vector2) -> void:
 	mouse_motion(_to_window().basis_xform(relative), _to_window() * at)
 
 
+## A finger tap at a canvas point. The engine makes the mouse click from it
+## (emulate_mouse_from_touch), exactly as on a phone.
+static func touch_tap(at: Vector2) -> void:
+	for pressed: bool in [true, false]:
+		var e := InputEventScreenTouch.new()
+		e.index = 0
+		e.position = _to_window() * at
+		e.pressed = pressed
+		Input.parse_input_event(e)
+		Input.flush_buffered_events()
+
+
 static func _to_window() -> Transform2D:
 	return (Engine.get_main_loop() as SceneTree).root.get_final_transform()

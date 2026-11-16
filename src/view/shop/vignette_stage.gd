@@ -15,6 +15,11 @@ var buff: StringName = &"":
 ## Seconds into the loop.
 var time := 0.0
 var playing := true
+## With no buff on show: the army itself marches, one figure per ten men.
+var men := 0:
+	set(value):
+		men = value
+		queue_redraw()
 
 
 func _init() -> void:
@@ -23,7 +28,7 @@ func _init() -> void:
 
 
 func _process(delta: float) -> void:
-	if not playing or buff == &"" or not is_visible_in_tree():
+	if not playing or (buff == &"" and men <= 0) or not is_visible_in_tree():
 		return
 	time = fposmod(time + delta, BuffVignettes.LOOP_S)
 	queue_redraw()
@@ -33,3 +38,5 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), SKY)
 	if buff != &"":
 		BuffVignettes.draw(buff, self, Rect2(Vector2.ZERO, size), time)
+	elif men > 0:
+		BuffVignettes.draw_army(self, Rect2(Vector2.ZERO, size), time, men)

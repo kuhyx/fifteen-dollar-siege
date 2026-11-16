@@ -18,9 +18,10 @@
 |---|---|---|
 | Hub | start the game | three pictogram buttons (eye, flag, bar chart) and a menu button, all inside the viewport, no words |
 | Pause menu | Esc, pad B or the menu button on any screen | the tree pauses; resume, hub and quit buttons; Esc closes it; the hub button returns to the hub |
-| Loadout | hub -> a mode button | 25 cards in price rows 5 to 1, each with coins for its price; 15 budget coins; the army size as a number |
-| Buy / sell | click a card | the card gets a green frame and a check, budget coins dim, the army number follows `fifty_men` / `double_men` |
-| Budget refusal | click a card that costs more than is left | the card shakes red; cost and loadout unchanged |
+| Loadout | hub -> a mode button | 25 pictogram cards on five price shelves (5 dollars down to 1), each with its price as coin slots; a tray of 15 budget coins; the army size as a number and one figure per ten men; a green go button; no words |
+| Buy / sell | click a card (touch: tap to look, tap again to buy) | coins fly from the tray into the card's slots, the card gets a green frame and a check; a second click sends the coins back; cards the dollars left do not reach are dimmed; the army number follows `fifty_men` / `double_men` |
+| Budget refusal | click a card that costs more than is left | the tray shakes and its rim turns red, the card shakes; cost and loadout unchanged; nothing is written |
+| Vignette | hover, focus or tap a card | the preview plays that buff's looping vector scene (2.4 s); its pictogram and price stand under it; with no card on show the army marches there |
 | Remembered loadout | open a mode's loadout again | last time's picks for that mode are bought already |
 | Watch | hub -> eye -> go | dots march; army morale, village morale and alarm bars and a clock; it ends by itself |
 | Command | hub -> flag -> go | as Watch, plus: a click on the map plants a rally flag, charge and retreat buttons send orders |
