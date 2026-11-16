@@ -111,8 +111,6 @@ func _buy(ids: Array[StringName], tag: String) -> bool:
 		await click(shop.cards[id])
 	if shop.loadout.remaining() == 0:
 		await click(shop.cards[ONE_TOO_MANY])
-		if not await MenuBeats.refusal(self, shop, ONE_TOO_MANY):
-			return false
 	var want := Loadout.of(ids)
 	ok = (
 		check(shop.loadout.ids == want.ids, "the cards bought %s" % [shop.loadout.ids])

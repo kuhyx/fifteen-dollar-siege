@@ -1,17 +1,23 @@
 class_name MenuBeats
 extends RefCounted
 ## The autodrive bot's beats on the menu-side screens (autodrive.gd calls
-## them): the shop tour (hover a card for its vignette, buy, sell, touch), the
-## refused buy, the result's payoff and its three controls, the Lab's batch,
+## them): the shop tour (hover a card for its vignette, buy, a refused buy,
+## sell, touch), the result's payoff and its three controls, the Lab's batch,
 ## ranking and controls. Every beat asserts what it claims and takes a shot.
+## The tour picks its own buffs: it does not depend on the loadouts the bot
+## fights with.
 
 const TOUR_BUFF := &"wasps"
 const TOUCH_BUFF := &"moose"
+## With TOUR_BUFF these spend all 15 dollars; ONE_MORE is then refused.
+const FILLERS: Array[StringName] = [&"double_men", &"knight_armor"]
+const ONE_MORE := &"stew"
 const WAIT_FRAMES := 6000
 
 
 ## The empty shop, a hovered card's vignette, a buy caught with its coins in
-## the air, the sell, and the same by touch (tap looks, the second tap buys).
+## the air, a buy over the budget (refused), the sells, and a buy by touch
+## (tap looks, the second tap buys). Leaves the shop empty again.
 static func shop_tour(bot: BotBase, shop: LoadoutScreen) -> bool:
 	var card := shop.cards[TOUR_BUFF] as BuffCard
 	var empty := shop.loadout.ids.is_empty() and shop.tray.coins == Loadout.BUDGET
@@ -36,20 +42,14 @@ static func shop_tour(bot: BotBase, shop: LoadoutScreen) -> bool:
 	var paid := await settled(bot, shop) and card.coins_in == card.def.price
 	if not bot.check(paid and shop.tray.coins == 10, "the coins land in the card"):
 		return false
-	await bot.click(card)
+	if not await _refusal(bot, shop):
+		return false
+	for id: StringName in [TOUR_BUFF] + FILLERS:
+		await bot.click(shop.cards[id])
 	var back := await settled(bot, shop) and shop.tray.coins == Loadout.BUDGET
-	if not bot.check(back and not shop.loadout.has(TOUR_BUFF), "a second click sells it back"):
+	if not bot.check(back and shop.loadout.ids.is_empty(), "a second click sells a card back"):
 		return false
 	return await _touch(bot, shop)
-
-
-## The over-budget click just made: the tray shakes, nothing was bought.
-static func refusal(bot: BotBase, shop: LoadoutScreen, id: StringName) -> bool:
-	var refused := shop.tray.is_shaking() and not shop.loadout.has(id)
-	return (
-		bot.check(refused, "a buy over the budget shakes the tray")
-		and await bot.shot("shop_refusal")
-	)
 
 
 ## Waits until every coin has landed and the tray stands still.
@@ -135,6 +135,22 @@ static func lab_leave(bot: BotBase, lab: LabScreen, wins: bool) -> bool:
 		return false
 	await bot.click(second.home_button)
 	return await bot.on_screen(&"hub")
+
+
+## Spends the last dollar, then tries one buy more: the tray shakes, its rim
+## turns red and nothing is bought.
+static func _refusal(bot: BotBase, shop: LoadoutScreen) -> bool:
+	for id in FILLERS:
+		await bot.click(shop.cards[id])
+	if not await settled(bot, shop) or not bot.check(shop.tray.coins == 0, "the tray is empty"):
+		return false
+	await bot.click(shop.cards[ONE_MORE])
+	var refused := shop.tray.is_shaking() and not shop.loadout.has(ONE_MORE)
+	var kept := shop.loadout.cost() == Loadout.BUDGET
+	return (
+		bot.check(refused and kept, "a buy over the budget shakes the tray and buys nothing")
+		and await bot.shot("shop_refusal")
+	)
 
 
 static func _controls_up(bot: BotBase, screen: ResultScreen, tag: String) -> bool:
