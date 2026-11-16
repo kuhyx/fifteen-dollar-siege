@@ -41,6 +41,10 @@ menu action to a file; no event is silent.
 | `pumpkin_launch` | creak, crack, whoosh | `victory` | a crowd's "aaah" (plus the win stinger) |
 | `pumpkin_splat` | squelch, thud, two drips | `combust` | flame whoomp and crackle (plus the lose stinger) |
 | `heal` | four chimes up D major | | |
+| `fun_toll` | a bright bell and a fifth above, higher with each tally | `fun_heartbeat` | lub, dub |
+| `fun_glint` | a twinkle off steel | `fun_dice` | a rattle, two dice land |
+| `fun_star` | a small bell and a shimmer; climbs with each star | `fun_firework` | a whistle, a burst, crackle |
+| `fun_hic` | a squeak that jumps and falls | `fun_tick` | the `centre_tick` file, for the prep clocks |
 
 Menu: `ui_buy` (coins up), `ui_unbuy` (coins down), `ui_refuse` (two dull
 knocks), `ui_go` (war drum and horn), `ui_mode` (lute strum), `ui_pause` /
@@ -201,7 +205,7 @@ Every value is a `[design guess]` unless a source is named.
 
 Loudness is ITU-R BS.1770-4: gated programme loudness for music, the
 loudest 100 ms for an effect (`loudness.py`; a 997 Hz full-scale sine reads
--3.01 in its test). Measured 2026-11-16: 50 of 50 files clean; music
+-3.01 in its test). Measured 2026-11-16: 57 of 57 files clean (7 fun cues added); music
 -18.0 / -17.5, stems -22.0..-21.0, stingers -17.0 / -16.5, effects
 -21.0..-15.0, menu -27.0..-17.5 LUFS; worst loop seam 0.52x; highest effect
 centroid 2644 Hz. The demo mix (23 s) peaks at -4.1 dBFS and reads -18.7 LUFS.

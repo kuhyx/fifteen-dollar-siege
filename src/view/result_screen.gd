@@ -12,6 +12,7 @@ extends Control
 signal home_pressed
 signal retry_pressed
 signal edit_pressed
+signal dice_pressed
 
 const STAGE := Rect2(440, 24, 1040, 696)
 const ICON_PX := 84.0
@@ -19,6 +20,8 @@ const STRIP_Y := 744.0
 ## The bought buffs drop in one after another from this moment on.
 const STRIP_FROM_S := 0.5
 const STRIP_STEP_S := 0.07
+## Real seconds before the dice start to breathe.
+const BECKON_S := 1.0
 
 var outcome := SiegeSim.Outcome.RUNNING
 var loadout := Loadout.new()
@@ -28,6 +31,8 @@ var home_button: PictoButton
 var retry_button: PictoButton
 var edit_button: PictoButton
 var controls: EndControls
+## The win's stars, popping in over the scene.
+var stars := ResultStars.new()
 var controls_shown := false
 
 var _age := 0.0
@@ -45,9 +50,18 @@ func setup(p_outcome: int, p_loadout: Loadout = null, p_fresh: Array = []) -> vo
 	_frame.place(_stage, STAGE)
 	_stage.draw.connect(_draw_scene)
 	_frame.draw.connect(_draw_strip)
-	controls = EndControls.new()
-	var corner := Vector2((ScreenFrame.SIZE.x - EndControls.wide()) / 2.0, 900.0)
-	_frame.place(controls, Rect2(corner, Vector2(EndControls.wide(), EndControls.BUTTON.y)))
+	stars.setup(StarRating.of(outcome, loadout))
+	_frame.place(
+		stars,
+		Rect2(
+			Vector2((ScreenFrame.SIZE.x - ResultStars.wide()) / 2.0, 70.0),
+			Vector2(ResultStars.wide(), 220.0)
+		)
+	)
+	controls = EndControls.new(true)
+	var corner := Vector2((ScreenFrame.SIZE.x - EndControls.wide(4)) / 2.0, 900.0)
+	_frame.place(controls, Rect2(corner, Vector2(EndControls.wide(4), EndControls.BUTTON.y)))
+	controls.dice_pressed.connect(func() -> void: dice_pressed.emit())
 	controls.again_pressed.connect(func() -> void: retry_pressed.emit())
 	controls.edit_pressed.connect(func() -> void: edit_pressed.emit())
 	controls.hub_pressed.connect(func() -> void: home_pressed.emit())
@@ -67,6 +81,15 @@ func _process(delta: float) -> void:
 	if _frame != null:
 		_frame.queue_redraw()
 	_show_controls()
+	_beckon()
+
+
+## After a moment the dice breathe: one more try is one press away.
+func _beckon() -> void:
+	var dice := controls.dice if controls != null else null
+	if dice != null and _age > BECKON_S:
+		dice.pivot_offset = dice.size / 2.0
+		dice.scale = Vector2.ONE * (1.0 + 0.07 * sin((_age - BECKON_S) * 5.0))
 
 
 func _input(event: InputEvent) -> void:

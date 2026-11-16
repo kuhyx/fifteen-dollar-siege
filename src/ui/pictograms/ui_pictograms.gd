@@ -22,6 +22,9 @@ const IDS: Array[StringName] = [
 	&"flag",
 	&"flame",
 	&"spark",
+	&"dice",
+	&"star",
+	&"star_off",
 ]
 
 static var _cache: Dictionary = {}
@@ -34,7 +37,12 @@ static func ids() -> Array[StringName]:
 static func of(id: StringName) -> Pictogram:
 	if not _cache.has(id):
 		var brush := PictoBrush.new()
-		if not (_modes(id, brush) or _controls(id, brush) or UiMarks.paint(id, brush)):
+		if not (
+			_modes(id, brush)
+			or _controls(id, brush)
+			or UiMarks.paint(id, brush)
+			or UiFunMarks.paint(id, brush)
+		):
 			push_error("no pictogram for %s" % id)
 		_cache[id] = brush.picture
 	return _cache[id]

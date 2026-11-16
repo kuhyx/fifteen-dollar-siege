@@ -88,7 +88,7 @@ All of it is already in the frozen contract; this is how the view reads it.
   the snapshot as they are (`tests/view/test_real_siege.gd`).
 - **Chips and marks.** `BuffChips` shows what was bought: large above the
   army for `SHOW_S` then in the strip (small while a beat plays); a buff that
-  only changes numbers has no other sign. `FxHeroes` rings the army's single
+  only changes numbers gets a moment on the field too (`BuffMoments`). `FxHeroes` rings the army's single
   figures (captain, trumpet boy, gunman, monster). `BattleEffects.seen` and
   `AudioDirector.heard` count effects and cues: `--autodrive=buffs` reads them.
 - A squad whose `ent_count` drops loses that many figures (bodies stay). An

@@ -45,7 +45,15 @@ Each is a `[design guess]` unless a source is named.
   look at the clock) instead of calling `Lab.run_one` per frame, so one slow
   siege cannot freeze a frame. `tests/test_menu_screens.gd` holds it equal to
   `Lab.run_batch`.
-- **Keys.** One `KeyHint` draws them (`InputDevice` picks the event for the device). 1 2 3 pick a screen's big controls left to right, Backspace goes
+- **The fun pass's menu delights** (`DOCS-design-fun.md`): the shop's dice
+  (`ShopDice`, key 2, top right) sell back and buy a random legal loadout
+  (`LoadoutDice`) card by card; a win's result shows 1 to 3 stars
+  (`StarRating`, `ResultStars`: a win, at most 10 dollars, at most 5 dollars)
+  and a fourth control, the dice (key 4), starts a siege with a random new
+  loadout; the hub's mode buttons swell under the pointer and a wave of light
+  crosses the shelf (`TrophyShelf.glow`). `UiFunMarks` holds the dice and the
+  two stars. Key 4 is `menu_pick_4`.
+- **Keys.** One `KeyHint` draws them (`InputDevice` picks the event for the device). 1 2 3 (4) pick a screen's big controls left to right, Backspace goes
   back from the shop: keys whose glyph needs no letter. A pad uses focus and
   its accept button.
 

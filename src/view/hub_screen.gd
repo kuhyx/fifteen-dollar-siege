@@ -18,6 +18,9 @@ const SPOKEN := {
 const BUTTON := Vector2(360, 360)
 const BUTTON_GAP := 90.0
 const BUTTONS_TOP := 100.0
+## A button under the pointer (or in focus) swells to this, springily.
+const HOVER_SCALE := 1.07
+const SWELL_S := 0.22
 
 ## Mode id -> its button.
 var buttons: Dictionary = {}
@@ -37,6 +40,11 @@ func _init() -> void:
 		button.pressed.connect(func() -> void: mode_picked.emit(mode))
 		KeyHint.attach(button, MenuKeys.PICKS[i], 64.0)
 		buttons[mode] = button
+		button.pivot_offset = BUTTON / 2.0
+		button.mouse_entered.connect(_swell.bind(button, HOVER_SCALE))
+		button.focus_entered.connect(_swell.bind(button, HOVER_SCALE))
+		button.mouse_exited.connect(_swell.bind(button, 1.0))
+		button.focus_exited.connect(_swell.bind(button, 1.0))
 	var lab := buttons[&"lab"] as Control
 	var under := Rect2(
 		lab.position.x - 140.0, BUTTONS_TOP + BUTTON.y + 20.0, BUTTON.x + 280.0, 84.0
@@ -44,6 +52,11 @@ func _init() -> void:
 	frame.place(best_lab, under)
 	var left := (ScreenFrame.SIZE.x - TrophyShelf.wide()) / 2.0
 	frame.place(shelf, Rect2(left, 650.0, TrophyShelf.wide(), TrophyShelf.high()))
+
+
+func _swell(button: Control, to: float) -> void:
+	var tween := button.create_tween()
+	tween.tween_property(button, "scale", Vector2.ONE * to, SWELL_S).set_trans(Tween.TRANS_BACK)
 
 
 func _ready() -> void:

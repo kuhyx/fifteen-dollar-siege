@@ -32,7 +32,17 @@
 | Vignette | hover, focus or tap a card | the preview plays that buff's looping vector scene (2.4 s); its pictogram and price stand under it; with no card on show the army marches there |
 | Remembered loadout | open a mode's loadout again | last time's picks for that mode are bought already |
 | Watch | hub -> eye -> go | the real siege: every man and villager is a drawn figure on a map with the sim's church (north of the plaza, its bell where the map says); two morale bars, an alarm bell, a hold-the-centre ring and a clock, each equal to the snapshot's value; it ends by itself in about a minute at x2 (the siege lasts about 100 sim seconds) |
-| Buff chips | battle, under the meters strip | one pictogram per bought buff (stew, the prep time, a sleepless or deaf village have nothing else to show); large above the army for 1.2 s at the start, then small; small while a beat plays |
+| Buff chips | battle, under the meters strip | one pictogram per bought buff; large above the army for 1.2 s at the start, then small; small while a beat plays. The buffs that only change numbers also get a moment on the field (rows below) |
+| Weight of blows | battle: a smash, crash, blast, charge, splat, wipe, reveal, win or loss | the camera shakes (at most 16 px, decaying) and the world holds a few frames; the same kind kicks again only after 0.6 s |
+| Pops and tally | battle: heads fall | a pop where each squad loses heads; every 10th villager down, a gold number over the fight, a rising bell, the men hop |
+| Heartbeat edge | battle: army morale under 0.3 | a red frame at the screen's edge pulses lub-dub with a heartbeat; back above 0.45 it flashes gold once |
+| Finale | the siege is won | 8 rockets burst over the church, the men jump, invisible squads appear one by one |
+| Buff moments | battle, 1.5 s in (or at the alarm or the bell) | stew: a bowl badge and steam; prep times: a sweeping clock with ticks; double or fifty men: the army number rolls up; sleepless village: its badge at the alarm; deaf village: its badge at the bell |
+| Live looks | battle, a squad in view | knight armour and helmets glint, cardboard flakes, booze hiccups bubbles, metal bats ping, each every 0.5 to 1.2 s |
+| Shop dice | shop: the dice at the top right (key 2) | sells back, then buys a random legal loadout card by card, coins flying and dice rattling; the go button then starts it |
+| Stars | result of a win | 1 star for the win, 2 for at most 10 dollars spent, 3 for at most 5; they pop in with rising chimes; the empty ones show their coins as a number |
+| Try again | result: the dice (key 4) | a siege starts with a random new legal loadout; the dice breathe after a second |
+| Hub life | hub | a mode button swells under the pointer or focus; a wave of light crosses the shelf every 4.5 s |
 | Hero marks | battle | a gold ring and a pointer on the army's single figures (the great captain, the trumpet boy, the gunman, the monster) at any zoom |
 | Speed and hold | battle: Space / 1 2 3 4, or the buttons bottom left | the sim stands still or runs at x1, x2 (the start), x4, x8; each button shows its key; the figures glide between the sim's 0.1 s ticks at every speed; once decided the siege plays on at x1 at most |
 | Camera | battle: wheel or pinch, drag; 0 or the view-finder button | zoom and pan by hand; back to framing the action by itself, the planted rally flag included |
@@ -42,7 +52,7 @@
 | Every buff | `scripts/test_buffs.sh` | each of the 25 buffs alone on the battle screen: its chip, and as the buff has them its figure, look, men on the field, effect and the audio director's cue, then one frame named after it |
 | Reel | `scripts/reel.sh out_dir ids seed` | one real siege, a frame every few sim seconds and the payoff |
 | Showcase | `scripts/autodrive_all.sh showcase` | 24 frames: every kind in every state, six looks, every event, both beats, both payoffs, 2,400 figures inside the frame budget |
-| Result | after the payoff | the same scene in its end state (the flag over the village, or the leader's ash; nothing plays twice) with three controls up at once: the same loadout again (1), change the loadout (2), hub (3); the bought buffs line up under it (new ones on the shelf spark) |
+| Result | after the payoff | the same scene in its end state (the flag over the village, or the leader's ash; nothing plays twice) with four controls up at once: the same loadout again (1), change the loadout (2), hub (3), the dice (4); the bought buffs line up under it (new ones on the shelf spark) |
 | Lab | hub -> flask -> go | N sieges (default 200) run in slices, the frame never waits: a ring fills with the win rate, the rate stands in it as a number, every siege drops a tick (tall green = won, short red = lost), an outer ring and two numbers show the runs done, a number the mean seconds |
 | Lab ranking | the Lab screen, right side | every loadout tried, best first: place number, its pictograms, a bar and the rate; the one on the bench is framed; survives a restart |
 | Lab controls | the Lab screen | again (a new batch of the same loadout, added to its line), change the loadout, hub |
@@ -65,6 +75,7 @@
 | F9 | Volume: both speakers, a key and a step move the row, the bus and the save; a restart restores them | `scripts/autodrive_all.sh watch` (hub beat) and `scripts/test.sh -gselect=test_volume` | 2026-11-16 |
 | F10 | Every buff seen and heard (chip, figure, look, effect, cue), 25 frames | `scripts/test_buffs.sh` | 2026-11-16 |
 | F11 | The sim's pinned balance checks (30) | `scripts/balance_gate.sh` | 2026-11-16 |
+| F12 | The fun pass: the shop dice, a win's stars and dice, and one real siege per battle delight (shake, unmasking, looks, tally, finale, heartbeat edge) on screen | `scripts/autodrive_all.sh watch` and `scripts/autodrive_all.sh fun` | 2026-11-16 |
 
 On failure a bot flow prints `AUTODRIVE FAIL: <the assert that broke>`, then
 `<label>: FAILED (<why>; exit <n>, log <path>)`, keeps its run directory

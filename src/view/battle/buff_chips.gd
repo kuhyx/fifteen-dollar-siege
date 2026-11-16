@@ -1,8 +1,9 @@
 class_name BuffChips
 extends Control
 ## What the army bought, as a row of buff pictograms under the meters strip.
-## Every buff has a chip, so the ones that only change numbers (stew, the prep
-## time, a sleepless or deaf village) are on screen too. At the start the row
+## Every buff has a chip, and the ones that only change numbers (stew, the prep
+## time, a sleepless or deaf village) also get a moment on the field
+## (BuffMoments, DOCS-design-fun.md). At the start the row
 ## stands large above the army for a moment, then settles into the
 ## strip: the player sees what was bought before the first blow. Pictograms
 ## only, no word.

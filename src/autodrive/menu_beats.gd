@@ -15,6 +15,8 @@ const ONE_MORE := &"stew"
 const WAIT_FRAMES := 6000
 ## Frames from the decision to the same loadout fighting again.
 const RETRY_FRAMES := 60
+## Frames a win's result waits for its stars to pop in (about 2.4 s).
+const STARS_FRAMES := 150
 
 
 ## The empty shop, a hovered card's vignette, a buy caught with its coins in
@@ -51,7 +53,28 @@ static func shop_tour(bot: BotBase, shop: LoadoutScreen) -> bool:
 	var back := await settled(bot, shop) and shop.tray.coins == Loadout.BUDGET
 	if not bot.check(back and shop.loadout.ids.is_empty(), "a second click sells a card back"):
 		return false
-	return await _touch(bot, shop)
+	return await _dice(bot, shop) and await _touch(bot, shop)
+
+
+## The dice: one press buys a random legal loadout card by card (a frame
+## while the coins fly), and it sells back like any other buy. Leaves the
+## shop empty again.
+static func _dice(bot: BotBase, shop: LoadoutScreen) -> bool:
+	await bot.click(shop.dice.button)
+	await bot.frames(20)
+	var rolling := shop.dice.rolling and not shop.loadout.ids.is_empty()
+	if not bot.check(rolling, "the dice roll and buy cards") or not await bot.shot("shop_dice"):
+		return false
+	var stopped := func() -> bool: return not shop.dice.rolling
+	if not await bot.wait_for(stopped, 600, "the dice to stop") or not await settled(bot, shop):
+		return false
+	var full := shop.loadout.is_legal() and shop.loadout.cost() >= 12
+	if not bot.check(full, "a roll is a legal, nearly full loadout"):
+		return false
+	for id: StringName in shop.loadout.ids.duplicate():
+		await bot.click(shop.cards[id])
+	var emptied := await settled(bot, shop) and shop.loadout.ids.is_empty()
+	return bot.check(emptied and shop.tray.coins == Loadout.BUDGET, "a roll sells back")
 
 
 ## Waits until every coin has landed and the tray stands still.
@@ -67,11 +90,13 @@ static func settled(bot: BotBase, shop: LoadoutScreen) -> bool:
 static func result(bot: BotBase, wins: bool, want: int, ids: Array[StringName]) -> bool:
 	var tag := "win" if wins else "lose"
 	var screen := bot.main.screen as ResultScreen
-	await bot.frames(3)
+	await bot.frames(3 if not wins else STARS_FRAMES)
 	var up := screen.outcome == want and screen.controls_shown
 	var ok := (
 		bot.check(up, "the %s result has its controls up at once, no second payoff" % tag)
 		and bot.all_inside(screen.controls.buttons(), "result control")
+		and bot.check(screen.controls.dice != null, "the result offers the dice")
+		and bot.check(screen.stars.shown == StarRating.of(want, bot.main.loadout), "stars popped")
 		and await bot.shot("result_" + tag)
 	)
 	if not ok:

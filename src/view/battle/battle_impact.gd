@@ -1,9 +1,10 @@
 class_name BattleImpact
 extends RefCounted
-## Weight for the big blows. A heavy event kicks `trauma` (squared into the
-## shake, the "Art of Screenshake" way: small hits whisper, big ones slam) and
-## holds the world for a few frames (hit pause). Common events (clashes,
-## volleys) never shake: they would never stop. See DOCS-design-fun.md.
+## Weight for the big blows. A heavy event kicks `trauma` (the trauma model of
+## Eiserloh's GDC 2016 camera talk; squared into the shake so small hits
+## whisper and big ones slam) and holds the world for a few frames (the hit
+## pause of Nijman's "Art of Screenshake"). Common events (clashes, volleys)
+## never shake: they would never stop. See DOCS-design-fun.md.
 
 ## Largest shake in canvas pixels, and the longest hold in real seconds.
 const MAX_PX := 16.0

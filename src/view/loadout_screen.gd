@@ -27,6 +27,8 @@ var tray := CoinTray.new()
 var flight := CoinFlight.new()
 var preview := ShopPreview.new()
 var army := ArmyMeter.new()
+## The dice: sell everything, buy a random legal loadout card by card.
+var dice := ShopDice.new()
 ## The card on show in the preview ("" = none yet).
 var focused_id: StringName = &""
 
@@ -55,6 +57,8 @@ func _init() -> void:
 	frame.place(go_button, Rect2(1600, 925, 280, 110))
 	go_button.pressed.connect(func() -> void: start_pressed.emit(loadout.duplicate()))
 	KeyHint.attach(go_button, MenuKeys.PICKS[0])
+	add_child(dice)
+	dice.setup(self, frame)
 	add_child(flight)
 	flight.landed.connect(func(_target: StringName) -> void: _settle())
 

@@ -8,7 +8,8 @@ itself), **Command** (the same plus a rally flag and charge / retreat), **Lab**
 (one loadout, N headless sieges, the win rate as a number and a ring).
 Design, rules and the Core API: `DOCS-design.md`. Menu screens (hub, shop,
 Lab, result): `DOCS-menus.md`. The battle screen (layers, controls, showcase,
-frame gate): `DOCS-design-battle.md`. Feature map and core flows:
+frame gate): `DOCS-design-battle.md`. The fun pass (what makes it surprising, every
+delight and its check): `DOCS-design-fun.md`. Feature map and core flows:
 `DOCS-features.md`.
 
 **State (2026-11-16):** everything is real and plays together: the sim
@@ -58,13 +59,13 @@ fails on a change nobody re-balanced). Sound: `DOCS-audio.md`.
 | `src/core/` | buffs, loadout, map, snapshot, the sim and its systems, lab, fixtures | sim agent |
 | `tools/sim/` | balance search, report, pins, the scripted commander (headless) | sim agent |
 | `src/app/` | `LaunchOptions` (CLI), `SaveStore` (guarded saves), `WebProbe` (read-only state for the browser gate, only with `?probe`) | shared |
-| `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit` | audio agent |
+| `src/audio/` | `AudioDirector` (owned by `Main`; `AudioDirector.live()` for the volume API), `FunCue` (the delights' cues), `AudioBank`, `AudioBuses`, `AudioCues` (the cue sheet), `MusicDeck`, `SfxPool`, `BattleMix`, `AudioSettings`, `AudioExit` | audio agent |
 | `src/ui/` | `VectorGlyph`, `GlyphTexture`, `Glyphs`, `GlyphButton`, `SevenSegment`, `Palette` (the only file with colour literals) | view and art agents |
 | `src/ui/pictograms/` | `Pictogram`, the 25 buff and the menu pictograms, `PictoButton`, `KeyGlyph` + `KeyHint` + `InputDevice` (every key hint of the game) | menu-screen agent |
-| `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera) | view agent |
+| `src/view/` | `Main` flow, the five screens, `PauseMenu`, the battle screen with `src/view/battle/` (map, crowd, effects, HUD, camera, and `BattleFlair`: the delights of the fun pass) | view agent |
 | `src/view/volume/` | the pause menu's volume control: `VolumeRow`, `VolumeBar`, `VolumeGlyphs`, `VolumeKeys` | view agent |
 | `src/view/shop/`, `src/view/lab/` | the shop's tray, cards' coins, vignettes, result scenes, shelf; the Lab's runner, ranking, book | menu-screen agent |
-| `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
+| `src/autodrive/` | the `--autodrive` bots: the flow (`autodrive`, `siege_round`, `menu_beats`), `showcase`, `touch`, `reel` (films one siege), `buffs` (every buff seen and heard, `buff_signs`), `fun` (one siege per fun-pass delight); `bot_commander` plays Command mode (ships in builds too) | whoever changes the flow |
 | `src/dev/` | dev feedback mode, loaded only with `--dev` | shared |
 | `tools/recording/` | the session recorder (Python) | shared |
 | `tools/audio/` | music and effects rendered from code, the offline gate, the boot probe (Python) | audio agent |
@@ -136,8 +137,8 @@ is recorded beside the game with moments as chapters
 
 `--dev` | `--mode=watch|command|lab` with `--loadout=id,id` opens straight
 into a siege | `--seed=N` | `--speed=N` (0.1 to 64, default 2) | `--lab-runs=N` |
-`--save-dir=DIR` | `--autodrive=MODE` (a mode, `showcase`, `touch`, `reel` or
-`buffs`) with `--result-file=`, `--screenshot-dir=`, `--expect-window=WxH`,
+`--save-dir=DIR` | `--autodrive=MODE` (a mode, `showcase`, `touch`, `reel`, `buffs` or
+`fun`) with `--result-file=`, `--screenshot-dir=`, `--expect-window=WxH`,
 `--every=S` (reel), `--shard=I/N` (buffs) |
 `--feedback-dir=DIR`, `--session-id=ID`, `--dev-tag=T`,
 `--dev-shot=/abs/out.png` (dev tools).
@@ -155,7 +156,8 @@ Other gates, each one call under 60 s:
 
 - `./install.sh` tools, GUT, export templates, binaries links, git hooks
 - `scripts/autodrive_all.sh [mode ...]` the done gate (watch, command, lab,
-  `touch` (a finger's whole loop, touch events only) and `showcase`: every kind, state, look and event on the battle screen plus
+  `touch` (a finger's whole loop, touch events only), `fun` (one real siege per
+  delight of `DOCS-design-fun.md` on screen) and `showcase`: every kind, state, look and event on the battle screen plus
   the 2,400-figure frame gate); frames land in
   `~/data/claude-scratch/fifteen-dollar-siege/<checkout>/shots/<mode>/`
 - `scripts/screenshot.sh <out_dir> [mode] [WxH]` one mode's frames

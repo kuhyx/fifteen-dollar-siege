@@ -126,7 +126,15 @@ func open_result(outcome: int) -> void:
 	result.home_pressed.connect(open_hub)
 	result.retry_pressed.connect(func() -> void: start_siege(loadout))
 	result.edit_pressed.connect(func() -> void: open_loadout(mode))
+	result.dice_pressed.connect(_try_new_fifteen)
 	_show(result, &"result")
+
+
+## The result's dice: a siege with a random new loadout (never the one just played).
+func _try_new_fifteen() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	start_siege(Loadout.of(LoadoutDice.roll(rng, loadout.ids)))
 
 
 func quit_game(reason: String) -> void:

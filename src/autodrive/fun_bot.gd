@@ -10,9 +10,16 @@ const SPEED := 16.0
 const LIMIT_FRAMES := 9000
 ## Frames a delight plays before its frame is taken (it has grown by then).
 const LOOK_FRAMES := 12
+## Different look signs that must be on screen together for the `looks` frame.
+const LOOKS_AT_ONCE := 2
 const SCENES := [
 	[&"shake_monster", [&"stitched_monster"], 1000],
 	[&"reveal", [&"invisibility_potions"], 1000],
+	[
+		&"looks",
+		[&"knight_armor", &"football_helmets", &"metal_bats", &"booze", &"cardboard_armor"],
+		1000
+	],
 	[&"tally", SiegeFixtures.WIN_IDS, SiegeFixtures.WIN_SEED],
 	[&"finale", SiegeFixtures.WIN_IDS, SiegeFixtures.WIN_SEED],
 	[&"last_stand", SiegeFixtures.LOSE_IDS, SiegeFixtures.LOSE_SEED],
@@ -49,6 +56,8 @@ static func showing(battle: BattleScreen, tag: StringName) -> bool:
 			)
 		&"reveal":
 			return _live(battle, &"reveal") > 0
+		&"looks":
+			return _looks_in_view(battle) >= LOOKS_AT_ONCE
 		&"tally":
 			return _live(battle, &"toll") > 0 and _live(battle, &"pop") > 1
 		&"finale":
@@ -56,6 +65,17 @@ static func showing(battle: BattleScreen, tag: StringName) -> bool:
 		&"last_stand":
 			return battle.hud.edge.intensity() > 0.7 and battle.hud.edge.beats > 0
 	return false
+
+
+## How many of the look signs (glint, flake, hiccup, ping) are on screen now.
+static func _looks_in_view(battle: BattleScreen) -> int:
+	var window := Rect2(Vector2.ZERO, battle.size)
+	var kinds := {}
+	for fx in battle.effects.live:
+		if fx.kind in [&"glint", &"scrap", &"hic", &"ping"]:
+			if window.has_point(battle.map_to_canvas(fx.pos)):
+				kinds[fx.kind] = true
+	return kinds.size()
 
 
 static func _live(battle: BattleScreen, kind: StringName) -> int:

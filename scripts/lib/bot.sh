@@ -14,12 +14,12 @@ readonly BOT_ENGINE_FLAGS=(--audio-driver Dummy --fixed-fps 60 --disable-vsync)
 # fails the gate). Keep in step with src/autodrive/autodrive.gd.
 bot_frames() {
     case "$1" in
-        watch) echo 19 ;;
-        command) echo 23 ;;
-        lab) echo 13 ;;
+        watch) echo 20 ;;
+        command) echo 24 ;;
+        lab) echo 14 ;;
         showcase) echo 24 ;;
         touch) echo 4 ;;
-        fun) echo 5 ;;
+        fun) echo 6 ;;
         *)
             echo "Error: unknown mode '$1' (watch, command, lab, showcase, touch or fun)" >&2
             return 2

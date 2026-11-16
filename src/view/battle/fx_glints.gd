@@ -5,7 +5,7 @@ extends RefCounted
 ## helmets, cardboard flakes, a drunk man's bubbles, a bat's ping.
 ## Painters are func(canvas, fx); BuffLooks decides when and where.
 
-const STAR_PX := 22.0
+const STAR_PX := 34.0
 
 
 ## A four-point twinkle that swells and snaps shut.
@@ -41,7 +41,7 @@ static func hic(canvas: CanvasItem, fx: BattleFx) -> void:
 		var at := (
 			fx.pos + Vector2(sin(rise * 6.0 + i * 2.0) * 7.0 * px, -12.0 * px - rise * 54.0 * px)
 		)
-		var size := (3.0 + 2.0 * i) * px * (1.0 + 0.4 * rise)
+		var size := (4.5 + 3.0 * i) * px * (1.0 + 0.4 * rise)
 		var tint := Color(WorldPalette.WHITE, (1.0 - rise) * fx.fading(0.3))
 		canvas.draw_arc(at, size, 0.0, TAU, 14, tint, 1.4 * px)
 		canvas.draw_circle(at + Vector2(-size * 0.3, -size * 0.3), size * 0.22, tint)
@@ -54,7 +54,7 @@ static func ping(canvas: CanvasItem, fx: BattleFx) -> void:
 	var at := fx.pos + Vector2(0.0, -10.0 * px)
 	canvas.draw_arc(
 		at,
-		(6.0 + 20.0 * grow) * px,
+		(9.0 + 30.0 * grow) * px,
 		0.0,
 		TAU,
 		24,
