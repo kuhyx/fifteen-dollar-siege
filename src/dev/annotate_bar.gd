@@ -86,7 +86,7 @@ static func note_field() -> LineEdit:
 	field.custom_minimum_size.y = 56.0
 	field.add_theme_font_size_override("font_size", 28)
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.2, 0.23, 0.3)
+	style.bg_color = Palette.PANEL_PRESSED
 	style.set_content_margin_all(8)
 	field.add_theme_stylebox_override("normal", style)
 	return field
@@ -96,7 +96,7 @@ static func note_field() -> LineEdit:
 static func panel(preset: Control.LayoutPreset) -> PanelContainer:
 	var strip := PanelContainer.new()
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.06, 0.07, 0.1, 0.88)
+	style.bg_color = Color(Palette.PANEL, 0.88)
 	style.set_content_margin_all(8)
 	strip.add_theme_stylebox_override("panel", style)
 	var bottom := preset == Control.PRESET_BOTTOM_WIDE

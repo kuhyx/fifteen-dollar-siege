@@ -41,7 +41,7 @@ func _lay_out() -> void:
 
 
 func _draw() -> void:
-	var frame := GlyphButton.box(Color.TRANSPARENT, Palette.PANEL_PRESSED)
+	var frame := GlyphButton.box(Palette.CLEAR, Palette.PANEL_PRESSED)
 	frame.set_corner_radius_all(0)
 	draw_style_box(frame, Rect2(stage.position, stage.size).grow(4.0))
 	var def := BuffCatalog.by_id(buff)

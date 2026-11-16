@@ -11,7 +11,7 @@ signal hub_pressed
 
 const BUTTON := Vector2(170, 120)
 const GAP := 30.0
-const AGAIN_FILL := Color(0.24, 0.5, 0.28)
+const AGAIN_FILL := Palette.GO
 
 var again: PictoButton
 var edit: PictoButton

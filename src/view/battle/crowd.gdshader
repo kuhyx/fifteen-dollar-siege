@@ -24,6 +24,9 @@ global uniform float figure_boost;
 // Metres one real pixel spans: the feather (UV.y above 0.5 = a fringe vertex,
 // its outward angle plus 4) is one pixel wide at every zoom.
 global uniform float pixel_m;
+// The char and glint colours come from Palette (set once by CrowdLayer).
+global uniform vec4 char_tint;
+global uniform vec4 glint_tint;
 uniform float flip = 1.0;
 // Amplitudes: bob (walk), shake (fight), lean (flee), swing (weapon arm).
 uniform vec4 motion = vec4(0.38, 0.09, 0.42, 0.9);
@@ -122,8 +125,8 @@ void vertex() {
 			home += vec2(sin(t * 0.9 + phase * 20.0), cos(t * 0.7)) * 0.12 * wobble;
 		}
 		v = turned(v, tilt);
-		COLOR.rgb = mix(COLOR.rgb, COLOR.rgb * vec3(0.3, 0.24, 0.24), burn * 0.8);
-		COLOR.rgb = mix(COLOR.rgb, vec3(0.8, 0.95, 1.0), shimmer * 0.45);
+		COLOR.rgb = mix(COLOR.rgb, COLOR.rgb * char_tint.rgb, burn * 0.8);
+		COLOR.rgb = mix(COLOR.rgb, glint_tint.rgb, shimmer * 0.45);
 	}
 	float glint = 0.3 + 0.18 * sin(t * 3.0);
 	COLOR.a *= fade * mix(1.0, glint, shimmer);

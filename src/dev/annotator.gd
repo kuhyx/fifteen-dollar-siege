@@ -12,7 +12,7 @@ const Bar = preload("res://src/dev/annotate_bar.gd")
 const Entry = preload("res://src/dev/feedback_entry.gd")
 const Saver = preload("res://src/dev/feedback_saver.gd")
 const LOG_TAIL_LINES := 200
-const ARMED := Color(1.0, 0.35, 0.35)
+const ARMED := Palette.BAD
 
 var dev_log: RefCounted
 var shapes: Array[Dictionary] = []
@@ -59,7 +59,7 @@ func set_tool(shape_tool: String) -> void:
 	commit_text()
 	drawing_tool = shape_tool
 	for id: String in tool_buttons:
-		tool_buttons[id].modulate = Color(1, 1, 1, 1.0 if id == shape_tool else 0.5)
+		tool_buttons[id].modulate = Color(Palette.NO_TINT, 1.0 if id == shape_tool else 0.5)
 
 
 ## False (nothing added) for a drag too short to mean anything.
@@ -171,7 +171,7 @@ func _remember() -> void:
 func disarm() -> void:
 	cancel_pending = false
 	if action_buttons.has("cancel"):
-		action_buttons["cancel"].modulate = Color.WHITE
+		action_buttons["cancel"].modulate = Palette.NO_TINT
 
 
 func _gui_input(event: InputEvent) -> void:

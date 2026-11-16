@@ -13,11 +13,11 @@ const BLUE := Palette.ARMY
 const ORANGE := Palette.VILLAGE
 const GREEN := Palette.GOOD
 const RED := Palette.BAD
-const WOOD := Color(0.68, 0.48, 0.3)
-const VIOLET := Color(0.68, 0.52, 0.96)
+const WOOD := Palette.PICTO_WOOD
+const VIOLET := Palette.VIOLET
 ## The shaded side of a coin, a flame's core.
-const DEEP_GOLD := Color(0.74, 0.55, 0.14)
-const SLATE := Color(0.34, 0.37, 0.46)
+const DEEP_GOLD := Palette.DEEP_GOLD
+const SLATE := Palette.SLATE
 
 
 static func all() -> Array[Color]:

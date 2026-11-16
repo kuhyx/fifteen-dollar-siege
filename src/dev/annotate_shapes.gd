@@ -10,7 +10,7 @@ const TOOLS: Array[String] = ["rect", "arrow", "circle", "pen", "text", "select"
 const KEYS := {
 	KEY_R: "rect", KEY_A: "arrow", KEY_C: "circle", KEY_P: "pen", KEY_T: "text", KEY_S: "select"
 }
-const MARK := Color(1.0, 0.15, 0.15)
+const MARK := Palette.BAD
 const WIDTH := 5.0
 const HEAD_LEN := 26.0
 const HEAD_ANGLE := 0.45
@@ -86,7 +86,7 @@ static func _label(canvas: CanvasItem, at: Vector2, text: String) -> void:
 	var font := ThemeDB.fallback_font
 	var base := at + Vector2(0, FONT_PX)
 	canvas.draw_string_outline(
-		font, base, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_PX, OUTLINE_PX, Color.BLACK
+		font, base, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_PX, OUTLINE_PX, Palette.PANEL
 	)
 	canvas.draw_string(font, base, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_PX, MARK)
 

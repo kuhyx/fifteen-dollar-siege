@@ -48,7 +48,7 @@ func _draw() -> void:
 		var here: bool = line["key"] == current_key
 		draw_style_box(GlyphButton.box(Palette.PANEL_HOVER if here else Palette.PANEL), box)
 		if here:
-			draw_style_box(GlyphButton.box(Color.TRANSPARENT, Palette.INK), box)
+			draw_style_box(GlyphButton.box(Palette.CLEAR, Palette.INK), box)
 		var middle := box.get_center().y
 		var place := shown[row] + 1
 		var place_at := Vector2(22.0, middle - PLACE_H / 2.0)

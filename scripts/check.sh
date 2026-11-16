@@ -8,7 +8,8 @@
 #   recording  recorder unit tests    autodrive   the bot, all three modes
 #   launcher   run.sh on a broken GPU GL + the F12 bundle (Xvfb)
 #   static     greps: muted runs, lossless imports, no AI-art tooling, dev
-#              files without class_name, exports without src/dev, no visible text
+#              files without class_name, exports without src/dev, no visible text,
+#              no colour literal outside the palette file
 #   shared     file length, md naming, no binaries, dependency freshness, contract
 #   export     the Linux build plays without src/dev
 # smoke runs first, the middle gates run side by side (each in its own capped
@@ -79,6 +80,8 @@ gate_static() {
     fi
     # L11: GUT only ever starts through scripts/test.sh and its config.
     must_be_empty "a GUT call that skips .gutconfig.json" grep -rn -- "$no_hook" scripts || bad=1
+    # One palette: no colour literal outside src/ui/palette.gd.
+    scripts/check_palette.sh >/dev/null || bad=1
     # textgate: nothing the player sees is a word.
     if command -v textgate >/dev/null && ! textgate scan | grep -q '^0 to rework'; then
         textgate scan | tail -10 >&2

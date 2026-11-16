@@ -74,6 +74,14 @@ pixel_m={
 "type": "float",
 "value": 1.0
 }
+char_tint={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
+glint_tint={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
 block_count={
 "type": "int",
 "value": 0

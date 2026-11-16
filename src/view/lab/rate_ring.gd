@@ -4,7 +4,7 @@ extends RefCounted
 ## rest is dark red), and the same share as a seven-segment number with a
 ## percent mark. The Lab, its ranking and the hub all draw it with this.
 
-const LOST := Color(0.42, 0.14, 0.13)
+const LOST := Palette.LOST
 const SEGMENTS := 96
 
 

@@ -9,7 +9,7 @@ const GAP := 16.0
 const PER_ROW := 13
 const BOARD_H := 12.0
 const ROW_PITCH := 170.0
-const WAITING := Color(0.17, 0.19, 0.25)
+const WAITING := Palette.WAITING
 
 ## Buffs won with (filled slots).
 var won: Array[StringName] = []:

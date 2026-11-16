@@ -9,7 +9,7 @@ var glyph: VectorGlyph
 ## Natural size in pixels (what a theme slot like a slider grabber lays out with).
 var px: int = int(VectorGlyph.UNITS)
 ## Colour baked in for slots that cannot tint (a theme icon); white = tint on draw.
-var tint: Color = Color.WHITE
+var tint: Color = Palette.NO_TINT
 
 
 static func of(p_glyph: VectorGlyph, p_px := int(VectorGlyph.UNITS)) -> GlyphTexture:

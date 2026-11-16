@@ -9,9 +9,9 @@ signal pressed
 const Glyph = preload("res://src/dev/dev_glyphs.gd")
 const SIZE_PX := 56.0
 const MARGIN_PX := 14
-const IDLE := Color(1, 1, 1, 0.38)
-const SHADOW := Color(0, 0, 0, 0.45)
-const HOVER := Color(1, 1, 1, 0.95)
+const IDLE := Color(Palette.INK, 0.38)
+const SHADOW := Color(Palette.PANEL, 0.45)
+const HOVER := Color(Palette.INK, 0.95)
 
 var _hover := false
 

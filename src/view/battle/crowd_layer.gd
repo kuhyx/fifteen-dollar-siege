@@ -50,6 +50,8 @@ var _blocks := PackedVector4Array()
 
 func setup(map_bounds: Rect2, p_look: FigureLook) -> void:
 	_rect = map_bounds.grow(60.0)
+	RenderingServer.global_shader_parameter_set(&"char_tint", Palette.CHAR)
+	RenderingServer.global_shader_parameter_set(&"glint_tint", Palette.GLINT)
 	look = p_look
 	FigureLibrary.warm(look)
 

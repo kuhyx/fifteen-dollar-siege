@@ -51,7 +51,7 @@ static func make(p_def: BuffDef) -> BuffCard:
 	card.add_theme_stylebox_override("normal", GlyphButton.box(Palette.PANEL))
 	card.add_theme_stylebox_override("hover", GlyphButton.box(Palette.PANEL_HOVER))
 	card.add_theme_stylebox_override("pressed", GlyphButton.box(Palette.PANEL_PRESSED))
-	card.add_theme_stylebox_override("focus", GlyphButton.box(Color.TRANSPARENT, Palette.INK))
+	card.add_theme_stylebox_override("focus", GlyphButton.box(Palette.CLEAR, Palette.INK))
 	return card
 
 
@@ -122,7 +122,7 @@ func _draw() -> void:
 		else:
 			coin.draw(self, box, 0.82 if dim else 0.55, Palette.PANEL)
 	if bought:
-		draw_style_box(GlyphButton.box(Color.TRANSPARENT, Palette.GOOD), Rect2(Vector2.ZERO, size))
+		draw_style_box(GlyphButton.box(Palette.CLEAR, Palette.GOOD), Rect2(Vector2.ZERO, size))
 		UiPictograms.of(&"check").draw(self, Rect2(size.x - 44.0, 8.0, 34.0, 34.0))
 	elif shown:
-		draw_style_box(GlyphButton.box(Color.TRANSPARENT, Palette.DIM), Rect2(Vector2.ZERO, size))
+		draw_style_box(GlyphButton.box(Palette.CLEAR, Palette.DIM), Rect2(Vector2.ZERO, size))

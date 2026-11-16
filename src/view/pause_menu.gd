@@ -11,7 +11,7 @@ signal hub_pressed
 signal quit_pressed
 
 const LAYER := 50
-const SHADE := Color(0.03, 0.03, 0.05, 0.7)
+const SHADE := Palette.SHADE
 const BUTTON_PX := 200.0
 const BADGE_PX := 60.0
 const PADDING := 44

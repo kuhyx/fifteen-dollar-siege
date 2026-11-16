@@ -16,7 +16,7 @@ signal refused(id: StringName)
 
 ## The flight target that means "back into the tray".
 const TRAY := &"tray"
-const GO_FILL := Color(0.24, 0.5, 0.28)
+const GO_FILL := Palette.GO
 
 var loadout := Loadout.new()
 ## Buff id -> BuffCard.

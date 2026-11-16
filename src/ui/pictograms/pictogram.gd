@@ -64,12 +64,12 @@ func color_at(point: Vector2) -> Color:
 	for i in range(layers.size() - 1, -1, -1):
 		if layers[i].contains(point):
 			return tints[i]
-	return Color.TRANSPARENT
+	return Palette.CLEAR
 
 
 ## Draws the picture into `box` of `canvas` (call from its _draw). `fade` 0..1
 ## mixes every colour toward `toward`: a dimmed card stays opaque.
-func draw(canvas: CanvasItem, box: Rect2, fade := 0.0, toward := Color.BLACK) -> void:
+func draw(canvas: CanvasItem, box: Rect2, fade := 0.0, toward := Palette.PANEL) -> void:
 	var xform := Transform2D(
 		Vector2(box.size.x / UNITS, 0), Vector2(0, box.size.y / UNITS), box.position
 	)
@@ -77,7 +77,9 @@ func draw(canvas: CanvasItem, box: Rect2, fade := 0.0, toward := Color.BLACK) ->
 
 
 ## The same with any transform from glyph units to the canvas item's own space.
-func draw_xform(canvas: CanvasItem, xform: Transform2D, fade := 0.0, toward := Color.BLACK) -> void:
+func draw_xform(
+	canvas: CanvasItem, xform: Transform2D, fade := 0.0, toward := Palette.PANEL
+) -> void:
 	var mesh := mesh_for(xform.get_scale().x * _canvas_px(canvas))
 	var colors: PackedColorArray = mesh["colors"]
 	if fade > 0.0:

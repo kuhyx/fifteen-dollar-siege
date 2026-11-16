@@ -101,7 +101,7 @@ func arc(at: Vector2, r: float, from: float, to: float, width: float, tint: Colo
 ## A pictogram `size` stage units tall, centred on `at`, turned by `turn` radians.
 func picture(picto: Pictogram, at: Vector2, size: float, turn := 0.0, fade := 0.0) -> void:
 	var box := Rect2(at - Vector2.ONE * size / 2.0, Vector2.ONE * size)
-	_note(5, [at.x, at.y, size, turn, fade, picto.area()], box, Color.WHITE)
+	_note(5, [at.x, at.y, size, turn, fade, picto.area()], box, Palette.NO_TINT)
 	if canvas == null:
 		return
 	var shrink := size / Pictogram.UNITS

@@ -28,7 +28,7 @@ static func make(
 	button.add_theme_stylebox_override("hover", GlyphButton.box(fill.lightened(0.12)))
 	button.add_theme_stylebox_override("pressed", GlyphButton.box(fill.lightened(0.22)))
 	button.add_theme_stylebox_override("disabled", GlyphButton.box(fill.darkened(0.2)))
-	button.add_theme_stylebox_override("focus", GlyphButton.box(Color.TRANSPARENT, Palette.INK))
+	button.add_theme_stylebox_override("focus", GlyphButton.box(Palette.CLEAR, Palette.INK))
 	return button
 
 

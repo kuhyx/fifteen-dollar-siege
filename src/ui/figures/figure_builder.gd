@@ -182,7 +182,7 @@ func body_tint() -> Color:
 		var cross := (points[indices[i + 1]] - a).cross(points[indices[i + 2]] - a)
 		var tint := colors[indices[i]]
 		areas[tint] = areas.get(tint, 0.0) + absf(cross)
-	var best := Color.TRANSPARENT
+	var best := Palette.CLEAR
 	for tint: Color in areas:
 		if areas[tint] > areas.get(best, 0.0):
 			best = tint

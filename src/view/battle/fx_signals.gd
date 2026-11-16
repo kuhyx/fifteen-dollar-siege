@@ -137,16 +137,14 @@ static func reveal(canvas: CanvasItem, fx: BattleFx) -> void:
 	var close := 1.0 - ease(fx.progress(), 0.5)
 	for i in 10:
 		var at := fx.pos + Vector2.from_angle(TAU * i / 10.0 + fx.age * 3.0) * (2.0 + 12.0 * close)
-		BattleFx.star(
-			canvas, at + Vector2(0, -2.0), 1.3, 0.4, 4, Color(0.8, 0.95, 1.0, fx.fading())
-		)
+		BattleFx.star(canvas, at + Vector2(0, -2.0), 1.3, 0.4, 4, Color(Palette.GLINT, fx.fading()))
 	canvas.draw_arc(
 		fx.pos, 2.0 + 12.0 * close, 0.0, TAU, 32, Color(fx.tint(), 0.7 * fx.fading()), 0.5
 	)
 	if fx.progress() > 0.6:
 		var flash := (fx.progress() - 0.6) / 0.4
 		BattleFx.star(
-			canvas, fx.pos + Vector2(0, -2.0), 7.0 * flash, 2.0, 8, Color(1, 1, 1, 1.0 - flash)
+			canvas, fx.pos + Vector2(0, -2.0), 7.0 * flash, 2.0, 8, Color(Palette.INK, 1.0 - flash)
 		)
 
 

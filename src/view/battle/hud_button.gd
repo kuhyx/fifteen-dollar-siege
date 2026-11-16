@@ -32,8 +32,8 @@ static func create(
 	button.custom_minimum_size = Vector2.ONE * px
 	button.accessibility_name = spoken
 	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_color_override("icon_hover_color", Color.WHITE)
-	button.add_theme_color_override("icon_pressed_color", Color.WHITE)
+	button.add_theme_color_override("icon_hover_color", Palette.NO_TINT)
+	button.add_theme_color_override("icon_pressed_color", Palette.NO_TINT)
 	button.add_theme_stylebox_override("hover", GlyphButton.box(Palette.PANEL_HOVER))
 	button.add_theme_stylebox_override("pressed", GlyphButton.box(Palette.PANEL_PRESSED))
 	button._restyle()
@@ -57,6 +57,6 @@ func badge_event() -> InputEvent:
 
 
 func _restyle() -> void:
-	var frame := Palette.COIN if lit else Color.TRANSPARENT
+	var frame := Palette.COIN if lit else Palette.CLEAR
 	add_theme_stylebox_override("normal", GlyphButton.box(Palette.PANEL, frame))
 	add_theme_color_override("icon_normal_color", Palette.COIN if lit else Palette.INK)

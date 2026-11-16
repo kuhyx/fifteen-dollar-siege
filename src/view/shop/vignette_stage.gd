@@ -3,7 +3,7 @@ extends Control
 ## A window onto one buff's looping vignette: sky, then the scene, clipped to
 ## the control. It plays while it is visible and holds no words.
 
-const SKY := Color(0.09, 0.11, 0.17)
+const SKY := Palette.SKY
 
 ## The buff on show ("" = an empty stage).
 var buff: StringName = &"":

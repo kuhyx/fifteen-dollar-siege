@@ -37,7 +37,7 @@ var far_signature := 0
 ## Body width high and low (far level): the team's outline.
 var shoulder_span := 0.0
 var hem_span := 0.0
-var body_tint := Color.TRANSPARENT
+var body_tint := Palette.CLEAR
 var swings := false
 
 

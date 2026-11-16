@@ -16,9 +16,9 @@ static func make(glyph: StringName, spoken: String, px := 160.0) -> GlyphButton:
 	button.custom_minimum_size = Vector2.ONE * px
 	button.accessibility_name = spoken
 	button.add_theme_color_override("icon_normal_color", Palette.INK)
-	button.add_theme_color_override("icon_hover_color", Color.WHITE)
-	button.add_theme_color_override("icon_pressed_color", Color.WHITE)
-	button.add_theme_color_override("icon_focus_color", Color.WHITE)
+	button.add_theme_color_override("icon_hover_color", Palette.NO_TINT)
+	button.add_theme_color_override("icon_pressed_color", Palette.NO_TINT)
+	button.add_theme_color_override("icon_focus_color", Palette.NO_TINT)
 	button.add_theme_stylebox_override("normal", box(Palette.PANEL))
 	button.add_theme_stylebox_override("hover", box(Palette.PANEL_HOVER))
 	button.add_theme_stylebox_override("pressed", box(Palette.PANEL_PRESSED))
@@ -27,7 +27,7 @@ static func make(glyph: StringName, spoken: String, px := 160.0) -> GlyphButton:
 
 
 ## A rounded panel; `border` (when given) draws a 4 px outline.
-static func box(fill: Color, border := Color.TRANSPARENT) -> StyleBoxFlat:
+static func box(fill: Color, border := Palette.CLEAR) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = fill
 	style.set_corner_radius_all(RADIUS)

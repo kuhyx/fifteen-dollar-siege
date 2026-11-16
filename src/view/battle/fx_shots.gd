@@ -5,7 +5,7 @@ extends RefCounted
 
 const STONES := 7
 const ARROWS := 8
-const STONE := Color(0.82, 0.8, 0.76)
+const STONE := Palette.SLING_STONE
 
 
 ## Small stones on a low arc from the squad to its target.
