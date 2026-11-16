@@ -36,17 +36,17 @@ static func run(s: SiegeState) -> void:
 	_potions(s)
 
 
-## An invisible squad shows itself: by striking `victim` (an ambush that shakes
-## everyone near, friends included) or, with -1, because the potion ran out.
+## An invisible squad shows itself, which startles everyone near, friends
+## included: by striking `victim` (an ambush) or, with -1, because the potion
+## ran out or it broke.
 static func reveal(s: SiegeState, i: int, victim: int) -> void:
 	s.flag[i] &= ~SiegeState.F_INVISIBLE
 	s.state[i] = ST.FIGHT if victim >= 0 else ST.IDLE
 	s.emit(SiegeEvent.REVEAL, s.pos[i])
-	if victim < 0:
-		return
-	s.jolt(victim, B.AMBUSH_SHOCK)
 	s.jolt_team(VILLAGE, s.pos[i], B.REVEAL_M, B.REVEAL_FOE_SHOCK, victim, false)
 	s.jolt_team(ARMY, s.pos[i], B.REVEAL_M, B.REVEAL_FRIEND_SHOCK, i, false)
+	if victim >= 0:
+		s.jolt(victim, B.AMBUSH_SHOCK)
 
 
 ## Golf carts ram squad e at speed: it loses men and nerve, and now and then a

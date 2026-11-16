@@ -10,7 +10,8 @@ extends RefCounted
 ##   RALLY    form up around the flag and hold there: morale and breath come
 ##            back faster, slings answer whoever comes near
 ##   RETREAT  the same at the start line, reached at a sprint
-## A routed squad runs for the flag (RALLY) or the start line.
+## A routed squad runs for the flag (RALLY) or the start line. Squads that
+## drank the potion sneak to the plaza instead of marching (see _sneak).
 
 const T = preload("res://src/core/siege_tuning.gd")
 const ST := SiegeSnapshot.State
@@ -36,13 +37,13 @@ static func run(s: SiegeState) -> void:
 		if s.state[i] == ST.FLEE:
 			_run_away(s, i, enemy)
 			continue
-		if f & SiegeState.F_INVISIBLE != 0:
-			enemy = _quarry(s, i, enemy)
 		var mode := SiegeState.NO_ORDER if f & SiegeState.F_IGNORE != 0 else s.order
 		if drill or mode == RETREAT:
 			_hold_at(s, i, spawn, enemy, SiegeMove.MARCH if drill else SiegeMove.SPRINT)
 		elif mode == RALLY:
 			_hold_at(s, i, s.order_pos, enemy, SiegeMove.MARCH)
+		elif f & SiegeState.F_INVISIBLE != 0:
+			_sneak(s, i)
 		else:
 			# A charge is one rush: once the squad has struck, it fights on as
 			# the default plan would.
@@ -51,19 +52,19 @@ static func run(s: SiegeState) -> void:
 			s.state[i] = ST.HIDDEN
 
 
-## The men nobody can see go for the lord: the nearest retinue squad that still
-## stands within QUARRY_M, else `enemy`.
-static func _quarry(s: SiegeState, i: int, enemy: int) -> int:
-	var best := enemy
-	var best_d := BuffTuning.QUARRY_M * BuffTuning.QUARRY_M
-	for e in s.retinue:
-		if s.count[e] <= 0 or s.state[e] == ST.FLEE:
-			continue
-		var d := s.pos[i].distance_squared_to(s.pos[e])
-		if d < best_d:
-			best_d = d
-			best = e
-	return best
+## The men nobody can see slip past the fighting into the plaza and stand
+## there without striking a blow: nobody contests what nobody sees, so fifty
+## unseen men can hold it while the rest keep the village busy. (Held at a
+## rally flag they fight like anyone, and their first blow is an ambush.)
+static func _sneak(s: SiegeState, i: int) -> void:
+	s.flag[i] &= ~SiegeState.F_HOLDING
+	s.foe[i] = -1
+	var dest := s.map.village_center + s.slot[i] * TIGHT
+	if s.pos[i].distance_squared_to(dest) <= T.ARRIVE_M * T.ARRIVE_M:
+		SiegeMove.stand(s, i)
+	else:
+		# They run: men who will not fight need no breath left.
+		SiegeMove.go(s, i, dest, SiegeMove.SPRINT)
 
 
 ## Where the army stands: the middle of its standing line squads, the point

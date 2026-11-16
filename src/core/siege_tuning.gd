@@ -49,6 +49,8 @@ const BELL_BOOST := 2.0
 ## Seconds a militia squad needs to arm after it heard the alarm.
 const ARM_MIN_S := 15.0
 const ARM_MAX_S := 60.0
+## Seconds the lord's household needs:
+## ... and anybody caught at home with the enemy at the door.
 const RETINUE_ARM_S := 5.0
 ## A squad caught unarmed is shaken.
 const SURPRISE_SHOCK := 0.15
@@ -134,7 +136,7 @@ const ROUTED_WEIGHT := 0.5
 ## Team morale (standing heads times morale, relative to the start) at which
 ## the side breaks.
 const ARMY_BREAK := 0.25
-const VILLAGE_BREAK := 0.51
+const VILLAGE_BREAK := 0.465
 ## The lord's retinue steadies the village while it stands.
 const LORD_AURA := 0.1
 const LORD_FALL_SHOCK := 0.15

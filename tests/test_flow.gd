@@ -12,7 +12,7 @@ func before_each() -> void:
 	SaveStore.clear()
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
-	main.options.speed = 32.0
+	main.options.speed = LaunchOptions.MAX_SPEED
 	main.options.sim_seed = SiegeFixtures.WIN_SEED
 	main.options.lab_runs = 6
 	main.screen_changed.connect(func(screen: StringName) -> void: seen.append(screen))

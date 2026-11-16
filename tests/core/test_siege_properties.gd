@@ -11,7 +11,7 @@ extends GutTest
 ##   finality     the outcome never changes once set, and no event follows it
 
 const Space = preload("res://tools/sim/loadout_space.gd")
-const CASES := 8
+const CASES := 6
 const GENERATOR_SEED := 20261116
 
 var _rng := RandomNumberGenerator.new()

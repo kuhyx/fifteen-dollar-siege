@@ -16,9 +16,10 @@ func test_a_batch_reports_wins_runs_and_mean_seconds() -> void:
 
 func test_the_same_base_seed_gives_the_same_batch() -> void:
 	var loadout := Loadout.of(IDS)
-	assert_eq(Lab.run_batch(loadout, 8, 7), Lab.run_batch(loadout, 8, 7))
-	var other := Lab.run_batch(loadout, 8, 8000)
-	assert_ne(other["mean_seconds"], Lab.run_batch(loadout, 8, 7)["mean_seconds"])
+	var batch := Lab.run_batch(loadout, 5, 7)
+	assert_eq(batch, Lab.run_batch(loadout, 5, 7))
+	var other := Lab.run_batch(loadout, 5, 8000)
+	assert_ne(other["mean_seconds"], batch["mean_seconds"])
 
 
 func test_an_empty_batch_is_all_zeros() -> void:

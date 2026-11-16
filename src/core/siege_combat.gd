@@ -49,10 +49,10 @@ static func hit(s: SiegeState, e: int, heads: int) -> void:
 	s.count[e] -= heads
 	s.hit[e] = s.tick
 	s.hurt[e] += s.sample(heads * T.LIGHT_WOUND_SHARE)
-	if s.team[e] == VILLAGE and s.flag[e] & SiegeState.F_ARMED == 0:
-		# Caught at home: up in arms at once, and shaken.
-		s.flag[e] |= SiegeState.F_ALERTED | SiegeState.F_ARMED
-		s.reload[e] = 0.0
+	if s.team[e] == VILLAGE and s.flag[e] & SiegeState.F_ALERTED == 0:
+		# Caught at home: shaken, and scrambling for whatever is at hand.
+		s.flag[e] |= SiegeState.F_ALERTED
+		s.wait[e] = T.RETINUE_ARM_S
 		s.jolt(e, T.SURPRISE_SHOCK)
 	var dread := s.rng.randf_range(1.0 - T.SHOCK_SPREAD, 1.0 + T.SHOCK_SPREAD)
 	if s.medics_up and s.team[e] == ARMY:

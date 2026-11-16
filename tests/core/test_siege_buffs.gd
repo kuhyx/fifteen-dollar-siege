@@ -102,20 +102,39 @@ func test_gear_goes_to_men_already_in_the_army() -> void:
 		assert_eq(_army_heads(shot), 100, "%s adds no men" % id)
 
 
-func test_fifty_potions_hide_fifty_men_until_they_strike_or_it_wears_off() -> void:
-	var sim := _sim([&"invisibility_potions"])
-	var shot := sim.snapshot()
+func _hidden_heads(shot: SiegeSnapshot) -> int:
 	var hidden := 0
 	for i in shot.entity_count():
 		if shot.ent_team[i] == ARMY and shot.ent_state[i] == ST.HIDDEN:
 			hidden += shot.ent_count[i]
-	assert_eq(hidden, 50)
-	var kinds := _event_kinds(sim, BuffTuning.POTION_S + 2.0)
-	assert_eq(kinds.count(SiegeEvent.REVEAL), 5, "every unseen squad is revealed exactly once")
-	shot = sim.snapshot()
+	return hidden
+
+
+func test_fifty_potions_hide_fifty_men_who_sneak_into_the_plaza() -> void:
+	var sim := _sim([&"invisibility_potions", &"double_men"])
+	var map := sim.map()
+	assert_eq(_hidden_heads(sim.snapshot()), 50)
+	sim.step(64.0)
+	var shot := sim.snapshot()
+	assert_eq(_hidden_heads(shot), 50, "nobody saw them come")
 	for i in shot.entity_count():
-		if shot.ent_team[i] == ARMY:
-			assert_ne(shot.ent_state[i], ST.HIDDEN, "nobody is unseen after the potion")
+		if shot.ent_state[i] == ST.HIDDEN and shot.ent_team[i] == ARMY:
+			var from_centre := shot.ent_pos[i].distance_to(map.village_center)
+			assert_lt(from_centre, map.centre_radius, "squad %d stands in the plaza" % i)
+
+
+func test_the_unseen_show_when_the_potion_wears_off_or_they_strike() -> void:
+	# Held back at the start line the whole army outlives the potion.
+	var waiting := _sim([&"invisibility_potions"])
+	waiting.command(SiegeSim.Command.RETREAT, Vector2.ZERO)
+	var kinds := _event_kinds(waiting, BuffTuning.POTION_S + 2.0)
+	assert_eq(kinds.count(SiegeEvent.REVEAL), 5, "every unseen squad shows exactly once")
+	assert_eq(_hidden_heads(waiting.snapshot()), 0, "nobody is unseen after the potion")
+	# Rallied at the village edge they fight: the first blow is an ambush.
+	var striking := _sim([&"invisibility_potions"])
+	var edge := striking.map().village_center - Vector2(striking.map().village_radius, 0.0)
+	striking.command(SiegeSim.Command.RALLY, edge)
+	assert_has(_event_kinds(striking, 70.0), SiegeEvent.REVEAL, "an ambush shows them")
 
 
 func test_knight_armor_slows_the_march() -> void:

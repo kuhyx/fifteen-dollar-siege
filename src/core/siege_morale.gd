@@ -103,7 +103,7 @@ static func _sweep(s: SiegeState, live: bool) -> Array[float]:
 		pep_step = s.mods.pep * T.THINK_S / B.PEP_FADE_S
 	var centre := s.map.village_center
 	var plaza2 := T.CENTRE_R * T.CENTRE_R
-	var plaza_army := 0
+	var plaza_army := 0.0
 	var plaza_village := 0
 	var flag := s.flag
 	var count := s.count
@@ -122,7 +122,12 @@ static func _sweep(s: SiegeState, live: bool) -> Array[float]:
 		if live:
 			_tire(s, i, f)
 			_recover(s, i, quiet, pep_step)
-		var felt := morale[i] + (s.army_aura if side == ARMY else s.village_aura)
+		var felt := morale[i]
+		if side == ARMY:
+			# A leader steadies men who still have some nerve of their own.
+			felt += s.army_aura * minf(felt / B.AURA_NEEDS, 1.0)
+		else:
+			felt += s.village_aura
 		if side == VILLAGE and f & SiegeState.F_DEAF == 0:
 			felt -= fear
 		var st := state[i]
@@ -145,14 +150,17 @@ static func _sweep(s: SiegeState, live: bool) -> Array[float]:
 			weight = count[i] * cap[i] * T.ROUTED_WEIGHT
 		var inside := st != ST.FLEE and pos[i].distance_squared_to(centre) <= plaza2
 		if side == ARMY:
-			army += weight
-			if inside and st != ST.HIDDEN:
-				plaza_army += count[i]
+			# The unseen hold the plaza but not the line: an army whose visible
+			# men are gone is routed.
+			if st != ST.HIDDEN:
+				army += weight
+			if inside:
+				plaza_army += count[i] * (B.UNSEEN_HOLD if st == ST.HIDDEN else 1.0)
 		else:
 			village += weight
 			if inside and f & SiegeState.F_ARMED != 0:
 				plaza_village += count[i]
-	s.plaza_army = plaza_army
+	s.plaza_army = int(plaza_army)
 	s.plaza_village = plaza_village
 	return [army, village]
 
