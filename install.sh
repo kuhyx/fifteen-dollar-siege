@@ -5,13 +5,16 @@
 #   - Godot 4.7.2 and the system tools the scripts call (pacman, or apt in CI)
 #   - gdtoolkit, pre-commit, ruff, coverage: exact pins from requirements-dev.txt
 #   - GUT (pinned tag) into addons/gut (gitignored)
+#   - Chromium (the web smoke gate; CI uses the runner's Chrome) and its pinned
+#     Python venv (tools/web/venv.sh)
 #   - Godot export templates for the installed Godot (downloaded if missing)
 #   - the music and sound effects, rendered from code into assets/audio/
 #     (tools/audio/build.sh: its own Python venv with the pinned music toolkit)
 #   - ~/data/fifteen-dollar-siege_binaries with assets/ builds/ feedback/, and
 #     the gitignored links assets -> .../assets and builds -> .../builds
 #   - git hooks (skip with SKIP_HOOKS=1; never in CI)
-# CI=1 (GitHub Actions) installs only what the CI gates use.
+# CI=1 (GitHub Actions) installs only what the CI gates use (plus the export
+# templates and the web venv: the web smoke gate runs there too).
 # ============================================================================
 
 set -euo pipefail
@@ -26,7 +29,7 @@ readonly CORE_TOOLS=(git:git:git shellcheck:shellcheck:shellcheck ffmpeg:ffmpeg:
 readonly DESKTOP_TOOLS=(
     Xvfb:xorg-server-xvfb:xvfb glxinfo:mesa-utils:mesa-utils xdotool:xdotool:xdotool
     xprop:xorg-xprop:x11-utils mpv:mpv:mpv pactl:libpulse:pulseaudio-utils
-    curl:curl:curl unzip:unzip:unzip jq:jq:jq
+    curl:curl:curl unzip:unzip:unzip jq:jq:jq chromium:chromium:chromium
 )
 
 in_ci() {
@@ -179,9 +182,10 @@ main() {
     ensure_godot
     ensure_python_tools
     ensure_gut
+    "$REPO_ROOT/tools/web/venv.sh" >/dev/null
+    ensure_templates # CI exports the Web preset for the browser smoke gate
     if ! in_ci; then
         ensure_tools "${DESKTOP_TOOLS[@]}"
-        ensure_templates
         link_binaries
         install_hooks
     fi

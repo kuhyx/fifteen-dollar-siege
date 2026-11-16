@@ -1,0 +1,2 @@
+# The web smoke gate's CDP client (tools/web/smoke.py), exact pin.
+websocket-client==1.9.2
