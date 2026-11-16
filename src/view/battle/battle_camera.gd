@@ -13,12 +13,18 @@ const MIN_FIT := 0.85
 const FOLLOW_S := 0.45
 const WHEEL_STEP := 1.15
 ## Auto framing: metres of margin around the action, and its smallest frame.
-const PAD_M := 24.0
-const MIN_SPAN_M := Vector2(150.0, 84.0)
+const PAD_M := 14.0
+const MIN_SPAN_M := Vector2(120.0, 68.0)
 ## Villagers this close to the army are part of the action.
-const ENGAGE_M := 70.0
+const ENGAGE_M := 45.0
 ## Metres of the way ahead of the army that stay in the frame.
-const LEAD_M := 60.0
+const LEAD_M := 40.0
+## The auto camera never zooms out past this many canvas pixels per metre
+## (a man about 20 px tall): a wide fight shows its army, not the whole map.
+const AUTO_MIN_ZOOM := 6.0
+## How far the army may stand from the middle of an over-wide frame, as a
+## share of the half view.
+const ANCHOR_SLACK := 0.4
 
 var bounds := Rect2(0.0, 0.0, 600.0, 400.0)
 ## The canvas rectangle the action is framed in (the screen without the
@@ -71,6 +77,19 @@ func frame(box: Rect2) -> void:
 	var wanted := minf(view.size.x / maxf(box.size.x, 1.0), view.size.y / maxf(box.size.y, 1.0))
 	_goal_zoom = clampf(wanted, fit_zoom() * MIN_FIT, MAX_ZOOM)
 	_goal_center = on_map(box.get_center(), _goal_zoom)
+
+
+## The auto camera's `frame`: the same, but never out past AUTO_MIN_ZOOM.
+## When the action is wider than that view allows, the camera stays near
+## `anchor` (the army) instead of showing everything small.
+func follow(box: Rect2, anchor: Vector2) -> void:
+	frame(box)
+	if _goal_zoom >= AUTO_MIN_ZOOM:
+		return
+	_goal_zoom = AUTO_MIN_ZOOM
+	var half := view.size / AUTO_MIN_ZOOM / 2.0 * ANCHOR_SLACK
+	var aside := (box.get_center() - anchor).clamp(-half, half)
+	_goal_center = on_map(anchor + aside, _goal_zoom)
 
 
 ## `point` moved so that, at `at_zoom`, the screen shows no more of the
@@ -150,6 +169,17 @@ static func action_box(shot: SiegeSnapshot, map: SiegeMap) -> Rect2:
 		if shot.ent_team[i] == SiegeSnapshot.Team.VILLAGE and _reached(shot, i, army):
 			box = box.expand(shot.ent_pos[i])
 	return _fitted(box.grow(PAD_M), map.bounds)
+
+
+## The middle of the army (the map's middle when there is none).
+static func action_anchor(shot: SiegeSnapshot, map: SiegeMap) -> Vector2:
+	var sum := Vector2.ZERO
+	var count := 0
+	for i in shot.entity_count():
+		if shot.ent_team[i] == SiegeSnapshot.Team.ARMY and shot.ent_count[i] > 0:
+			sum += shot.ent_pos[i]
+			count += 1
+	return sum / count if count > 0 else map.bounds.get_center()
 
 
 static func _reached(shot: SiegeSnapshot, index: int, army: PackedVector2Array) -> bool:

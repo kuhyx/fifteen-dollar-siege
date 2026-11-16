@@ -16,6 +16,13 @@ const FAR_BELOW_PX := 26.0
 const LOD_SLACK := 1.15
 ## A man's height, the yardstick of the level of detail.
 const MAN_M := 3.4
+## A man drawn shorter than this many real pixels is blown up to it (up to
+## MAX_BOOST times life size), so the whole-map view still shows men and not
+## specks. The shader scales every figure about its feet.
+const MIN_MAN_PX := 18.0
+const MAX_BOOST := 4.0
+## The shader's global for it, set once a frame beside the clock.
+const BOOST := &"figure_boost"
 ## A rout within this many metres throws a squad apart.
 const SCATTER_M := 30.0
 const SCATTER_KICK := 1.2
@@ -61,6 +68,7 @@ func draw_frame(
 ) -> void:
 	_pick_level(zoom_px)
 	RenderingServer.global_shader_parameter_set(CLOCK, clock)
+	RenderingServer.global_shader_parameter_set(BOOST, boost_for(zoom_px))
 	var cheering := _cheer > 0.0
 	_cheer = maxf(_cheer - delta * CHEER_FADE, 0.0)
 	for i in mini(squads.size(), shot.entity_count()):
@@ -69,6 +77,12 @@ func draw_frame(
 		squad.pose(at, tween.velocity(i), shot.ent_state[i], shot.ent_facing[i], delta)
 		if cheering and squad.team == SiegeSnapshot.Team.ARMY:
 			squad.material.set_shader_parameter("cheer", _cheer)
+
+
+## How many times life size a figure is drawn at `zoom_px` (real pixels per
+## metre): 1 once a man is tall enough, more as the camera goes out.
+static func boost_for(zoom_px: float) -> float:
+	return clampf(MIN_MAN_PX / maxf(zoom_px * MAN_M, 0.001), 1.0, MAX_BOOST)
 
 
 ## Individuals drawn, standing or fallen.

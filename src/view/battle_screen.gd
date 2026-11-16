@@ -74,7 +74,7 @@ func setup(p_sim: SiegeSim, p_mode: StringName, p_speed: float) -> void:
 	retreat_button = hud.retreat_button
 	_wire()
 	_take(sim.snapshot(), 0.0)
-	camera.frame(_focus())
+	BattleAim.aim(self)
 	camera.snap()
 	world.transform = camera.transform()
 	setup_ms = (Time.get_ticks_usec() - started) / 1000.0
@@ -93,7 +93,7 @@ func _process(delta: float) -> void:
 		_clock += delta
 		effects.advance(delta)
 	beats.tick_payoff(delta)
-	camera.frame(_focus())
+	BattleAim.aim(self)
 	if payoff_active or beats.staging():
 		camera.resume_auto()
 	camera.update(delta)
@@ -232,15 +232,6 @@ func _fit() -> void:
 func _on_payoff_done() -> void:
 	payoff_active = false
 	finished.emit(sim.outcome())
-
-
-## What the camera should show now: the beat, the payoff or the action.
-func _focus() -> Rect2:
-	if beats.staging():
-		return beats.beat_box()
-	if payoff_active:
-		return BattleBeats.payoff_box(sim.outcome() == SiegeSim.Outcome.WIN, plan, shot)
-	return BattleCamera.action_box(shot, sim.map())
 
 
 ## Real pixels per canvas unit (2 on a 4K screen): only the level of detail

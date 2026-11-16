@@ -62,3 +62,7 @@ siege_clock={
 "type": "float",
 "value": 0.0
 }
+figure_boost={
+"type": "float",
+"value": 1.0
+}

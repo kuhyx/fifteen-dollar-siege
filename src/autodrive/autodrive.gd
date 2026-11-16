@@ -173,7 +173,7 @@ func _to_result(battle: BattleScreen, wins: bool) -> bool:
 
 ## Command mode: a rally click on the map, then retreat and charge buttons.
 func _give_orders(battle: BattleScreen) -> bool:
-	await click_at(battle.map_to_canvas(Vector2(200.0, 90.0)))
+	await click_at(battle.camera.view.get_center() + Vector2(0.0, -120.0))
 	if not check(battle.commands_sent == 1, "a map click places the rally flag"):
 		return false
 	await frames(20)
