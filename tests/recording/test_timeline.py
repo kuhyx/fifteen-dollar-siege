@@ -61,6 +61,11 @@ class OffsetTest(unittest.TestCase):
         self.assertTrue(doc["sync"]["approx"])
         self.assertEqual(doc["sync"]["method"], "session_start.time")
 
+    def test_no_usable_sync_entry_is_an_error(self) -> None:
+        for rows in ([], [{"event": "session_start", "ms": 0}], [{"event": "recording_sync", "ms": 5}]):
+            with self.assertRaises(timeline.NoSync):
+                timeline.find_sync(rows)
+
     def test_exact_sync_is_not_approx(self) -> None:
         doc = build([sync_entry()])
         self.assertFalse(doc["sync"]["approx"])

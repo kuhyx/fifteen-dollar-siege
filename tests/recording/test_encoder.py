@@ -1,7 +1,9 @@
 """The ffmpeg command line: encoder choice, window capture, exact timestamps."""
 
+import subprocess
 import unittest
 from itertools import pairwise
+from unittest import mock
 
 from helpers import ROOT  # noqa: F401
 from recording import encoder
@@ -19,6 +21,14 @@ class EncoderTest(unittest.TestCase):
     def test_nothing_usable_is_an_error(self) -> None:
         with self.assertRaises(encoder.NoEncoder):
             encoder.pick({"mpeg4"})
+
+    def test_probe_lists_only_the_encoders_that_encode_a_frame(self) -> None:
+        def run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[bytes]:
+            return subprocess.CompletedProcess(cmd, 0 if "libx264" in cmd else 1)
+
+        with mock.patch.object(encoder.subprocess, "run", side_effect=run) as fake:
+            self.assertEqual(encoder.probe_usable(), {"libx264"})
+        self.assertEqual(fake.call_count, 2)
 
     def test_nvenc_is_quality_first(self) -> None:
         cmd = encoder.command(SPEC, "h264_nvenc")
