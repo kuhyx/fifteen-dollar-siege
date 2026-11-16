@@ -2,13 +2,13 @@
 
 # ============================================================================
 # One release export (one Godot call, under 60 s) into a folder of your choice:
-#   scripts/export.sh web   builds/v01/web     ->  .../index.html (+ pck, wasm)
-#   scripts/export.sh linux builds/v01/linux   ->  .../fifteen-dollar-siege.x86_64
+#   scripts/export.sh web   <dir>   ->  <dir>/index.html (+ pck, wasm)
+#   scripts/export.sh linux <dir>   ->  <dir>/fifteen-dollar-siege.x86_64
 # The Web build is single-threaded (nothreads template). Both presets leave
 # out src/dev, tests, tools and scripts (export_presets.cfg): the script fails
-# if the pack still contains a dev file. Keep one builds/vNN/ per prototype
-# round with a one-line NOTES file (R17); `builds` is a gitignored link into
-# ~/data/fifteen-dollar-siege_binaries. Publishing is skill `itch-publish`.
+# if the pack still contains a dev file. A prototype round (builds/vNN/ with
+# a NOTES line, R17) is scripts/build_round.sh. Publishing is skill
+# `itch-publish`.
 # ============================================================================
 
 set -euo pipefail
