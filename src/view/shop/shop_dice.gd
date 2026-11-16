@@ -31,6 +31,11 @@ func setup(shop: LoadoutScreen, frame: ScreenFrame) -> void:
 	KeyHint.attach(button, MenuKeys.PICKS[1])
 
 
+## Makes the next rolls repeatable (the bot's steps must not depend on luck).
+func seed_rolls(value: int) -> void:
+	_rng.seed = value
+
+
 func roll() -> void:
 	if rolling:
 		return

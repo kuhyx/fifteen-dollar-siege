@@ -13,6 +13,8 @@ const TOUCH_BUFF := &"moose"
 const FILLERS: Array[StringName] = [&"double_men", &"knight_armor"]
 const ONE_MORE := &"stew"
 const WAIT_FRAMES := 6000
+## Seed of the dice roll the bot presses (a legal, nearly full loadout; not the touch buff last).
+const DICE_SEED := 15
 ## Frames from the decision to the same loadout fighting again.
 const RETRY_FRAMES := 60
 ## Frames a win's result waits for its stars to pop in (about 2.4 s).
@@ -60,6 +62,7 @@ static func shop_tour(bot: BotBase, shop: LoadoutScreen) -> bool:
 ## while the coins fly), and it sells back like any other buy. Leaves the
 ## shop empty again.
 static func _dice(bot: BotBase, shop: LoadoutScreen) -> bool:
+	shop.dice.seed_rolls(DICE_SEED)  # the same roll every run: no step rides on luck
 	await bot.click(shop.dice.button)
 	# The first card lands within a few frames; a roll of three cards is over in
 	# 20 (the dice are random), so the frame is taken the moment it buys.

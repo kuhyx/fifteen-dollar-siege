@@ -45,6 +45,18 @@ func test_the_shop_dice_sell_back_and_buy_a_random_loadout_card_by_card() -> voi
 	assert_eq(shop.dice.button.rotation, 0.0, "the dice stand still again")
 
 
+func test_a_seeded_dice_rolls_the_same_loadout_every_time() -> void:
+	var rolled: Array = []
+	for run in 2:
+		var shop := _shop()
+		shop.dice.seed_rolls(MenuBeats.DICE_SEED)
+		shop.dice.roll()
+		await wait_until(func() -> bool: return not shop.dice.rolling, 6.0)
+		rolled.append(shop.loadout.ids.duplicate())
+	assert_eq(rolled[0], rolled[1], "the bot's roll never depends on luck")
+	assert_ne(rolled[0], [], "and it bought something")
+
+
 func test_the_dice_button_is_a_labelled_keyed_control_inside_the_screen() -> void:
 	var shop := _shop()
 	var button := shop.dice.button
