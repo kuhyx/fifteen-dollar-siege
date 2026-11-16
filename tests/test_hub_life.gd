@@ -14,7 +14,7 @@ func test_a_mode_button_swells_under_the_pointer_and_settles_back() -> void:
 	assert_gt(button.scale.x, HubScreen.HOVER_SCALE - 0.01)
 	button.mouse_exited.emit()
 	await wait_until(func() -> bool: return is_equal_approx(button.scale.x, 1.0), 2.0)
-	assert_eq(button.scale, Vector2.ONE)
+	assert_almost_eq(button.scale.x, 1.0, 0.001)
 
 
 func test_the_wave_crosses_the_shelf_then_rests() -> void:

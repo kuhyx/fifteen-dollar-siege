@@ -31,7 +31,7 @@ func _button_with_hint(action: StringName) -> Button:
 
 
 func test_every_menu_action_has_a_key_that_can_be_drawn() -> void:
-	assert_eq(MenuKeys.actions().size(), 4)
+	assert_eq(MenuKeys.actions().size(), 5)
 	for action in MenuKeys.actions():
 		assert_true(InputMap.has_action(action), String(action))
 		var event := InputDevice.event_for(action)
