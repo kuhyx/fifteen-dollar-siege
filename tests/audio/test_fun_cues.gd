@@ -7,6 +7,8 @@ extends GutTest
 
 const VIEW := Rect2(0.0, 0.0, 600.0, 400.0)
 
+const SilentBank := preload("res://tests/audio/silent_bank.gd")
+
 var main: Main
 var director: AudioDirector
 
@@ -16,6 +18,7 @@ func before_each() -> void:
 	main = (load("res://main.tscn") as PackedScene).instantiate()
 	add_child_autofree(main)
 	director = AudioDirector.live()
+	SilentBank.fill(director)
 	AudioDirector.on_snapshot(SiegeSnapshot.new(), VIEW)
 
 

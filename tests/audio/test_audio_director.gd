@@ -7,6 +7,8 @@ extends GutTest
 
 const MAP := Rect2(0.0, 0.0, 600.0, 400.0)
 
+const SilentBank := preload("res://tests/audio/silent_bank.gd")
+
 var main: Main
 var director: AudioDirector
 
@@ -19,6 +21,7 @@ func before_each() -> void:
 	main.options.sim_seed = 5
 	main.options.lab_runs = 6
 	director = AudioDirector.live()
+	SilentBank.fill(director)
 
 
 func after_each() -> void:
