@@ -9,6 +9,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 export REPO_ROOT
 export CAPPED="${HOME}/.claude/scripts/capped.sh"
 export REPO_NAME="fifteen-dollar-siege"
+# Every gate (tests, smoke, autodrive, export) runs with the shared error
+# reporter off: its errors are not a player's and must not become tickets.
+export APP_ERRORS_OFF=1
 # kuhy's binaries folder (feedback, builds, fetched assets); install.sh makes it.
 export BINARIES="${SIEGE_BINARIES:-$HOME/data/${REPO_NAME}_binaries}"
 

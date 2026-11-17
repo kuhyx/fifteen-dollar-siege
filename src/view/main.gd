@@ -17,6 +17,9 @@ signal quitting(reason: String)
 
 const DEV_TOOLS := "res://src/dev/dev_tools.gd"
 const AUTODRIVE := "res://src/autodrive/autodrive.gd"
+## Shared error + slow-wait reporter (kuhyx/utils DOCS-app-errors.md), mounted
+## by scripts/mount_dev_tools.sh in every build; absent, the game plays on.
+const APP_ERRORS := "res://addons/app_errors/error_reporter.gd"
 const LAST_LOADOUT := "last_loadout.json"
 const OVERLAY_LAYER := 40
 
@@ -37,6 +40,7 @@ var _fresh: Array[StringName] = []
 
 
 func _ready() -> void:
+	_mount_error_reporter()
 	options = LaunchOptions.parse()
 	if options.save_dir != "":
 		SaveStore.root = options.save_dir
@@ -67,6 +71,16 @@ func _ready() -> void:
 		open_first()
 	else:
 		open_hub()
+
+
+## Every script error, push_error and frame over 1 s becomes a board ticket.
+func _mount_error_reporter() -> void:
+	if not ResourceLoader.exists(APP_ERRORS):
+		return
+	var reporter: Node = (load(APP_ERRORS) as GDScript).new()
+	reporter.name = "AppErrors"
+	reporter.call("setup", "fifteen-dollar-siege", "kuhyx/fifteen-dollar-siege")
+	add_child(reporter)
 
 
 ## The screen the command line asked for: the mode's shop, the result of the

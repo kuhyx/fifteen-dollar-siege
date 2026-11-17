@@ -18,3 +18,4 @@ coverage.xml
 .idea/
 # agent worktrees
 .claude/
+addons/app_errors

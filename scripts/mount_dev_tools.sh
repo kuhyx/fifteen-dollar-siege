@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # ============================================================================
-# Mounts the shared dev feedback addon (kuhyx/utils, godot_dev_tools) at
-# res://addons/dev_tools. The pin below is the ONLY place that names the repo
+# Mounts the shared addons of kuhyx/utils godot_dev_tools: the dev feedback
+# mode at res://addons/dev_tools (--dev runs only) and the error + slow-wait
+# reporter at res://addons/app_errors (every build, exports included). The pin below is the ONLY place that names the repo
 # and the tag; install.sh calls this script.
 #   scripts/mount_dev_tools.sh               fetch (shallow, cached) and mount
 #   scripts/mount_dev_tools.sh --print-pin   print "<url> <ref>" and stop
@@ -18,9 +19,10 @@
 set -euo pipefail
 
 readonly PIN_URL="https://github.com/kuhyx/utils"
-readonly PIN_TAG="godot-dev-tools-v0.1.1"
-readonly ADDON_IN_REPO="godot_dev_tools/addons/dev_tools"
-readonly MOUNT_REL="addons/dev_tools"
+readonly PIN_TAG="godot-dev-tools-v0.2.1"
+readonly ADDONS_IN_REPO="godot_dev_tools/addons"
+# Each mounted addon and the file that proves its checkout is complete.
+readonly ADDONS=(dev_tools/dev_tools.gd app_errors/error_reporter.gd)
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly REPO_ROOT
 
@@ -33,9 +35,17 @@ into="$REPO_ROOT"
 fetch_into() {
     local dir="$1"
     git init -q "$dir"
-    git -C "$dir" sparse-checkout set --no-cone "/$ADDON_IN_REPO/"
+    git -C "$dir" sparse-checkout set --no-cone "/$ADDONS_IN_REPO/dev_tools/" "/$ADDONS_IN_REPO/app_errors/"
     git -C "$dir" -c advice.detachedHead=false fetch -q --depth 1 "$remote" "$ref"
     git -C "$dir" -c advice.detachedHead=false checkout -q FETCH_HEAD
+}
+
+# True when `dir` holds every addon's proof file.
+all_present() {
+    local dir="$1" addon
+    for addon in "${ADDONS[@]}"; do
+        [[ -f "$dir/$ADDONS_IN_REPO/$addon" ]] || return 1
+    done
 }
 
 # The checkout of this remote and ref (made once; a tag or a hash never changes).
@@ -43,7 +53,7 @@ checkout_dir() {
     local key dir tmp
     key="$(printf '%s %s' "$remote" "$ref" | sha1sum | cut -c1-12)"
     dir="$cache/$key"
-    if [[ ! -f "$dir/$ADDON_IN_REPO/dev_tools.gd" ]]; then
+    if ! all_present "$dir"; then
         mkdir -p "$cache"
         tmp="$(mktemp -d "$cache/.fetch.XXXXXX")"
         if ! fetch_into "$tmp"; then
@@ -57,22 +67,31 @@ checkout_dir() {
     echo "$dir"
 }
 
-mount_addon() {
-    local source link
-    source="$(checkout_dir)/$ADDON_IN_REPO"
-    link="$into/$MOUNT_REL"
-    mkdir -p "$into/addons"
+# Links (or, under CI, copies) one addon folder `name` from checkout `dir`.
+mount_one() {
+    local dir="$1" name="$2" source link
+    source="$dir/$ADDONS_IN_REPO/$name"
+    link="$into/addons/$name"
     if [[ -n "${CI:-}" ]]; then
         rm -rf "$link"
         cp -a "$source" "$link"
-        echo "done dev tools $ref (copied)"
+        echo "done $name $ref (copied)"
     elif [[ "$(readlink "$link" 2>/dev/null || true)" == "$source" ]]; then
-        echo "ok   dev tools $ref"
+        echo "ok   $name $ref"
     else
         rm -rf "$link"
         ln -sfn "$source" "$link"
-        echo "done dev tools $ref -> $source"
+        echo "done $name $ref -> $source"
     fi
+}
+
+mount_addon() {
+    local dir addon
+    dir="$(checkout_dir)"
+    mkdir -p "$into/addons"
+    for addon in "${ADDONS[@]}"; do
+        mount_one "$dir" "${addon%%/*}"
+    done
 }
 
 main() {
