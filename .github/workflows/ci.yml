@@ -6,8 +6,7 @@ name: ci
 # display and stays local in scripts/autodrive_all.sh), the audio build and
 # its gate, the 100 % Python coverage gate, the Linux export, the round
 # builder and the Web build in a headless Chrome (scripts/test_web.sh). The
-# shared gates (file length, markdown naming, dependency freshness, repo
-# contract) have their own workflows. Locally the same gates run in groups
+# shared gates (file length, markdown naming, repo contract) have their own workflows; dependency freshness runs locally only (pre-commit). Locally the same gates run in groups
 # under 60 s: scripts/check.sh --group fast|play|bots|tools|sim|build|web|handoff.
 on:
   push:
@@ -28,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        # game_recording (kuhyx/utils) needs 3.14 or newer; the freshness gate wants the
+        # game_recording (kuhyx/utils) needs 3.14 or newer; the local freshness hook wants the
         # newest stable, pinned exactly.
         with: { python-version: "3.15.2" }
 
