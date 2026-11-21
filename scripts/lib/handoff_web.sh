@@ -37,10 +37,11 @@ start_server() {
     WEB_URL="http://127.0.0.1:$port/index.html"
 }
 
-# The first browser of the machine, the same names tools/web/browser.py tries.
+# The first browser of the machine, the same names tools/web/browser.py tries
+# (/usr/bin first: a PATH wrapper that force-loads an extension stalls the check).
 find_browser() {
     local name
-    for name in chromium google-chrome-stable google-chrome chromium-browser; do
+    for name in /usr/bin/chromium chromium google-chrome-stable google-chrome chromium-browser; do
         command -v "$name" && return 0
     done
     echo "$ITEM_ID: no chromium or chrome found (run ./install.sh)" >&2

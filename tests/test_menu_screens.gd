@@ -56,6 +56,38 @@ func test_the_hub_has_three_picture_buttons_a_shelf_and_no_lab_rate_yet() -> voi
 	)
 
 
+func test_hub_has_credit_button_when_addon_exists() -> void:
+	var hub := main.screen as HubScreen
+	var credit := hub.get_node_or_null("KuhyCredit")
+	if not ResourceLoader.exists("res://addons/kuhy_credit/kuhy_credit.tscn"):
+		pending("kuhy_credit addon not mounted")
+		return
+	assert_not_null(credit, "hub has a child named KuhyCredit")
+	assert_true(credit is Control, "KuhyCredit is a Control")
+	assert_gt(credit.global_position.y, ScreenFrame.SIZE.y * 0.5, "credit in lower half")
+	assert_lt(credit.global_position.x, 100.0, "credit near left edge")
+
+
+func test_hub_credit_resets_on_resize_with_one_connection() -> void:
+	var hub := main.screen as HubScreen
+	var credit := hub.get_node_or_null("KuhyCredit")
+	if not ResourceLoader.exists("res://addons/kuhy_credit/kuhy_credit.tscn"):
+		pending("kuhy_credit addon not mounted")
+		return
+	assert_not_null(credit, "hub has a child named KuhyCredit")
+	get_viewport().size_changed.emit()
+	await wait_process_frames(1)
+	get_viewport().size_changed.emit()
+	await wait_process_frames(1)
+	assert_gt(credit.global_position.y, ScreenFrame.SIZE.y * 0.5, "credit in lower half")
+	assert_lt(credit.global_position.x, 100.0, "credit near left edge")
+	var place_credit_conns := []
+	for conn: Dictionary in get_viewport().size_changed.get_connections():
+		if conn["callable"].get_method() == "_place_credit":
+			place_credit_conns.append(conn)
+	assert_eq(place_credit_conns.size(), 1, "exactly one size_changed -> _place_credit connection")
+
+
 func test_a_number_key_picks_a_mode() -> void:
 	InputSynth.key_tap(KEY_3)
 	await wait_process_frames(2)

@@ -19,3 +19,4 @@ coverage.xml
 # agent worktrees
 .claude/
 addons/app_errors
+addons/kuhy_credit

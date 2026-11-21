@@ -13,6 +13,7 @@
 #                            freshness, contract
 #                   save_guard  GUT without the hook redirect
 #                   mount    the dev tools mount script, against a fixture remote
+#                   credit_mount the kuhy credit mount script, against a fixture remote
 #                   buildlock   a gate takes the board's build lock once (fixture lock)
 #                   deploy   scripts/deploy.sh against a fixture remote and checkout
 #                   recording   the recorder's pinned requirement and this game's settings of it
@@ -67,6 +68,7 @@ run_gate() {
         test) scripts/test.sh ;;
         save_guard) scripts/test_save_guard.sh ;;
         mount) scripts/test_mount_dev_tools.sh ;;
+        credit_mount) scripts/test_mount_credit.sh ;;
         buildlock) scripts/test_build_lock.sh ;;
         deploy) scripts/test_deploy.sh ;;
         recording) scripts/test_recording.sh ;;

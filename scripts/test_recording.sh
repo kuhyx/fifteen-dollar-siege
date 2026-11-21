@@ -17,7 +17,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 # shellcheck source=scripts/lib/recording.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib/recording.sh"
 
-readonly PINNED='game_recording @ git+https://github.com/kuhyx/utils@game-recording-v0.1.0#subdirectory=game_recording'
+readonly PINNED='game_recording @ git+https://github.com/kuhyx/utils@game-recording-v0.1.1#subdirectory=game_recording'
 readonly BUILD="$REPO_ROOT/tools/recording/build.sh"
 
 fail() {

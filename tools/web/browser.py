@@ -63,6 +63,8 @@ class Browser:
             [find_chromium(), *flags, "about:blank"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            # Headless needs no X: an unreachable DISPLAY makes ANGLE fail and WebGL2 vanish.
+            env={k: v for k, v in os.environ.items() if k not in ("DISPLAY", "WAYLAND_DISPLAY")},
         )
         self.port = self._wait_for_port()
 

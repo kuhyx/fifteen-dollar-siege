@@ -74,6 +74,23 @@ func _ready() -> void:
 	for kept: StringName in stars:
 		(stars[kept] as StarRow).earned = StarBook.best(kept)
 	(buttons[LaunchOptions.MODES[0]] as Button).grab_focus()
+	const CREDIT := "res://addons/kuhy_credit/kuhy_credit.tscn"
+	if ResourceLoader.exists(CREDIT):
+		var credit: Control = (load(CREDIT) as PackedScene).instantiate()
+		credit.name = "KuhyCredit"
+		credit.light = false
+		credit.align_start = true
+		add_child(credit)
+		_place_credit()
+		get_viewport().size_changed.connect(_place_credit)
+
+
+func _place_credit() -> void:
+	var credit: Control = get_node_or_null("KuhyCredit") as Control
+	if credit == null:
+		return
+	var view := get_viewport_rect().size
+	credit.position = Vector2(16.0, view.y - float(credit.logo_size) - 16.0)
 
 
 ## What is under a canvas point (dev feedback's select tool), {} for nothing.

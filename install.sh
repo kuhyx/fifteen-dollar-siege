@@ -217,6 +217,7 @@ main() {
     ensure_python_tools
     ensure_gut
     "$REPO_ROOT/scripts/mount_dev_tools.sh" # the shared dev tools (kuhyx/utils), pinned there
+    "$REPO_ROOT/scripts/mount_credit.sh"     # the kuhy credit button (kuhyx/utils), pinned there
     "$REPO_ROOT/tools/web/venv.sh" >/dev/null
     ensure_templates # CI exports the Web preset for the browser smoke gate
     if in_ci; then

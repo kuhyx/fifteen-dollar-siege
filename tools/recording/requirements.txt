@@ -1,3 +1,3 @@
 # The session recorder, pinned to its released tag in the shared utils repo.
 # Stdlib only: nothing else is installed. Raise the tag here and nowhere else.
-game_recording @ git+https://github.com/kuhyx/utils@game-recording-v0.1.0#subdirectory=game_recording
+game_recording @ git+https://github.com/kuhyx/utils@game-recording-v0.1.1#subdirectory=game_recording
